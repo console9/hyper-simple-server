@@ -5,6 +5,7 @@ name = "hyper-simple-server"
 version = "0.0.0"
 authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
 edition = "2018"
+rust = "1.49"
 
 
 [[bin]]

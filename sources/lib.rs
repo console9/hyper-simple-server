@@ -1,1 +1,30 @@
-pub fn main () -> () {}
+
+
+#![ no_implicit_prelude ]
+
+#![ allow (unused_imports) ]
+#![ allow (dead_code) ]
+
+
+
+
+pub(crate) mod accepter;
+pub(crate) mod config;
+pub(crate) mod connection;
+pub(crate) mod errors;
+pub(crate) mod main;
+pub(crate) mod prelude;
+pub(crate) mod server;
+
+
+
+
+pub use {
+	
+	crate::config::*,
+	crate::errors::*,
+	crate::server::*,
+	
+	crate::main::main,
+};
+

@@ -24,6 +24,7 @@ default = []
 
 hyper = { version = "*", default-features = true, features = ["full"] }
 tokio = { version = "*", default-features = true, features = ["full"] }
+futures = { version = "*", default-features = true, features = [] }
 
 # tokio-rustls = { version = "*", default-features = true }
 # rustls = { version = "*", default-features = true }

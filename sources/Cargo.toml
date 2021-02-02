@@ -1,0 +1,33 @@
+
+
+[package]
+name = "hyper-simple-server"
+version = "0.0.0"
+authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
+edition = "2018"
+
+
+[[bin]]
+name = "example"
+path = "./example.rs"
+
+[lib]
+name = "hyper_simple_server"
+path = "./lib.rs"
+
+
+[features]
+default = []
+
+
+[dependencies]
+
+hyper = { version = "*", default-features = true, features = ["full"] }
+tokio = { version = "*", default-features = true, features = ["full"] }
+
+# tokio-rustls = { version = "*", default-features = true }
+# rustls = { version = "*", default-features = true }
+
+# tokio-native-tls = { version = "*", default-features = true }
+# native-tls = { version = "*", default-features = true }
+

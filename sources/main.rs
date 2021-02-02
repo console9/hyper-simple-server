@@ -7,9 +7,14 @@ use crate::prelude::*;
 
 pub fn main () -> () {
 	
-	let _configuration = Configuration::default ();
+	let _handler = |_request| {
+		Ok (Response::new (Body::from ("OK")))
+	};
 	
-	let _server = Server::new (_configuration) .or_panic (0x0e71d6cc);
-	_server.run () .or_panic (0x5116af5e);
+	let _configuration = Configuration::builder ()
+			.with_handler_fn_sync (_handler)
+			.build () .or_panic (0xb601cf12);
+	
+	Server::run (_configuration) .or_panic (0xe2bb7eb3);
 }
 

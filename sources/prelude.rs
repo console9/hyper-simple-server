@@ -4,6 +4,7 @@ pub use crate::accepter::*;
 pub use crate::config::*;
 pub use crate::connection::*;
 pub use crate::errors::*;
+pub use crate::handler::*;
 pub use crate::server::*;
 
 
@@ -12,6 +13,8 @@ pub use crate::server::*;
 pub use ::std::*;
 pub use ::std::prelude::v1::*;
 
+
+pub use ::std::future::Future;
 
 pub use ::std::pin::Pin;
 
@@ -37,6 +40,7 @@ pub(crate) mod hyper {
 			server::conn::Http,
 			service::service_fn,
 			service::make_service_fn,
+			service::Service,
 			Request,
 			Response,
 			Body,

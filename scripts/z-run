@@ -1,0 +1,32 @@
+#!/dev/null
+
+
+
+
+&&== env-path _RUST_SOURCES ./sources
+&&== env-path _RUST_TARGET ./.target
+
+
+
+
+<< debug / build / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- cargo build \
+			--manifest-path "${_RUST_SOURCES}/Cargo.toml" \
+			--target-dir "${_RUST_TARGET}" \
+			--lib \
+	#
+!!
+
+<< debug / run / example
+	#! <bash+>
+	exec -- cargo run \
+			--manifest-path "${_RUST_SOURCES}/Cargo.toml" \
+			--target-dir "${_RUST_TARGET}" \
+			--bin example \
+			-- \
+			"${@}" \
+	#
+!!
+

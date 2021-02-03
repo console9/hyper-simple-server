@@ -13,21 +13,22 @@ pub struct Configuration {
 
 
 
-#[ derive (Clone, Debug) ]
+#[ derive (Clone) ]
 pub struct Endpoint {
 	pub address : EndpointAddress,
 	pub protocol : EndpointProtocol,
+	pub security : EndpointSecurity,
 }
 
 
-#[ derive (Clone, Debug) ]
+#[ derive (Clone) ]
 pub enum EndpointAddress {
 	Socket (net::SocketAddr),
 	Descriptor (u32),
 }
 
 
-#[ derive (Copy, Clone, Debug) ]
+#[ derive (Clone) ]
 pub enum EndpointProtocol {
 	Http1,
 	Http2,
@@ -56,9 +57,61 @@ impl Default for Endpoint {
 	
 	fn default () -> Self {
 		Endpoint {
-				address : EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8080))),
+				address : EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 0))),
 				protocol : EndpointProtocol::Http1,
+				security : EndpointSecurity::Insecure,
 			}
+	}
+}
+
+
+impl Endpoint {
+	
+	pub fn example_http () -> Self {
+		
+		let mut _endpoint = Endpoint {
+				.. Default::default ()
+			};
+		
+		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8080)));
+		
+		_endpoint
+	}
+	
+	pub fn example_https () -> Self {
+		
+		let _certificates = {
+			let mut _certificate_data = & include_bytes! ("../examples/self-signed--certificate.pem") [..];
+			let _certificates = rustls::internal::pemfile::certs (&mut _certificate_data) .or_panic (0x6ed75325);
+			if _certificates.is_empty () {
+				panic_with_message (0xc6991697, "no certificates loaded");
+			}
+			_certificates
+		};
+		
+		let _private_key = {
+			let mut _private_key_data = & include_bytes! ("../examples/self-signed--private-key.pem") [..];
+			let _private_keys = rustls::internal::pemfile::pkcs8_private_keys (&mut _private_key_data) .or_panic (0x71cd79a6);
+			if _private_keys.len () == 1 {
+				_private_keys.into_iter () .next () .unwrap ()
+			} else if _private_keys.is_empty () {
+				panic_with_message (0x84af61dd, "no private key loaded");
+			} else {
+				panic_with_message (0xa5a124ef, "multiple private keys loaded");
+			}
+		};
+		
+		let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
+		_tls.set_single_cert (_certificates, _private_key) .expect ("[77a6398d]");
+		
+		let mut _endpoint = Endpoint {
+				.. Default::default ()
+			};
+		
+		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8443)));
+		_endpoint.security = EndpointSecurity::RustTls (Arc::new (_tls));
+		
+		_endpoint
 	}
 }
 

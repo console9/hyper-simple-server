@@ -40,4 +40,5 @@ extern crate tokio_rustls;
 extern crate tokio_native_tls;
 extern crate rustls;
 extern crate native_tls;
+extern crate rustls_pemfile;
 

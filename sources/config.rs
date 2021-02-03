@@ -80,27 +80,28 @@ impl Endpoint {
 	
 	pub fn example_https () -> Self {
 		
-		let _certificate_data = & include_bytes! ("../examples/tls/testing--server--rsa--certificate.pem") [..];
-		let _private_key_data = & include_bytes! ("../examples/tls/testing--server--rsa--private-key.pem") [..];
+		let _bundle_data = & include_bytes! ("../examples/tls/testing--server--rsa--bundle.pem") [..];
 		
 		let _certificate_chain = {
-			let mut _certificate_data = _certificate_data;
-			let _certificates = rustls::internal::pemfile::certs (&mut _certificate_data) .or_panic (0x6ed75325);
+			let mut _certificate_data = _bundle_data;
+			let _certificates = rustls_pem::certs (&mut _certificate_data) .or_panic (0x1d1d6f0f);
 			if _certificates.is_empty () {
 				panic_with_message (0xc6991697, "no certificates loaded");
 			}
-			_certificates
+			_certificates.into_iter () .map (rustls::Certificate) .collect ()
 		};
 		
 		let _private_key = {
-			let mut _private_key_data = _private_key_data;
-			let _private_keys = rustls::internal::pemfile::pkcs8_private_keys (&mut _private_key_data) .or_panic (0x71cd79a6);
-			if _private_keys.len () == 1 {
-				_private_keys.into_iter () .next () .unwrap ()
-			} else if _private_keys.is_empty () {
-				panic_with_message (0x84af61dd, "no private key loaded");
+			let mut _private_key_data = _bundle_data;
+			let _private_keys = rustls_pem::pkcs8_private_keys (&mut _private_key_data) .or_panic (0x71cd79a6);
+			let mut _private_keys = _private_keys.into_iter ();
+			if let Some (_private_key) = _private_keys.next () {
+				if _private_keys.next () .is_some () {
+					panic_with_message (0xa5a124ef, "multiple private keys loaded");
+				}
+				rustls::PrivateKey (_private_key)
 			} else {
-				panic_with_message (0xa5a124ef, "multiple private keys loaded");
+				panic_with_message (0x84af61dd, "no private key loaded");
 			}
 		};
 		

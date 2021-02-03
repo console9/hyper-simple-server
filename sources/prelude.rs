@@ -68,4 +68,5 @@ pub(crate) mod tokio {
 
 pub(crate) use ::rustls;
 pub(crate) use ::native_tls as natls;
+pub(crate) use ::rustls_pemfile as rustls_pem;
 

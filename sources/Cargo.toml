@@ -37,3 +37,5 @@ rustls = { version = "*", default-features = true }
 tokio-native-tls = { version = "*", default-features = true }
 native-tls = { version = "*", default-features = true }
 
+rustls-pemfile = { version = "*", default-features = true }
+

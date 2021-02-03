@@ -11,11 +11,8 @@ pub fn main () -> () {
 		Ok (Response::new (Body::from ("OK")))
 	};
 	
-	let _endpoint = Endpoint::example_https ();
-	
-	let _configuration = Configuration::builder ()
+	let _configuration = Configuration::example_https ()
 			.with_handler_fn_sync (_handler)
-			.with_endpoint (_endpoint)
 			.build () .or_panic (0xb601cf12);
 	
 	Server::run (_configuration) .or_panic (0xe2bb7eb3);

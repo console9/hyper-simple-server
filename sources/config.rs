@@ -11,8 +11,6 @@ pub struct Configuration {
 }
 
 
-
-
 #[ derive (Clone) ]
 pub struct Endpoint {
 	pub address : EndpointAddress,
@@ -39,7 +37,13 @@ pub enum EndpointProtocol {
 #[ derive (Clone) ]
 pub enum EndpointSecurity {
 	Insecure,
-	RustTls (Arc<rustls::ServerConfig>),
+	RustTls (RustTlsCertificate),
+}
+
+
+#[ derive (Clone) ]
+pub struct RustTlsCertificate {
+	pub certified : rustls::sign::CertifiedKey
 }
 
 
@@ -50,7 +54,19 @@ impl Configuration {
 	pub fn builder () -> ConfigurationBuilder {
 		ConfigurationBuilder::new ()
 	}
+	
+	pub fn example_http () -> ConfigurationBuilder {
+		Configuration::builder ()
+			.with_endpoint (Endpoint::example_http ())
+	}
+	
+	pub fn example_https () -> ConfigurationBuilder {
+		Configuration::builder ()
+			.with_endpoint (Endpoint::example_https ())
+	}
 }
+
+
 
 
 impl Default for Endpoint {
@@ -80,68 +96,14 @@ impl Endpoint {
 	
 	pub fn example_https () -> Self {
 		
-		let _bundle_data = & include_bytes! ("../examples/tls/testing--server--rsa--bundle.pem") [..];
-		
-		let _certificate_chain = {
-			let mut _certificate_data = _bundle_data;
-			let _certificates = rustls_pem::certs (&mut _certificate_data) .or_panic (0x1d1d6f0f);
-			if _certificates.is_empty () {
-				panic_with_message (0xc6991697, "no certificates loaded");
-			}
-			_certificates.into_iter () .map (rustls::Certificate) .collect ()
-		};
-		
-		let _private_key = {
-			let mut _private_key_data = _bundle_data;
-			let _private_keys = rustls_pem::pkcs8_private_keys (&mut _private_key_data) .or_panic (0x71cd79a6);
-			let mut _private_keys = _private_keys.into_iter ();
-			if let Some (_private_key) = _private_keys.next () {
-				if _private_keys.next () .is_some () {
-					panic_with_message (0xa5a124ef, "multiple private keys loaded");
-				}
-				rustls::PrivateKey (_private_key)
-			} else {
-				panic_with_message (0x84af61dd, "no private key loaded");
-			}
-		};
-		
-		let _certified = {
-			let _private_key = rustls::sign::any_supported_type (&_private_key) .or_panic (0x1a5e250d);
-			rustls::sign::CertifiedKey::new (_certificate_chain, Arc::new (_private_key))
-		};
-		
-		let _resolver = {
-			struct Resolver (rustls::sign::CertifiedKey);
-			impl rustls::ResolvesServerCert for Resolver {
-				fn resolve (&self, _: rustls::ClientHello) -> Option<rustls::sign::CertifiedKey> {
-					Some (self.0.clone ())
-				}
-			}
-			Resolver (_certified)
-		};
+		let _certificate = RustTlsCertificate::example () .or_panic (0xf64b30c4);
 		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()
 			};
 		
-		let _tls = {
-			let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
-			_tls.cert_resolver = Arc::new (_resolver);
-			match _endpoint.protocol {
-				EndpointProtocol::Http1 =>
-					_tls.alpn_protocols.push ("http/1.1".into ()),
-				EndpointProtocol::Http2 =>
-					_tls.alpn_protocols.push ("h2".into ()),
-				EndpointProtocol::Http12 => {
-					_tls.alpn_protocols.push ("h2".into ());
-					_tls.alpn_protocols.push ("http/1.1".into ());
-				}
-			}
-			_tls
-		};
-		
 		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8443)));
-		_endpoint.security = EndpointSecurity::RustTls (Arc::new (_tls));
+		_endpoint.security = EndpointSecurity::RustTls (_certificate);
 		
 		_endpoint
 	}
@@ -228,6 +190,70 @@ impl ConfigurationBuilder {
 	{
 		self.handler = Some (_handler);
 		self
+	}
+}
+
+
+
+
+impl RustTlsCertificate {
+	
+	pub fn load_from_pem_str (mut _data : &str) -> ServerResult<Self> {
+		Self::load_from_pem_bytes (_data.as_bytes ())
+	}
+	
+	pub fn load_from_pem_bytes (_data : &[u8]) -> ServerResult<Self> {
+		
+		let _certificates = {
+			let mut _data = _data;
+			rustls_pem::certs (&mut _data) .or_wrap () ?
+		};
+		let _private_keys = {
+			let mut _data = _data;
+			rustls_pem::pkcs8_private_keys (&mut _data) .or_wrap () ?
+		};
+		
+		Self::load_from_parts (
+				_certificates.iter () .map (|_part| _part.as_slice ()),
+				_private_keys.iter () .map (|_part| _part.as_slice ()),
+			)
+	}
+	
+	pub fn load_from_parts <'a> (mut _certificates : impl Iterator<Item = &'a [u8]>, mut _private_keys : impl Iterator<Item = &'a [u8]>) -> ServerResult<Self> {
+		let _certificates = {
+			let _certificates : Vec<_> = _certificates.map (<[u8]>::to_vec) .map (rustls::Certificate) .collect ();
+			if _certificates.is_empty () {
+				return Err (error_with_message (0xc6991697, "no certificates found"));
+			}
+			_certificates
+		};
+		let _private_key = {
+			if let Some (_private_key) = _private_keys.next () {
+				if _private_keys.next () .is_some () {
+					return Err (error_with_message (0xa5a124ef, "multiple private keys found"));
+				}
+				rustls::PrivateKey (_private_key.to_vec ())
+			} else {
+				return Err (error_with_message (0x84af61dd, "no private key found"));
+			}
+		};
+		Self::load_from_parts_0 (_certificates, _private_key)
+	}
+	
+	fn load_from_parts_0 (_certificates : Vec<rustls::Certificate>, _private_key : rustls::PrivateKey) -> ServerResult<Self> {
+		let _certified = {
+			let _private_key = rustls::sign::any_supported_type (&_private_key) .map_err (|_| error_with_message (0x5c4797d0, "invalid private key")) ?;
+			rustls::sign::CertifiedKey::new (_certificates, Arc::new (_private_key))
+		};
+		let _certificate = RustTlsCertificate {
+				certified : _certified,
+			};
+		Ok (_certificate)
+	}
+	
+	pub fn example () -> ServerResult<Self> {
+		let _bundle = include_str! ("../examples/tls/testing--server--rsa--bundle.pem");
+		Self::load_from_pem_str (_bundle)
 	}
 }
 

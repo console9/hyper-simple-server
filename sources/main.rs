@@ -11,7 +11,7 @@ pub fn main () -> () {
 		Ok (Response::new (Body::from ("OK")))
 	};
 	
-	let _configuration = Configuration::example_https ()
+	let _configuration = Configuration::localhost_https ()
 			.with_handler_fn_sync (_handler)
 			.build () .or_panic (0xb601cf12);
 	

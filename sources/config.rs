@@ -55,14 +55,14 @@ impl Configuration {
 		ConfigurationBuilder::new ()
 	}
 	
-	pub fn example_http () -> ConfigurationBuilder {
+	pub fn localhost_http () -> ConfigurationBuilder {
 		Configuration::builder ()
-			.with_endpoint (Endpoint::example_http ())
+			.with_endpoint (Endpoint::localhost_http ())
 	}
 	
-	pub fn example_https () -> ConfigurationBuilder {
+	pub fn localhost_https () -> ConfigurationBuilder {
 		Configuration::builder ()
-			.with_endpoint (Endpoint::example_https ())
+			.with_endpoint (Endpoint::localhost_https ())
 	}
 }
 
@@ -83,7 +83,7 @@ impl Default for Endpoint {
 
 impl Endpoint {
 	
-	pub fn example_http () -> Self {
+	pub fn localhost_http () -> Self {
 		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()
@@ -94,9 +94,9 @@ impl Endpoint {
 		_endpoint
 	}
 	
-	pub fn example_https () -> Self {
+	pub fn localhost_https () -> Self {
 		
-		let _certificate = RustTlsCertificate::example () .or_panic (0xf64b30c4);
+		let _certificate = RustTlsCertificate::localhost () .or_panic (0xf64b30c4);
 		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()
@@ -251,7 +251,7 @@ impl RustTlsCertificate {
 		Ok (_certificate)
 	}
 	
-	pub fn example () -> ServerResult<Self> {
+	pub fn localhost () -> ServerResult<Self> {
 		let _bundle = include_str! ("../examples/tls/testing--server--rsa--bundle.pem");
 		Self::load_from_pem_str (_bundle)
 	}

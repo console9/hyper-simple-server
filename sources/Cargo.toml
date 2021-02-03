@@ -5,16 +5,20 @@ name = "hyper-simple-server"
 version = "0.0.0"
 authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
 edition = "2018"
-rust = "1.49"
+license = "MIT"
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
 
-
-[[bin]]
-name = "example"
-path = "./example.rs"
 
 [lib]
 name = "hyper_simple_server"
 path = "./lib.rs"
+
+[[bin]]
+name = "example"
+path = "./example.rs"
 
 
 [features]
@@ -23,13 +27,13 @@ default = []
 
 [dependencies]
 
+futures = { version = "*", default-features = true }
 hyper = { version = "*", default-features = true, features = ["full"] }
 tokio = { version = "*", default-features = true, features = ["full"] }
-futures = { version = "*", default-features = true, features = [] }
 
-# tokio-rustls = { version = "*", default-features = true }
-# rustls = { version = "*", default-features = true }
+tokio-rustls = { version = "*", default-features = true }
+rustls = { version = "*", default-features = true }
 
-# tokio-native-tls = { version = "*", default-features = true }
-# native-tls = { version = "*", default-features = true }
+tokio-native-tls = { version = "*", default-features = true }
+native-tls = { version = "*", default-features = true }
 

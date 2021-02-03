@@ -83,7 +83,7 @@ impl Endpoint {
 		let _certificate_data = & include_bytes! ("../examples/tls/testing--server--rsa--certificate.pem") [..];
 		let _private_key_data = & include_bytes! ("../examples/tls/testing--server--rsa--private-key.pem") [..];
 		
-		let _certificates = {
+		let _certificate_chain = {
 			let mut _certificate_data = _certificate_data;
 			let _certificates = rustls::internal::pemfile::certs (&mut _certificate_data) .or_panic (0x6ed75325);
 			if _certificates.is_empty () {
@@ -104,8 +104,26 @@ impl Endpoint {
 			}
 		};
 		
-		let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
-		_tls.set_single_cert (_certificates, _private_key) .expect ("[77a6398d]");
+		let _certified = {
+			let _private_key = rustls::sign::any_supported_type (&_private_key) .or_panic (0x1a5e250d);
+			rustls::sign::CertifiedKey::new (_certificate_chain, Arc::new (_private_key))
+		};
+		
+		let _resolver = {
+			struct Resolver (rustls::sign::CertifiedKey);
+			impl rustls::ResolvesServerCert for Resolver {
+				fn resolve (&self, _: rustls::ClientHello) -> Option<rustls::sign::CertifiedKey> {
+					Some (self.0.clone ())
+				}
+			}
+			Resolver (_certified)
+		};
+		
+		let _tls = {
+			let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
+			_tls.cert_resolver = Arc::new (_resolver);
+			_tls
+		};
 		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()

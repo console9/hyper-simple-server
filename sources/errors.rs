@@ -34,6 +34,34 @@ impl <Value, Error : error::Error> ResultExtPanic<Value, Error> for Result<Value
 }
 
 
+impl <Value> ResultExtPanic<Value, io::Error> for Result<Value, ()> {
+	
+	fn result (self) -> Result<Value, io::Error> {
+		self.map_err (|_| io::Error::new (io::ErrorKind::Other, "unspecified error"))
+	}
+}
+
+
+
+
+pub(crate) trait ErrorExtPanic<Error : error::Error> : Sized {
+	
+	fn error (self) -> Error;
+	
+	fn panic (self, _code : u32) -> ! {
+		panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self.error ());
+	}
+}
+
+
+impl <Error : error::Error> ErrorExtPanic<Error> for Error {
+	
+	fn error (self) -> Self {
+		self
+	}
+}
+
+
 
 
 pub(crate) trait ResultExtWrap<Value> : Sized {
@@ -65,7 +93,30 @@ pub fn error_with_message (_code : u32, _message : &str) -> ServerError {
 	if ! _message.is_empty () {
 		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 	} else {
-		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
+		error_with_code (_code)
 	}
+}
+
+pub fn error_with_code (_code : u32) -> ServerError {
+	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
+}
+
+
+
+
+pub fn panic_with_format (_code : u32, _message : fmt::Arguments) -> ! {
+	panic! (format! ("[{:08x}]  {}", _code, _message))
+}
+
+pub fn panic_with_message (_code : u32, _message : &str) -> ! {
+	if ! _message.is_empty () {
+		panic! (format! ("[{:08x}]  {}", _code, _message))
+	} else {
+		panic_with_code (_code)
+	}
+}
+
+pub fn panic_with_code (_code : u32) -> ! {
+	panic! (format! ("[{:08x}]  unexpected error encountered!", _code))
 }
 

@@ -119,15 +119,25 @@ impl Endpoint {
 			Resolver (_certified)
 		};
 		
-		let _tls = {
-			let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
-			_tls.cert_resolver = Arc::new (_resolver);
-			_tls
-		};
-		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()
 			};
+		
+		let _tls = {
+			let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
+			_tls.cert_resolver = Arc::new (_resolver);
+			match _endpoint.protocol {
+				EndpointProtocol::Http1 =>
+					_tls.alpn_protocols.push ("http/1.1".into ()),
+				EndpointProtocol::Http2 =>
+					_tls.alpn_protocols.push ("h2".into ()),
+				EndpointProtocol::Http12 => {
+					_tls.alpn_protocols.push ("h2".into ());
+					_tls.alpn_protocols.push ("http/1.1".into ());
+				}
+			}
+			_tls
+		};
 		
 		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8443)));
 		_endpoint.security = EndpointSecurity::RustTls (Arc::new (_tls));

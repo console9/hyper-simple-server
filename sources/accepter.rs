@@ -7,6 +7,7 @@ use crate::prelude::*;
 
 pub(crate) enum Accepter {
 	TcpListener (tokio::TcpListener, hyper::Http),
+	RustTlsTcpListener (tokio::rustls::TlsAcceptor, tokio::TcpListener, hyper::Http),
 }
 
 
@@ -30,6 +31,17 @@ impl hyper::Accept for Accepter {
 					Err (_error) =>
 						Poll::Ready (Some (Err (_error))),
 				},
+			
+			Accepter::RustTlsTcpListener (_tls, _listener, _) =>
+				match futures::ready! (_listener.poll_accept (_context)) {
+					Ok ((_socket, _address)) => {
+						let _accepter = _tls.accept (_socket);
+						let _connection = Connection::RustTlsTcpStreamPending (_accepter, _address);
+						Poll::Ready (Some (Ok (_connection)))
+					}
+					Err (_error) =>
+						Poll::Ready (Some (Err (_error))),
+				},
 		}
 	}
 }
@@ -42,12 +54,21 @@ impl Accepter {
 		let _http = hyper_new_protocol (&_endpoint.protocol) ?;
 		let _listener = hyper_new_listener (&_endpoint.address) ?;
 		
-		Ok (Accepter::TcpListener (_listener, _http))
+		match &_endpoint.security {
+			EndpointSecurity::Insecure =>
+				Ok (Accepter::TcpListener (_listener, _http)),
+			EndpointSecurity::RustTls (_tls) => {
+				let _tls = tokio::rustls::TlsAcceptor::from (_tls.clone ());
+				Ok (Accepter::RustTlsTcpListener (_tls, _listener, _http))
+			}
+		}
 	}
 	
 	pub(crate) fn protocol (&self) -> hyper::Http {
 		match self {
 			Accepter::TcpListener (_, _protocol) =>
+				_protocol.clone (),
+			Accepter::RustTlsTcpListener (_, _, _protocol) =>
 				_protocol.clone (),
 		}
 	}

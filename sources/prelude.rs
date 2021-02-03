@@ -62,5 +62,10 @@ pub(crate) mod tokio {
 	pub(crate) use ::tokio::runtime::{
 			Runtime,
 		};
+	pub(crate) use ::tokio_rustls as rustls;
+	pub(crate) use ::tokio_native_tls as natls;
 }
+
+pub(crate) use ::rustls;
+pub(crate) use ::native_tls as natls;
 

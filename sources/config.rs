@@ -35,6 +35,13 @@ pub enum EndpointProtocol {
 }
 
 
+#[ derive (Clone) ]
+pub enum EndpointSecurity {
+	Insecure,
+	RustTls (Arc<rustls::ServerConfig>),
+}
+
+
 
 
 impl Configuration {

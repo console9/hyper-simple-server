@@ -7,6 +7,8 @@ use crate::prelude::*;
 
 pub(crate) enum Connection {
 	TcpStream (tokio::TcpStream, net::SocketAddr),
+	RustTlsTcpStreamPending (tokio::rustls::Accept<tokio::TcpStream>, net::SocketAddr),
+	RustTlsTcpStream (tokio::rustls::server::TlsStream<tokio::TcpStream>, net::SocketAddr),
 }
 
 
@@ -19,7 +21,21 @@ impl Connection {
 		let _self = Pin::into_inner (self);
 		
 		match _self {
+			
 			Connection::TcpStream (_stream, _) =>
+				Poll::Ready (Ok (Pin::new (_stream))),
+			
+			Connection::RustTlsTcpStreamPending (_accepter, _address) =>
+				match futures::ready! (Pin::new (_accepter).poll (_context)) {
+					Ok (_stream) => {
+						*_self = Connection::RustTlsTcpStream (_stream, *_address);
+						Self::poll_stream (Pin::new (_self), _context)
+					}
+					Err (_error) =>
+						Poll::Ready (Err (_error)),
+				}
+			
+			Connection::RustTlsTcpStream (_stream, _) =>
 				Poll::Ready (Ok (Pin::new (_stream))),
 		}
 	}

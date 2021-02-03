@@ -80,8 +80,11 @@ impl Endpoint {
 	
 	pub fn example_https () -> Self {
 		
+		let _certificate_data = & include_bytes! ("../examples/tls/testing--server--rsa--certificate.pem") [..];
+		let _private_key_data = & include_bytes! ("../examples/tls/testing--server--rsa--private-key.pem") [..];
+		
 		let _certificates = {
-			let mut _certificate_data = & include_bytes! ("../examples/self-signed--certificate.pem") [..];
+			let mut _certificate_data = _certificate_data;
 			let _certificates = rustls::internal::pemfile::certs (&mut _certificate_data) .or_panic (0x6ed75325);
 			if _certificates.is_empty () {
 				panic_with_message (0xc6991697, "no certificates loaded");
@@ -90,7 +93,7 @@ impl Endpoint {
 		};
 		
 		let _private_key = {
-			let mut _private_key_data = & include_bytes! ("../examples/self-signed--private-key.pem") [..];
+			let mut _private_key_data = _private_key_data;
 			let _private_keys = rustls::internal::pemfile::pkcs8_private_keys (&mut _private_key_data) .or_panic (0x71cd79a6);
 			if _private_keys.len () == 1 {
 				_private_keys.into_iter () .next () .unwrap ()

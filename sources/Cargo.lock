@@ -282,6 +282,7 @@ name = "hyper-simple-server"
 version = "0.0.0"
 dependencies = [
  "futures",
+ "http-body",
  "hyper",
  "native-tls",
  "rustls",

@@ -29,6 +29,7 @@ default = []
 
 futures = { version = "*", default-features = true }
 hyper = { version = "*", default-features = true, features = ["full"] }
+http-body = { version = "*", default-features = true }
 tokio = { version = "*", default-features = true, features = ["full"] }
 
 tokio-rustls = { version = "*", default-features = true }

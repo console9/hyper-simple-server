@@ -35,6 +35,7 @@ pub use {
 
 extern crate futures;
 extern crate hyper;
+extern crate http_body;
 extern crate tokio;
 extern crate tokio_rustls;
 extern crate tokio_native_tls;

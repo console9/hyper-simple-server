@@ -9,7 +9,7 @@
 
 
 pub(crate) mod accepter;
-pub(crate) mod config;
+pub(crate) mod configuration;
 pub(crate) mod connection;
 pub(crate) mod errors;
 pub(crate) mod handler;
@@ -22,7 +22,7 @@ pub(crate) mod server;
 
 pub use {
 	
-	crate::config::*,
+	crate::configuration::*,
 	crate::errors::*,
 	crate::handler::*,
 	crate::server::*,

@@ -1,7 +1,7 @@
 
 
 pub use crate::accepter::*;
-pub use crate::config::*;
+pub use crate::configuration::*;
 pub use crate::connection::*;
 pub use crate::errors::*;
 pub use crate::handler::*;

@@ -99,7 +99,7 @@ impl <Error : error::Error> ErrorExtWrap for Error {
 
 
 #[ allow (dead_code) ]
-pub(crate) fn error_with_format (_code : u32, _message : fmt::Arguments) -> ServerError {
+pub(crate) fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ServerError {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 }
 
@@ -121,7 +121,7 @@ pub(crate) fn error_with_code (_code : u32) -> ServerError {
 
 
 #[ allow (dead_code) ]
-pub(crate) fn panic_with_format (_code : u32, _message : fmt::Arguments) -> ! {
+pub(crate) fn panic_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ! {
 	panic! (format! ("[{:08x}]  {}", _code, _message))
 }
 

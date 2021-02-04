@@ -2,9 +2,36 @@
 
 #![ no_implicit_prelude ]
 
-#![ deny (unused_crate_dependencies) ]
-#![ deny (unreachable_pub) ]
+#![ warn (absolute_paths_not_starting_with_crate) ]
+#![ warn (anonymous_parameters) ]
+#![ warn (elided_lifetimes_in_paths) ]
+#![ warn (explicit_outlives_requirements) ]
+#![ warn (invalid_html_tags) ]
+#![ warn (keyword_idents) ]
+#![ warn (macro_use_extern_crate) ]
+#![ warn (meta_variable_misuse) ]
+//#![ warn (missing_crate_level_docs) ]
+//#![ warn (missing_doc_code_examples) ]
+//#![ warn (missing_docs) ]
+#![ warn (non_ascii_idents) ]
+#![ warn (pointer_structural_match) ]
+#![ warn (private_doc_tests) ]
+#![ warn (single_use_lifetimes) ]
+#![ warn (trivial_casts) ]
+#![ warn (trivial_numeric_casts) ]
+#![ warn (unreachable_pub) ]
+#![ warn (unsafe_code) ]
+#![ warn (unused_crate_dependencies) ]
+#![ warn (unused_extern_crates) ]
+#![ warn (unused_import_braces) ]
+#![ warn (unused_lifetimes) ]
+#![ warn (unused_qualifications) ]
+#![ warn (variant_size_differences) ]
 
+#![ allow (box_pointers) ]
+#![ allow (missing_copy_implementations) ]
+#![ allow (missing_debug_implementations) ]
+#![ allow (unused_results) ]
 
 
 
@@ -40,17 +67,14 @@ pub use {
 
 
 
-pub extern crate hyper;
-pub extern crate tokio;
-pub extern crate http_body;
+pub use ::hyper;
+pub use ::tokio;
+pub use ::http_body;
 
-pub extern crate rustls;
-pub extern crate tokio_rustls;
-pub extern crate rustls_pemfile;
+pub use ::rustls;
+pub use ::tokio_rustls;
+pub use ::rustls_pemfile;
 
-pub extern crate native_tls;
-pub extern crate tokio_native_tls;
-
-extern crate futures;
-extern crate path_tree;
+pub use ::native_tls;
+pub use ::tokio_native_tls;
 

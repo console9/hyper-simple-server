@@ -16,7 +16,7 @@ pub enum Connection {
 
 impl Connection {
 	
-	fn poll_stream (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult<Pin<&mut dyn AsyncStream>>> {
+	fn poll_stream (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Pin<&mut dyn AsyncStream>>> {
 		
 		let _self = Pin::into_inner (self);
 		
@@ -49,7 +49,7 @@ impl <Stream : tokio::AsyncRead + tokio::AsyncWrite + Unpin> AsyncStream for Str
 
 impl tokio::AsyncRead for Connection {
 	
-	fn poll_read (self : Pin<&mut Self>, _context : &mut Context, _buffer : &mut tokio::ReadBuf) -> Poll<ServerResult> {
+	fn poll_read (self : Pin<&mut Self>, _context : &mut Context<'_>, _buffer : &mut tokio::ReadBuf<'_>) -> Poll<ServerResult> {
 		match futures::ready! (self.poll_stream (_context)) {
 			Ok (_stream) =>
 				_stream.poll_read (_context, _buffer),
@@ -62,7 +62,7 @@ impl tokio::AsyncRead for Connection {
 
 impl tokio::AsyncWrite for Connection {
 	
-	fn poll_write (self : Pin<&mut Self>, _context : &mut Context, _buffer : &[u8]) -> Poll<ServerResult<usize>> {
+	fn poll_write (self : Pin<&mut Self>, _context : &mut Context<'_>, _buffer : &[u8]) -> Poll<ServerResult<usize>> {
 		match futures::ready! (self.poll_stream (_context)) {
 			Ok (_stream) =>
 				_stream.poll_write (_context, _buffer),
@@ -71,7 +71,7 @@ impl tokio::AsyncWrite for Connection {
 		}
 	}
 	
-	fn poll_flush (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult> {
+	fn poll_flush (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult> {
 		match futures::ready! (self.poll_stream (_context)) {
 			Ok (_stream) =>
 				_stream.poll_flush (_context),
@@ -80,7 +80,7 @@ impl tokio::AsyncWrite for Connection {
 		}
 	}
 	
-	fn poll_shutdown (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult> {
+	fn poll_shutdown (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult> {
 		match futures::ready! (self.poll_stream (_context)) {
 			Ok (_stream) =>
 				_stream.poll_shutdown (_context),

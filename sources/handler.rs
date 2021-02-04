@@ -162,7 +162,7 @@ impl hyper::Service<Request<Body>> for HandlerDynArc {
 	type Response = Response<BodyDynBox>;
 	type Error = ServerError;
 	
-	fn poll_ready (&mut self, _context : &mut Context) -> Poll<ServerResult> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServerResult> {
 		Poll::Ready (Ok (()))
 	}
 	
@@ -176,9 +176,9 @@ impl hyper::Service<Request<Body>> for HandlerDynArc {
 
 pub trait BodyDyn : Send + 'static {
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context) -> Poll<Option<ServerResult<Bytes>>>;
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult<Option<Headers>>>;
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>>;
 	
 	fn is_end_stream (&self) -> bool;
 	
@@ -191,7 +191,7 @@ impl <B, E> BodyDyn for B
 			B : BodyTrait<Data = Bytes, Error = E> + Send + 'static,
 			E : Error + Send + 'static,
 {
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context) -> Poll<Option<ServerResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
 		match futures::ready! (BodyTrait::poll_data (self, _context)) {
 			Some (Ok (_bytes)) =>
 				Poll::Ready (Some (Ok (_bytes))),
@@ -202,7 +202,7 @@ impl <B, E> BodyDyn for B
 		}
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
 		match futures::ready! (BodyTrait::poll_trailers (self, _context)) {
 			Ok (Some (_headers)) =>
 				Poll::Ready (Ok (Some (_headers))),
@@ -233,11 +233,11 @@ impl BodyTrait for BodyDynBox {
 	type Data = Bytes;
 	type Error = ServerError;
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context) -> Poll<Option<ServerResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
 		self.delegate_pin_mut () .poll_data (_context)
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context) -> Poll<ServerResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
 		self.delegate_pin_mut () .poll_trailers (_context)
 	}
 	

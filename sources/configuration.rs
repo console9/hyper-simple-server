@@ -20,6 +20,7 @@ pub struct Endpoint {
 
 
 #[ derive (Clone) ]
+#[ allow (variant_size_differences) ]
 pub enum EndpointAddress {
 	Socket (net::SocketAddr),
 	Descriptor (u32),
@@ -251,6 +252,7 @@ impl ConfigurationBuilder {
 
 impl ConfigurationBuilder {
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -264,6 +266,7 @@ impl ConfigurationBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_fn_sync <'a, P, H, C, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -276,6 +279,7 @@ impl ConfigurationBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_fn_async <'a, P, H, C, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -289,6 +293,7 @@ impl ConfigurationBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
 			where
 				P : Into<RoutePaths<'a>>,

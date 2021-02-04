@@ -122,6 +122,7 @@ impl RoutesBuilder {
 		Ok (_self)
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -135,6 +136,7 @@ impl RoutesBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_fn_sync <'a, P, H, C, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -147,6 +149,7 @@ impl RoutesBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_fn_async <'a, P, H, C, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
@@ -160,6 +163,7 @@ impl RoutesBuilder {
 		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
 			where
 					P : Into<RoutePaths<'a>>

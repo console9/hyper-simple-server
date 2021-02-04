@@ -18,7 +18,7 @@ impl hyper::Accept for Accepter {
 	type Conn = Connection;
 	type Error = ServerError;
 	
-	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
+	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
 		
 		match self.deref () {
 			
@@ -118,6 +118,7 @@ fn new_protocol (_protocol : &EndpointProtocol) -> ServerResult<hyper::Http> {
 
 
 
+#[ allow (unsafe_code) ]
 fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener> {
 	
 	let _listener = match _address {
@@ -142,7 +143,7 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 	let _resolver = {
 		struct Resolver (RustTlsCertificate);
 		impl rustls::ResolvesServerCert for Resolver {
-			fn resolve (&self, _ : rustls::ClientHello) -> Option<rustls::sign::CertifiedKey> {
+			fn resolve (&self, _ : rustls::ClientHello<'_>) -> Option<rustls::sign::CertifiedKey> {
 				Some (self.0.certified.clone ())
 			}
 		}

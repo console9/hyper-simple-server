@@ -14,7 +14,13 @@ pub use ::std::*;
 pub use ::std::prelude::v1::*;
 
 
+pub use ::std::error::Error;
+
 pub use ::std::future::Future;
+pub use futures::FutureExt as _;
+pub use futures::TryFutureExt as _;
+
+pub use ::std::marker::PhantomData;
 
 pub use ::std::pin::Pin;
 
@@ -30,10 +36,20 @@ pub use ::std::ops::DerefMut as _;
 
 
 
-pub(crate) use ::futures;
+pub(crate) mod futures {
+	pub use ::futures::prelude::{
+			*,
+			future::*,
+			sink::*,
+			stream::*,
+		};
+	pub use ::futures::{
+			*,
+		};
+}
 
 pub(crate) mod hyper {
-	pub(crate) use ::hyper::{
+	pub use ::hyper::{
 			server::Server,
 			server::Builder,
 			server::accept::Accept,
@@ -44,22 +60,31 @@ pub(crate) mod hyper {
 			Request,
 			Response,
 			Body,
+			header::HeaderMap,
+			header::HeaderValue,
+			body::Bytes,
+		};
+	pub use ::http_body::{
+			Body as BodyTrait,
+			SizeHint as BodySizeHint,
+			Data as BodyData,
+			Trailers as BodyTrailers,
 		};
 }
 
 pub(crate) mod tokio {
 	
-	pub(crate) use ::tokio::io::{
+	pub use ::tokio::io::{
 			AsyncWrite,
 			AsyncRead,
 			ReadBuf,
 			Error,
 		};
-	pub(crate) use ::tokio::net::{
+	pub use ::tokio::net::{
 			TcpListener,
 			TcpStream,
 		};
-	pub(crate) use ::tokio::runtime::{
+	pub use ::tokio::runtime::{
 			Runtime,
 		};
 	pub(crate) use ::tokio_rustls as rustls;

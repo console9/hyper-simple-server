@@ -64,6 +64,9 @@ pub(crate) mod hyper {
 			header::HeaderMap,
 			header::HeaderValue,
 			body::Bytes,
+			body::Buf,
+			Error,
+			rt::Executor,
 		};
 	pub use ::http_body::{
 			Body as BodyTrait,
@@ -74,7 +77,6 @@ pub(crate) mod hyper {
 }
 
 pub(crate) mod tokio {
-	
 	pub use ::tokio::io::{
 			AsyncWrite,
 			AsyncRead,
@@ -88,9 +90,13 @@ pub(crate) mod tokio {
 	pub use ::tokio::runtime::{
 			Runtime,
 		};
-	pub(crate) use ::tokio_rustls as rustls;
-	pub(crate) use ::tokio_native_tls as natls;
+	pub use ::tokio::task::{
+			spawn,
+		};
 }
+
+pub(crate) use ::tokio_rustls as tokio_rustls;
+pub(crate) use ::tokio_native_tls as tokio_natls;
 
 pub(crate) use ::rustls;
 pub(crate) use ::native_tls as natls;

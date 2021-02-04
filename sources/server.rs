@@ -94,7 +94,7 @@ impl Server {
 				SE : Error + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
-				SBD : ::hyper::body::Buf + Send + 'static,
+				SBD : hyper::Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
 		let _make_service = move |_connection : &Connection| {
@@ -115,12 +115,9 @@ impl Server {
 				SE : Error + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
-				SBD : ::hyper::body::Buf + Send + 'static,
+				SBD : hyper::Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
-		if self.handler () .is_some () {
-			return Err (error_with_message (0x22504ff3, "both configuration handler and service function specified"));
-		}
 		let _service = hyper::make_service_fn (_make_service);
 		let _builder = self.serve_builder () ?;
 		_builder.serve (_service) .await .or_wrap (0x73080376)
@@ -133,12 +130,12 @@ impl Server {
 #[ derive (Clone) ]
 pub struct ServerExecutor ();
 
-impl <F> ::hyper::rt::Executor<F> for ServerExecutor
+impl <F> hyper::Executor<F> for ServerExecutor
 		where
 			F : Future<Output = ()> + Send + 'static,
 {
 	fn execute (&self, _future : F) {
-		::tokio::task::spawn (_future);
+		tokio::spawn (_future);
 	}
 }
 

@@ -23,6 +23,6 @@ pub fn main () -> () {
 			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)
 			.build () .or_panic (0xb601cf12);
 	
-	Server::run (_configuration) .or_panic (0xe2bb7eb3);
+	Server::run_and_wait (_configuration) .or_panic (0x267c0521);
 }
 

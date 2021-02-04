@@ -5,7 +5,7 @@ use crate::prelude::*;
 
 
 
-pub(crate) enum Accepter {
+pub enum Accepter {
 	TcpListener (tokio::TcpListener, hyper::Http),
 	RustTlsTcpListener (tokio::rustls::TlsAcceptor, tokio::TcpListener, hyper::Http),
 }

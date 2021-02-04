@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 pub struct Configuration {
 	pub endpoint : Endpoint,
-	pub handler : HandlerDynArc,
+	pub handler : Option<HandlerDynArc>,
 }
 
 
@@ -148,11 +148,12 @@ impl ConfigurationBuilder {
 		}
 		
 		let _handler = if let Some (_handler) = _handler {
-			_handler
+			Some (_handler)
 		} else if let Some (_routes) = _routes {
-			_routes.build () ? .into_boxed ()
+			let _handler = _routes.build () ? .into_boxed ();
+			Some (_handler)
 		} else {
-			return Err (error_with_message (0x83e7297f, "missing handler or routes"));
+			None
 		};
 		
 		let _configuration = Configuration {

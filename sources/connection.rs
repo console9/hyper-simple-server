@@ -5,7 +5,7 @@ use crate::prelude::*;
 
 
 
-pub(crate) enum Connection {
+pub enum Connection {
 	TcpStream (tokio::TcpStream, net::SocketAddr),
 	RustTlsTcpStreamPending (tokio::rustls::Accept<tokio::TcpStream>, net::SocketAddr),
 	RustTlsTcpStream (tokio::rustls::server::TlsStream<tokio::TcpStream>, net::SocketAddr),

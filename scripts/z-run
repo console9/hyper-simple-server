@@ -28,6 +28,18 @@
 	Z_zexec ':: cargo / run' run --bin example -- "${@}"
 !!
 
+<< debug / check / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' check --lib
+!!
+
+<< debug / lint / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' clippy --lib
+!!
+
 << docs / crate / internals / build
 	#! <bash+>
 	Z_expect_no_arguments
@@ -59,7 +71,8 @@
 	#! <template>
 	
 	{{ $_watch_actions := array }}
-	{{ $_watch_actions = array_append $_watch_actions "debug / build / lib" "debug / run / example" }}
+	{{ $_watch_actions = array_append $_watch_actions "debug / build / lib" "debug / check / lib" "debug / lint / lib" }}
+	{{ $_watch_actions = array_append $_watch_actions "debug / run / example" }}
 	{{ $_watch_actions = array_append $_watch_actions "docs / crate / internals / build" "docs / crate / exports / build" "docs / crate / dependencies / build" }}
 	
 	{{ range $_, $_action := $_watch_actions }}
@@ -85,7 +98,7 @@
 	_arguments=()
 	
 	case "${_command}" in
-		( build | run | doc )
+		( check | build | run | doc | clippy )
 			_arguments+=(
 					--manifest-path "${_RUST_SOURCES}/Cargo.toml" \
 					--target-dir "${_RUST_TARGET}" \

@@ -2,6 +2,9 @@
 
 #![ no_implicit_prelude ]
 
+
+
+
 #![ warn (absolute_paths_not_starting_with_crate) ]
 #![ warn (anonymous_parameters) ]
 #![ warn (elided_lifetimes_in_paths) ]
@@ -32,6 +35,22 @@
 #![ allow (missing_copy_implementations) ]
 #![ allow (missing_debug_implementations) ]
 #![ allow (unused_results) ]
+
+
+#![ warn (clippy::all) ]
+#![ warn (clippy::correctness) ]
+#![ warn (clippy::style) ]
+#![ warn (clippy::complexity) ]
+#![ warn (clippy::perf) ]
+#![ warn (clippy::cargo) ]
+#![ allow (clippy::pedantic) ]
+#![ allow (clippy::nursery) ]
+
+#![ allow (clippy::unused_unit) ]
+#![ allow (clippy::new_without_default) ]
+
+#![ allow (clippy::cargo_common_metadata) ]
+#![ allow (clippy::wildcard_dependencies) ]
 
 
 
@@ -77,4 +96,9 @@ pub use ::rustls_pemfile;
 
 pub use ::native_tls;
 pub use ::tokio_native_tls;
+
+#[ allow (unused_imports) ]
+pub(crate) use ::futures;
+#[ allow (unused_imports) ]
+pub(crate) use ::path_tree;
 

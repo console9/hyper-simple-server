@@ -37,14 +37,17 @@ pub use {
 
 
 
+pub extern crate hyper;
+pub extern crate tokio;
+pub extern crate http_body;
+
+pub extern crate rustls;
+pub extern crate tokio_rustls;
+pub extern crate rustls_pemfile;
+
+pub extern crate native_tls;
+pub extern crate tokio_native_tls;
+
 extern crate futures;
-extern crate hyper;
-extern crate http_body;
-extern crate tokio;
-extern crate tokio_rustls;
-extern crate tokio_native_tls;
-extern crate rustls;
-extern crate native_tls;
-extern crate rustls_pemfile;
 extern crate path_tree;
 

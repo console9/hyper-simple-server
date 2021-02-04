@@ -165,6 +165,14 @@ impl <H, F> From<H> for HandlerDynArc
 pub struct HandlerDynArc (Arc<dyn HandlerDyn>);
 
 
+impl HandlerDyn for HandlerDynArc {
+	
+	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>> {
+		self.0.handle (_request)
+	}
+}
+
+
 impl hyper::Service<Request<Body>> for HandlerDynArc {
 	
 	type Future = Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;

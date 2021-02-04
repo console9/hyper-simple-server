@@ -15,6 +15,7 @@ pub(crate) mod errors;
 pub(crate) mod handler;
 pub(crate) mod main;
 pub(crate) mod prelude;
+pub(crate) mod routes;
 pub(crate) mod server;
 
 
@@ -25,6 +26,7 @@ pub use {
 	crate::configuration::*,
 	crate::errors::*,
 	crate::handler::*,
+	crate::routes::*,
 	crate::server::*,
 	
 	crate::main::main,
@@ -42,4 +44,5 @@ extern crate tokio_native_tls;
 extern crate rustls;
 extern crate native_tls;
 extern crate rustls_pemfile;
+extern crate path_tree;
 

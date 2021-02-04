@@ -112,17 +112,21 @@ impl Endpoint {
 
 
 
-#[ derive (Default) ]
 pub struct ConfigurationBuilder {
 	endpoint : Option<Endpoint>,
 	handler : Option<HandlerDynArc>,
+	routes : Option<RoutesBuilder>,
 }
 
 
 impl ConfigurationBuilder {
 	
 	pub fn new () -> Self {
-		Self { .. Default::default () }
+		Self {
+				endpoint : None,
+				handler : None,
+				routes : None,
+			}
 	}
 	
 	pub fn build (self) -> ServerResult<Configuration> {
@@ -130,6 +134,7 @@ impl ConfigurationBuilder {
 		let ConfigurationBuilder {
 				endpoint : _endpoint,
 				handler : _handler,
+				routes : _routes,
 			} = self;
 		
 		let _endpoint = if let Some (_endpoint) = _endpoint {
@@ -138,10 +143,16 @@ impl ConfigurationBuilder {
 			Endpoint::default ()
 		};
 		
+		if _handler.is_some () && _routes.is_some () {
+			return Err (error_with_message (0xc7d24cd3, "both handler and routes specified"))
+		}
+		
 		let _handler = if let Some (_handler) = _handler {
 			_handler
+		} else if let Some (_routes) = _routes {
+			_routes.build () ? .into_boxed ()
 		} else {
-			return Err (error_with_message (0x83e7297f, "missing handler"));
+			return Err (error_with_message (0x83e7297f, "missing handler or routes"));
 		};
 		
 		let _configuration = Configuration {
@@ -151,6 +162,10 @@ impl ConfigurationBuilder {
 		
 		Ok (_configuration)
 	}
+}
+
+
+impl ConfigurationBuilder {
 	
 	pub fn with_endpoint (mut self, _endpoint : Endpoint) -> Self {
 		self.endpoint = Some (_endpoint);
@@ -183,15 +198,12 @@ impl ConfigurationBuilder {
 	}
 	
 	fn endpoint_mut (&mut self) -> &mut Endpoint {
-		if self.endpoint.is_none () {
-			self.endpoint = Some (Endpoint::default ());
-		}
-		if let Some (_endpoint) = self.endpoint.as_mut () {
-			_endpoint
-		} else {
-			unreachable! ();
-		}
+		self.endpoint.get_or_insert_with (Endpoint::default)
 	}
+}
+
+
+impl ConfigurationBuilder {
 	
 	pub fn with_handler <I, H, F, RB, RBE> (self, _handler : I) -> Self
 			where
@@ -231,6 +243,53 @@ impl ConfigurationBuilder {
 	pub fn with_handler_dyn (mut self, _handler : HandlerDynArc) -> Self
 	{
 		self.handler = Some (_handler);
+		self
+	}
+}
+
+
+impl ConfigurationBuilder {
+	
+	pub fn with_route <I, H, F, RB, RBE> (self, _path : &str, _handler : I) -> Self
+			where
+				I : Into<H>,
+				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
+				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
+	{
+		let _handler : H = _handler.into ();
+		self.with_route_dyn (_path, _handler.into_boxed ())
+	}
+	
+	pub fn with_route_fn_sync <H, C, RB, RBE> (self, _path : &str, _handler : H) -> Self
+			where
+				H : Into<HandlerFnSync<C, RB, RBE>>,
+				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
+	{
+		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
+		self.with_route_dyn (_path, _handler.into_boxed ())
+	}
+	
+	pub fn with_route_fn_async <H, C, F, RB, RBE> (self, _path : &str, _handler : H) -> Self
+			where
+				H : Into<HandlerFnAsync<C, F, RB, RBE>>,
+				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
+				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
+	{
+		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
+		self.with_route_dyn (_path, _handler.into_boxed ())
+	}
+	
+	pub fn with_route_dyn (mut self, _path : &str, _handler : HandlerDynArc) -> Self
+	{
+		let _routes = self.routes.take () .unwrap_or_else (RoutesBuilder::new);
+		let _routes = _routes.with_route_dyn (_path, _handler);
+		self.routes = Some (_routes);
 		self
 	}
 }

@@ -94,7 +94,7 @@ impl Server {
 				SE : Error + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
-				SBD : hyper::Buf + Send + 'static,
+				SBD : Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
 		let _make_service = move |_connection : &Connection| {
@@ -115,7 +115,7 @@ impl Server {
 				SE : Error + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
-				SBD : hyper::Buf + Send + 'static,
+				SBD : Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
 		let _service = hyper::make_service_fn (_make_service);

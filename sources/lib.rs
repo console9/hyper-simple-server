@@ -2,8 +2,9 @@
 
 #![ no_implicit_prelude ]
 
-#![ allow (unused_imports) ]
-#![ allow (dead_code) ]
+#![ deny (unused_crate_dependencies) ]
+#![ deny (unreachable_pub) ]
+
 
 
 
@@ -12,6 +13,7 @@ pub(crate) mod accepter;
 pub(crate) mod configuration;
 pub(crate) mod connection;
 pub(crate) mod errors;
+pub(crate) mod exports;
 pub(crate) mod handler;
 pub(crate) mod main;
 pub(crate) mod prelude;
@@ -27,6 +29,7 @@ pub use {
 	crate::connection::*,
 	crate::configuration::*,
 	crate::errors::*,
+	crate::exports::*,
 	crate::handler::*,
 	crate::routes::*,
 	crate::server::*,

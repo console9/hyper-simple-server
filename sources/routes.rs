@@ -22,11 +22,11 @@ type RoutesInternals = Arc<RoutesInternals0>;
 
 impl Routes {
 	
-	fn builder () -> RoutesBuilder {
+	pub fn builder () -> RoutesBuilder {
 		RoutesBuilder::new ()
 	}
 	
-	fn resolve (&self, _path : &str) -> ServerResult<Option<RouteMatched>> {
+	pub fn resolve (&self, _path : &str) -> ServerResult<Option<RouteMatched>> {
 		if let Some ((_route, _parameters)) = self.internals.tree.find (_path) {
 			let _route = _route.clone ();
 			let _parameters = _parameters.into_iter () .map (|(_name, _value)| (String::from (_name), String::from (_value))) .collect ();
@@ -38,6 +38,10 @@ impl Routes {
 		} else {
 			Ok (None)
 		}
+	}
+	
+	pub fn routes (&self) -> impl Iterator<Item = Arc<Route>> + '_ {
+		self.internals.list.iter () .map (Arc::clone)
 	}
 }
 
@@ -177,9 +181,9 @@ impl RoutesBuilder {
 
 
 pub struct Route {
-	path : String,
-	handler : HandlerDynArc,
-	debug : Option<Box<dyn fmt::Debug + Send + Sync>>,
+	pub path : String,
+	pub handler : HandlerDynArc,
+	pub debug : Option<Box<dyn fmt::Debug + Send + Sync>>,
 }
 
 

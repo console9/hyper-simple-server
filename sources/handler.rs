@@ -5,23 +5,6 @@ use crate::prelude::*;
 
 
 
-pub use hyper::Request as Request;
-pub use hyper::Response as Response;
-
-pub use hyper::Body as Body;
-pub use hyper::BodyTrait as BodyTrait;
-pub use hyper::BodySizeHint as BodySizeHint;
-pub use hyper::BodyData as BodyData;
-pub use hyper::BodyTrailers as BodyTrailers;
-
-pub use hyper::HeaderValue as HeaderValue;
-pub type Headers = hyper::HeaderMap<HeaderValue>;
-
-pub use hyper::Bytes as Bytes;
-
-
-
-
 pub trait Handler : Send + Sync + 'static {
 	
 	type Future : Future<Output = ServerResult<Response<Self::ResponseBody>>> + Send + 'static;

@@ -98,10 +98,12 @@ impl <Error : error::Error> ErrorExtWrap for Error {
 
 
 
+#[ allow (dead_code) ]
 pub(crate) fn error_with_format (_code : u32, _message : fmt::Arguments) -> ServerError {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 }
 
+#[ allow (dead_code) ]
 pub(crate) fn error_with_message (_code : u32, _message : &str) -> ServerError {
 	if ! _message.is_empty () {
 		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
@@ -110,6 +112,7 @@ pub(crate) fn error_with_message (_code : u32, _message : &str) -> ServerError {
 	}
 }
 
+#[ allow (dead_code) ]
 pub(crate) fn error_with_code (_code : u32) -> ServerError {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
 }
@@ -117,10 +120,12 @@ pub(crate) fn error_with_code (_code : u32) -> ServerError {
 
 
 
+#[ allow (dead_code) ]
 pub(crate) fn panic_with_format (_code : u32, _message : fmt::Arguments) -> ! {
 	panic! (format! ("[{:08x}]  {}", _code, _message))
 }
 
+#[ allow (dead_code) ]
 pub(crate) fn panic_with_message (_code : u32, _message : &str) -> ! {
 	if ! _message.is_empty () {
 		panic! (format! ("[{:08x}]  {}", _code, _message))
@@ -129,6 +134,7 @@ pub(crate) fn panic_with_message (_code : u32, _message : &str) -> ! {
 	}
 }
 
+#[ allow (dead_code) ]
 pub(crate) fn panic_with_code (_code : u32) -> ! {
 	panic! (format! ("[{:08x}]  unexpected error encountered!", _code))
 }

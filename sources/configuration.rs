@@ -183,40 +183,48 @@ impl ConfigurationBuilder {
 	}
 	
 	fn endpoint_mut (&mut self) -> &mut Endpoint {
+		if self.endpoint.is_none () {
+			self.endpoint = Some (Endpoint::default ());
+		}
 		if let Some (_endpoint) = self.endpoint.as_mut () {
 			_endpoint
 		} else {
-			self.endpoint = Some (Endpoint::default);
-			self.endpoint_mut ()
+			unreachable! ();
 		}
 	}
 	
-	pub fn with_handler <I, H, F> (self, _handler : I) -> Self
+	pub fn with_handler <I, H, F, RB, RBE> (self, _handler : I) -> Self
 			where
 				I : Into<H>,
-				H : Handler<Future = F> + Send + Sync + 'static,
-				F : Future<Output = ServerResult<Response>> + Send + 'static
+				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
+				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	
-	pub fn with_handler_fn_sync <H, C> (self, _handler : H) -> Self
+	pub fn with_handler_fn_sync <H, C, RB, RBE> (self, _handler : H) -> Self
 			where
-				H : Into<HandlerFnSync<C>>,
-				C : Fn (Request) -> ServerResult<Response> + Send + Sync + 'static
+				H : Into<HandlerFnSync<C, RB, RBE>>,
+				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
 	{
-		let _handler : HandlerFnSync<C> = _handler.into ();
+		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	
-	pub fn with_handler_fn_async <H, C, F> (self, _handler : H) -> Self
+	pub fn with_handler_fn_async <H, C, F, RB, RBE> (self, _handler : H) -> Self
 			where
-				H : Into<HandlerFnAsync<C, F>>,
-				C : Fn (Request) -> F + Send + Sync + 'static,
-				F : Future<Output = ServerResult<Response>> + Send + 'static
+				H : Into<HandlerFnAsync<C, F, RB, RBE>>,
+				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
+				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
+				RBE : Error + Send + 'static,
 	{
-		let _handler : HandlerFnAsync<C, F> = _handler.into ();
+		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	

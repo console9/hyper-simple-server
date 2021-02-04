@@ -157,6 +157,40 @@ impl ConfigurationBuilder {
 		self
 	}
 	
+	pub fn with_endpoint_address (mut self, _address : EndpointAddress) -> Self {
+		self.endpoint_mut () .address = _address;
+		self
+	}
+	
+	pub fn with_endpoint_socket_address (mut self, _address : net::SocketAddr) -> Self {
+		self.endpoint_mut () .address = EndpointAddress::Socket (_address);
+		self
+	}
+	
+	pub fn with_endpoint_protocol (mut self, _protocol : EndpointProtocol) -> Self {
+		self.endpoint_mut () .protocol = _protocol;
+		self
+	}
+	
+	pub fn with_endpoint_security (mut self, _security : EndpointSecurity) -> Self {
+		self.endpoint_mut () .security = _security;
+		self
+	}
+	
+	pub fn with_endpoint_certificate (mut self, _certificate : RustTlsCertificate) -> Self {
+		self.endpoint_mut () .security = EndpointSecurity::RustTls (_certificate);
+		self
+	}
+	
+	fn endpoint_mut (&mut self) -> &mut Endpoint {
+		if let Some (_endpoint) = self.endpoint.as_mut () {
+			_endpoint
+		} else {
+			self.endpoint = Some (Endpoint::default);
+			self.endpoint_mut ()
+		}
+	}
+	
 	pub fn with_handler <I, H, F> (self, _handler : I) -> Self
 			where
 				I : Into<H>,
@@ -167,22 +201,22 @@ impl ConfigurationBuilder {
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	
-	pub fn with_handler_fn_sync <H, C> (self, _fn : H) -> Self
+	pub fn with_handler_fn_sync <H, C> (self, _handler : H) -> Self
 			where
 				H : Into<HandlerFnSync<C>>,
 				C : Fn (Request) -> ServerResult<Response> + Send + Sync + 'static
 	{
-		let _handler : HandlerFnSync<C> = _fn.into ();
+		let _handler : HandlerFnSync<C> = _handler.into ();
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	
-	pub fn with_handler_fn_async <H, C, F> (self, _fn : H) -> Self
+	pub fn with_handler_fn_async <H, C, F> (self, _handler : H) -> Self
 			where
 				H : Into<HandlerFnAsync<C, F>>,
 				C : Fn (Request) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response>> + Send + 'static
 	{
-		let _handler : HandlerFnAsync<C, F> = _fn.into ();
+		let _handler : HandlerFnAsync<C, F> = _handler.into ();
 		self.with_handler_dyn (_handler.into_boxed ())
 	}
 	

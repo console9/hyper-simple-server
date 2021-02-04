@@ -118,8 +118,9 @@ impl RoutesBuilder {
 		Ok (_self)
 	}
 	
-	pub fn with_route <I, H, F, RB, RBE> (self, _path : &str, _handler : I) -> Self
+	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				I : Into<H>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
@@ -127,22 +128,24 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_fn_sync <H, C, RB, RBE> (self, _path : &str, _handler : H) -> Self
+	pub fn with_route_fn_sync <'a, P, H, C, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				H : Into<HandlerFnSync<C, RB, RBE>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_fn_async <H, C, F, RB, RBE> (self, _path : &str, _handler : H) -> Self
+	pub fn with_route_fn_async <'a, P, H, C, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				H : Into<HandlerFnAsync<C, F, RB, RBE>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
@@ -150,17 +153,22 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_dyn (mut self, _path : &str, _handler : HandlerDynArc) -> Self
+	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
+			where
+					P : Into<RoutePaths<'a>>
 	{
-		let _route = Route {
-				path : String::from (_path),
-				handler : _handler,
-				debug : None,
-			};
-		self.routes.push (_route);
+		let mut _paths = _paths.into ();
+		while let Some (_path) = _paths.next () {
+			let _route = Route {
+					path : String::from (_path),
+					handler : _handler.clone (),
+					debug : None,
+				};
+			self.routes.push (_route);
+		}
 		self
 	}
 }
@@ -178,5 +186,77 @@ pub struct Route {
 pub struct RouteMatched {
 	pub route : Arc<Route>,
 	pub parameters : Vec<(String, String)>,
+}
+
+
+
+
+pub enum RoutePaths <'a> {
+	Single (&'a str),
+	Slice (&'a [&'a str]),
+	Fallback,
+	None,
+}
+
+
+impl <'a> RoutePaths<'a> {
+	
+	fn next (&mut self) -> Option<&'a str> {
+		match self {
+			RoutePaths::Single (_path) => {
+				let _path = *_path;
+				*self = RoutePaths::None;
+				Some (_path)
+			}
+			RoutePaths::Slice (_paths) => {
+				if let Some ((_first, _rest)) = _paths.split_first () {
+					*self = RoutePaths::Slice (_rest);
+					Some (_first)
+				} else {
+					*self = RoutePaths::None;
+					None
+				}
+			}
+			RoutePaths::Fallback => {
+				*self = RoutePaths::None;
+				Some ("")
+			}
+			RoutePaths::None =>
+				None,
+		}
+	}
+}
+
+impl <'a> From<&'a str> for RoutePaths<'a> {
+	fn from (_path : &'a str) -> Self {
+		RoutePaths::Single (_path)
+	}
+}
+
+impl <'a> From<&'a [&'a str]> for RoutePaths<'a> {
+	fn from (_paths : &'a [&'a str]) -> Self {
+		RoutePaths::Slice (_paths)
+	}
+}
+
+impl <'a> From<&'a [&'a str; 2]> for RoutePaths<'a> {
+	fn from (_paths : &'a [&'a str; 2]) -> Self {
+		RoutePaths::Slice (&_paths[..])
+	}
+}
+impl <'a> From<&'a [&'a str; 3]> for RoutePaths<'a> {
+	fn from (_paths : &'a [&'a str; 3]) -> Self {
+		RoutePaths::Slice (&_paths[..])
+	}
+}
+impl <'a> From<&'a [&'a str; 4]> for RoutePaths<'a> {
+	fn from (_paths : &'a [&'a str; 4]) -> Self {
+		RoutePaths::Slice (&_paths[..])
+	}
+}
+impl <'a> From<&'a [&'a str; 5]> for RoutePaths<'a> {
+	fn from (_paths : &'a [&'a str; 5]) -> Self {
+		RoutePaths::Slice (&_paths[..])
+	}
 }
 

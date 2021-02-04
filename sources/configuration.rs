@@ -250,8 +250,9 @@ impl ConfigurationBuilder {
 
 impl ConfigurationBuilder {
 	
-	pub fn with_route <I, H, F, RB, RBE> (self, _path : &str, _handler : I) -> Self
+	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				I : Into<H>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
@@ -259,22 +260,24 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_fn_sync <H, C, RB, RBE> (self, _path : &str, _handler : H) -> Self
+	pub fn with_route_fn_sync <'a, P, H, C, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				H : Into<HandlerFnSync<C, RB, RBE>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_fn_async <H, C, F, RB, RBE> (self, _path : &str, _handler : H) -> Self
+	pub fn with_route_fn_async <'a, P, H, C, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
+				P : Into<RoutePaths<'a>>,
 				H : Into<HandlerFnAsync<C, F, RB, RBE>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
@@ -282,13 +285,15 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_path, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler.into_boxed ())
 	}
 	
-	pub fn with_route_dyn (mut self, _path : &str, _handler : HandlerDynArc) -> Self
+	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
+			where
+				P : Into<RoutePaths<'a>>,
 	{
 		let _routes = self.routes.take () .unwrap_or_else (RoutesBuilder::new);
-		let _routes = _routes.with_route_dyn (_path, _handler);
+		let _routes = _routes.with_route_dyn (_paths, _handler);
 		self.routes = Some (_routes);
 		self
 	}

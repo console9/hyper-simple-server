@@ -19,8 +19,8 @@ pub fn main () -> () {
 	
 	let _configuration = Configuration::localhost_https ()
 			.with_route_fn_sync ("", _handler_0)
-			.with_route_fn_sync ("/1", _handler_1)
-			.with_route_fn_sync ("/2/*any", _handler_2)
+			.with_route_fn_sync (&["/1", "/1/"], _handler_1)
+			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)
 			.build () .or_panic (0xb601cf12);
 	
 	Server::run (_configuration) .or_panic (0xe2bb7eb3);

@@ -54,7 +54,7 @@ impl Server {
 				}
 			});
 		
-		_server.serve (_service) .await .or_wrap ()
+		_server.serve (_service) .await .or_wrap (0xa6c69e0d)
 	}
 	
 	pub fn run (_configuration : Configuration) -> ServerResult {

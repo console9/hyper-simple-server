@@ -20,7 +20,7 @@ pub(crate) trait ResultExtPanic<Value, Error : error::Error> : Sized {
 			Ok (_value) =>
 				_value,
 			Err (_error) =>
-				panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, _error),
+				_error.panic (_code),
 		}
 	}
 }
@@ -66,19 +66,32 @@ impl <Error : error::Error> ErrorExtPanic<Error> for Error {
 
 pub(crate) trait ResultExtWrap<Value> : Sized {
 	
-	fn or_wrap (self) -> ServerResult<Value>;
+	fn or_wrap (self, _code : u32) -> ServerResult<Value>;
 }
 
 
-impl <Value, Error : error::Error + Send + Sync + 'static> ResultExtWrap<Value> for Result<Value, Error> {
+impl <Value, Error : error::Error> ResultExtWrap<Value> for Result<Value, Error> {
 	
-	fn or_wrap (self) -> ServerResult<Value> {
+	fn or_wrap (self, _code : u32) -> ServerResult<Value> {
 		match self {
 			Ok (_value) =>
 				Ok (_value),
 			Err (_error) =>
-				Err (io::Error::new (io::ErrorKind::Other, Box::new (_error))),
+				Err (_error.wrap (_code)),
 		}
+	}
+}
+
+
+pub(crate) trait ErrorExtWrap : Sized {
+	
+	fn wrap (self, _code : u32) -> ServerError;
+}
+
+impl <Error : error::Error> ErrorExtWrap for Error {
+	
+	fn wrap (self, _code : u32) -> ServerError {
+		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, self))
 	}
 }
 

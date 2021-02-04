@@ -240,11 +240,11 @@ impl RustTlsCertificate {
 		
 		let _certificates = {
 			let mut _data = _data;
-			rustls_pem::certs (&mut _data) .or_wrap () ?
+			rustls_pem::certs (&mut _data) .or_wrap (0x1004be65) ?
 		};
 		let _private_keys = {
 			let mut _data = _data;
-			rustls_pem::pkcs8_private_keys (&mut _data) .or_wrap () ?
+			rustls_pem::pkcs8_private_keys (&mut _data) .or_wrap (0x57b13036) ?
 		};
 		
 		Self::load_from_parts (

@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-main") ]
 pub fn main () -> () {
 	
 	let _handler_0 = |_request| {

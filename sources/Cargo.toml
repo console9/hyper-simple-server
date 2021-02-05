@@ -21,23 +21,107 @@ name = "example"
 path = "./example.rs"
 
 
+
+
 [features]
-default = []
+
+default = ["hss-full"]
+
+hss-full = [
+	"hss-handler",
+	"hss-routes",
+	"hss-config",
+	"hss-accepter",
+	"hss-tls-rust",
+	"hss-tls-native",
+	"hss-server",
+	"hss-main",
+]
+
+hss-server = [
+	"hss-config",
+	"hss-accepter",
+	"hyper--server",
+	"hyper--http1",
+	"hyper--http2",
+#	"hyper--runtime",
+	"http",
+	"http-body",
+	"bytes",
+	"tokio--rt",
+	"tokio--rt-multi-thread", # FIXME
+]
+
+hss-accepter = [
+	"hss-config",
+	"hyper--server", # FIXME
+	"hyper--http1", # FIXME
+	"hyper--http2", # FIXME
+	"tokio--net",
+	"futures",
+]
+
+hss-config = []
+
+hss-handler = [
+	"hyper",
+	"http",
+	"http-body",
+	"bytes",
+	"futures",
+]
+
+hss-routes = [
+	"hss-handler",
+	"path-tree",
+]
+
+hss-tls-rust = [
+	"rustls",
+	"rustls-pemfile",
+	"tokio-rustls",
+]
+
+hss-tls-native = [
+	"native-tls",
+	"native-tls/alpn",
+	"tokio-native-tls",
+]
+
+hss-main = [
+	"hss-server",
+	"hss-routes",
+	"hss-tls-rust",
+]
+
+
+"hyper--server" = ["hyper", "hyper/server"]
+"hyper--http1" = ["hyper", "hyper/http1", "hyper--http"]
+"hyper--http2" = ["hyper", "hyper/http2", "hyper--http"]
+"hyper--http" = ["hyper", "hyper/http2"]
+"hyper--runtime" = ["hyper", "hyper/runtime"]
+"tokio--rt" = ["tokio", "tokio/rt"]
+"tokio--rt-multi-thread" = ["tokio", "tokio/rt-multi-thread"]
+"tokio--net" = ["tokio", "tokio/net"]
+
+
 
 
 [dependencies]
 
-hyper = { version = "*", default-features = false, features = ["http1", "http2", "server"] }
-tokio = { version = "*", default-features = false, features = ["rt", "rt-multi-thread", "net"] }
-http-body = { version = "*", default-features = false, features = [] }
+hyper = { version = "*", default-features = false, features = [], optional = true }
+tokio = { version = "*", default-features = false, features = [], optional = true }
+http = { version = "*", default-features = false, features = [], optional = true }
+http-body = { version = "*", default-features = false, features = [], optional = true }
+bytes = { version = "*", default-features = false, features = [], optional = true }
 
-rustls = { version = "*", default-features = false, features = [] }
-tokio-rustls = { version = "*", default-features = false, features = [] }
-rustls-pemfile = { version = "*", default-features = false, features = [] }
+rustls = { version = "*", default-features = false, features = [], optional = true }
+tokio-rustls = { version = "*", default-features = false, features = [], optional = true }
+rustls-pemfile = { version = "*", default-features = false, features = [], optional = true }
 
-native-tls = { version = "*", default-features = false, features = ["alpn"] }
-tokio-native-tls = { version = "*", default-features = false, features = [] }
+native-tls = { version = "*", default-features = false, features = [], optional = true }
+tokio-native-tls = { version = "*", default-features = false, features = [], optional = true }
 
-futures = { version = "*", default-features = false, features = [] }
-path-tree = { version = "*", default-features = false, features = [] }
+futures = { version = "*", default-features = false, features = [], optional = true }
+path-tree = { version = "*", default-features = false, features = [], optional = true }
 

@@ -5,21 +5,25 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-routes") ]
 pub struct Routes {
 	internals : RoutesInternals,
 }
 
+#[ cfg (feature = "hss-routes") ]
 struct RoutesInternals0 {
 	tree : path_tree::PathTree<Arc<Route>>,
 	list : Vec<Arc<Route>>,
 	fallback : Option<HandlerDynArc>,
 }
 
+#[ cfg (feature = "hss-routes") ]
 type RoutesInternals = Arc<RoutesInternals0>;
 
 
 
 
+#[ cfg (feature = "hss-routes") ]
 impl Routes {
 	
 	pub fn builder () -> RoutesBuilder {
@@ -46,6 +50,7 @@ impl Routes {
 }
 
 
+#[ cfg (feature = "hss-routes") ]
 impl Handler for Routes {
 	
 	type Future = Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
@@ -76,11 +81,13 @@ impl Handler for Routes {
 
 
 
+#[ cfg (feature = "hss-routes") ]
 pub struct RoutesBuilder {
 	pub routes : Vec<Route>,
 }
 
 
+#[ cfg (feature = "hss-routes") ]
 impl RoutesBuilder {
 	
 	pub fn new () -> Self {
@@ -184,6 +191,7 @@ impl RoutesBuilder {
 
 
 
+#[ cfg (feature = "hss-routes") ]
 pub struct Route {
 	pub path : String,
 	pub handler : HandlerDynArc,
@@ -191,6 +199,7 @@ pub struct Route {
 }
 
 
+#[ cfg (feature = "hss-routes") ]
 pub struct RouteMatched {
 	pub route : Arc<Route>,
 	pub parameters : Vec<(String, String)>,
@@ -199,6 +208,7 @@ pub struct RouteMatched {
 
 
 
+#[ cfg (feature = "hss-routes") ]
 pub enum RoutePaths <'a> {
 	Single (&'a str),
 	Slice (&'a [&'a str]),
@@ -207,6 +217,7 @@ pub enum RoutePaths <'a> {
 }
 
 
+#[ cfg (feature = "hss-routes") ]
 impl <'a> RoutePaths<'a> {
 	
 	fn next (&mut self) -> Option<&'a str> {
@@ -235,33 +246,39 @@ impl <'a> RoutePaths<'a> {
 	}
 }
 
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a str> for RoutePaths<'a> {
 	fn from (_path : &'a str) -> Self {
 		RoutePaths::Single (_path)
 	}
 }
 
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a [&'a str]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str]) -> Self {
 		RoutePaths::Slice (_paths)
 	}
 }
 
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a [&'a str; 2]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str; 2]) -> Self {
 		RoutePaths::Slice (&_paths[..])
 	}
 }
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a [&'a str; 3]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str; 3]) -> Self {
 		RoutePaths::Slice (&_paths[..])
 	}
 }
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a [&'a str; 4]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str; 4]) -> Self {
 		RoutePaths::Slice (&_paths[..])
 	}
 }
+#[ cfg (feature = "hss-routes") ]
 impl <'a> From<&'a [&'a str; 5]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str; 5]) -> Self {
 		RoutePaths::Slice (&_paths[..])

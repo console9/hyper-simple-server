@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub trait Handler : Send + Sync + 'static {
 	
 	type Future : Future<Output = ServerResult<Response<Self::ResponseBody>>> + Send + 'static;
@@ -21,6 +22,7 @@ pub trait Handler : Send + Sync + 'static {
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub struct HandlerFnAsync <C, F, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
@@ -33,6 +35,7 @@ pub struct HandlerFnAsync <C, F, RB, RBE>
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <C, F, RB, RBE> Handler for HandlerFnAsync<C, F, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
@@ -50,6 +53,7 @@ impl <C, F, RB, RBE> Handler for HandlerFnAsync<C, F, RB, RBE>
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <C, F, RB, RBE> From<C> for HandlerFnAsync<C, F, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
@@ -68,6 +72,7 @@ impl <C, F, RB, RBE> From<C> for HandlerFnAsync<C, F, RB, RBE>
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub struct HandlerFnSync <C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
@@ -79,6 +84,7 @@ pub struct HandlerFnSync <C, RB, RBE>
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <C, RB, RBE> Handler for HandlerFnSync<C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
@@ -95,6 +101,7 @@ impl <C, RB, RBE> Handler for HandlerFnSync<C, RB, RBE>
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <C, RB, RBE> From<C> for HandlerFnSync<C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
@@ -112,12 +119,14 @@ impl <C, RB, RBE> From<C> for HandlerFnSync<C, RB, RBE>
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub trait HandlerDyn : Send + Sync + 'static {
 	
 	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <H, F> HandlerDyn for H
 		where
 			H : Handler<Future = F> + Send + Sync + 'static,
@@ -131,6 +140,7 @@ impl <H, F> HandlerDyn for H
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <H, F> From<H> for HandlerDynArc
 		where
 			H : Handler<Future = F> + Send + Sync + 'static,
@@ -145,9 +155,11 @@ impl <H, F> From<H> for HandlerDynArc
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-handler") ]
 pub struct HandlerDynArc (Arc<dyn HandlerDyn>);
 
 
+#[ cfg (feature = "hss-handler") ]
 impl HandlerDyn for HandlerDynArc {
 	
 	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>> {
@@ -156,6 +168,7 @@ impl HandlerDyn for HandlerDynArc {
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl hyper::Service<Request<Body>> for HandlerDynArc {
 	
 	type Future = Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
@@ -174,6 +187,7 @@ impl hyper::Service<Request<Body>> for HandlerDynArc {
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub trait BodyDyn : Send + 'static {
 	
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
@@ -186,6 +200,7 @@ pub trait BodyDyn : Send + 'static {
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl <B, E> BodyDyn for B
 		where
 			B : BodyTrait<Data = Bytes, Error = E> + Send + 'static,
@@ -225,9 +240,11 @@ impl <B, E> BodyDyn for B
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub struct BodyDynBox (Pin<Box<dyn BodyDyn>>);
 
 
+#[ cfg (feature = "hss-handler") ]
 impl BodyTrait for BodyDynBox {
 	
 	type Data = Bytes;
@@ -251,6 +268,7 @@ impl BodyTrait for BodyDynBox {
 }
 
 
+#[ cfg (feature = "hss-handler") ]
 impl BodyDynBox {
 	
 	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut dyn BodyDyn> {

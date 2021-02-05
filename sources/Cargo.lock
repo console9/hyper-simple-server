@@ -236,6 +236,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project 1.0.4",
+ "socket2",
  "tokio",
  "tower-service",
  "tracing",
@@ -246,7 +247,9 @@ dependencies = [
 name = "hyper-simple-server"
 version = "0.0.0"
 dependencies = [
+ "bytes",
  "futures",
+ "http",
  "http-body",
  "hyper",
  "native-tls",

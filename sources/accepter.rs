@@ -5,15 +5,19 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 pub enum Accepter {
 	TcpListener (Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	#[ cfg (feature = "hss-tls-rust") ]
 	RustTlsTcpListener (Arc<tokio_rustls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	#[ cfg (feature = "hss-tls-native") ]
 	NativeTlsTcpListener (Arc<tokio_natls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
 }
 
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 impl hyper::Accept for Accepter {
 	
 	type Conn = Connection;
@@ -38,12 +42,14 @@ impl hyper::Accept for Accepter {
 				Poll::Ready (Some (Ok (_connection)))
 			}
 			
+			#[ cfg (feature = "hss-tls-rust") ]
 			Accepter::RustTlsTcpListener (_tls, _, _) => {
 				let _accepter = _tls.accept (_socket);
 				let _connection = Connection::RustTlsTcpStreamPending (_accepter, _address);
 				Poll::Ready (Some (Ok (_connection)))
 			}
 			
+			#[ cfg (feature = "hss-tls-native") ]
 			Accepter::NativeTlsTcpListener (_tls, _, _) => {
 				let _tls = _tls.clone ();
 				#[ allow (unsafe_code) ]
@@ -58,9 +64,10 @@ impl hyper::Accept for Accepter {
 }
 
 
+#[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
-	pub(crate) fn new (_endpoint : &Endpoint) -> ServerResult<Self> {
+	pub fn new (_endpoint : &Endpoint) -> ServerResult<Self> {
 		
 		let _http = new_protocol (&_endpoint.protocol) ?;
 		let _listener = new_listener (&_endpoint.address) ?;
@@ -69,12 +76,17 @@ impl Accepter {
 		let _listener = Arc::new (_listener);
 		
 		match &_endpoint.security {
+			
 			EndpointSecurity::Insecure =>
 				Ok (Accepter::TcpListener (_listener, _http)),
+			
+			#[ cfg (feature = "hss-tls-rust") ]
 			EndpointSecurity::RustTls (_certificate) => {
 				let _accepter = new_rustls_accepter (_certificate, &_endpoint.protocol) ?;
 				Ok (Accepter::RustTlsTcpListener (Arc::new (_accepter), _listener, _http))
 			}
+			
+			#[ cfg (feature = "hss-tls-native") ]
 			EndpointSecurity::NativeTls (_certificate) => {
 				let _accepter = new_native_accepter (_certificate, &_endpoint.protocol) ?;
 				Ok (Accepter::NativeTlsTcpListener (Arc::new (_accepter), _listener, _http))
@@ -86,8 +98,10 @@ impl Accepter {
 		match self {
 			Accepter::TcpListener (_, _protocol) =>
 				_protocol.clone (),
+			#[ cfg (feature = "hss-tls-rust") ]
 			Accepter::RustTlsTcpListener (_, _, _protocol) =>
 				_protocol.clone (),
+			#[ cfg (feature = "hss-tls-native") ]
 			Accepter::NativeTlsTcpListener (_, _, _protocol) =>
 				_protocol.clone (),
 		}
@@ -97,8 +111,10 @@ impl Accepter {
 		match self {
 			Accepter::TcpListener (_listener, _) =>
 				_listener,
+			#[ cfg (feature = "hss-tls-rust") ]
 			Accepter::RustTlsTcpListener (_, _listener, _) =>
 				_listener,
+			#[ cfg (feature = "hss-tls-native") ]
 			Accepter::NativeTlsTcpListener (_, _listener, _) =>
 				_listener,
 		}
@@ -108,41 +124,56 @@ impl Accepter {
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 fn new_protocol (_protocol : &EndpointProtocol) -> ServerResult<hyper::Http> {
 	
 	let mut _http = hyper::Http::new ();
 	
 	match _protocol {
+		#[ cfg (feature = "hyper--http1") ]
 		EndpointProtocol::Http1 => {
 			_http.http1_only (true);
 		}
+		#[ cfg (feature = "hyper--http2") ]
 		EndpointProtocol::Http2 => {
 			_http.http2_only (true);
 		}
+		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--http2") ]
 		EndpointProtocol::Http12 =>
 			(),
 	}
 	
-	match _protocol {
-		EndpointProtocol::Http1 | EndpointProtocol::Http12 => {
+	#[ cfg (feature = "hyper--http1") ]
+	{
+		let _apply = match _protocol {
+			EndpointProtocol::Http1 => true,
+			#[ cfg (feature = "hyper--http2") ]
+			EndpointProtocol::Http12 => true,
+			_ => false,
+		};
+		if _apply {
 			_http.http1_keep_alive (true);
 			_http.http1_half_close (true);
 			_http.max_buf_size (16 * 1024);
 		}
-		_ =>
-			(),
 	}
 	
-	match _protocol {
-		EndpointProtocol::Http2 | EndpointProtocol::Http12 => {
+	#[ cfg (feature = "hyper--http2") ]
+	{
+		let _apply = match _protocol {
+			EndpointProtocol::Http2 => true,
+			#[ cfg (feature = "hyper--http1") ]
+			EndpointProtocol::Http12 => true,
+			_ => false,
+		};
+		if _apply {
 			_http.http2_max_concurrent_streams (128);
-			#[ cfg (FIXME) ]
+			#[ cfg (feature = "hyper--runtime") ]
 			_http.http2_keep_alive_interval (Some (time::Duration::new (6, 0)));
-			#[ cfg (FIXME) ]
+			#[ cfg (feature = "hyper--runtime") ]
 			_http.http2_keep_alive_timeout (time::Duration::new (30, 0));
 		}
-		_ =>
-			(),
 	}
 	
 	Ok (_http)
@@ -152,6 +183,7 @@ fn new_protocol (_protocol : &EndpointProtocol) -> ServerResult<hyper::Http> {
 
 
 #[ allow (unsafe_code) ]
+#[ cfg (feature = "hss-accepter") ]
 fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener> {
 	
 	let _listener = match _address {
@@ -171,6 +203,8 @@ fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener
 
 
 
+#[ cfg (feature = "hss-accepter") ]
+#[ cfg (feature = "hss-tls-rust") ]
 fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &EndpointProtocol) -> ServerResult<tokio_rustls::TlsAcceptor> {
 	
 	let _resolver = {
@@ -207,6 +241,8 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 
 
 
+#[ cfg (feature = "hss-accepter") ]
+#[ cfg (feature = "hss-tls-native") ]
 fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> ServerResult<tokio_natls::TlsAcceptor> {
 	
 	let _configuration = {

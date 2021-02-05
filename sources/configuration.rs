@@ -5,15 +5,19 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-config") ]
 pub struct Configuration {
 	pub endpoint : Endpoint,
+	#[ cfg (feature = "hss-handler") ]
 	pub handler : Option<HandlerDynArc>,
 }
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-config") ]
 pub struct Endpoint {
 	pub address : EndpointAddress,
+	#[ cfg (feature = "hyper--http") ]
 	pub protocol : EndpointProtocol,
 	pub security : EndpointSecurity,
 }
@@ -21,6 +25,7 @@ pub struct Endpoint {
 
 #[ derive (Clone) ]
 #[ allow (variant_size_differences) ]
+#[ cfg (feature = "hss-config") ]
 pub enum EndpointAddress {
 	Socket (net::SocketAddr),
 	Descriptor (u32),
@@ -28,27 +33,38 @@ pub enum EndpointAddress {
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hyper--http") ]
 pub enum EndpointProtocol {
+	#[ cfg (feature = "hyper--http1") ]
 	Http1,
+	#[ cfg (feature = "hyper--http2") ]
 	Http2,
+	#[ cfg (feature = "hyper--http1") ]
+	#[ cfg (feature = "hyper--http2") ]
 	Http12,
 }
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-config") ]
 pub enum EndpointSecurity {
 	Insecure,
+	#[ cfg (feature = "hss-tls-rust") ]
 	RustTls (RustTlsCertificate),
+	#[ cfg (feature = "hss-tls-native") ]
 	NativeTls (NativeTlsCertificate),
 }
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-tls-rust") ]
 pub struct RustTlsCertificate {
 	pub certified : rustls::sign::CertifiedKey,
 }
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-tls-native") ]
 pub struct NativeTlsCertificate {
 	pub identity : natls::Identity,
 }
@@ -56,6 +72,7 @@ pub struct NativeTlsCertificate {
 
 
 
+#[ cfg (feature = "hss-config") ]
 impl Configuration {
 	
 	pub fn builder () -> ConfigurationBuilder {
@@ -67,6 +84,7 @@ impl Configuration {
 			.with_endpoint (Endpoint::localhost_http ())
 	}
 	
+	#[ cfg (any (feature = "hss-tls-rust", feature = "hss-tls-native")) ]
 	pub fn localhost_https () -> ConfigurationBuilder {
 		Configuration::builder ()
 			.with_endpoint (Endpoint::localhost_https ())
@@ -76,18 +94,64 @@ impl Configuration {
 
 
 
+#[ cfg (feature = "hss-config") ]
 impl Default for Endpoint {
 	
 	fn default () -> Self {
 		Endpoint {
-				address : EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 0))),
-				protocol : EndpointProtocol::Http1,
-				security : EndpointSecurity::Insecure,
+				address : EndpointAddress::default (),
+				#[ cfg (feature = "hyper--http") ]
+				protocol : EndpointProtocol::default (),
+				security : EndpointSecurity::default (),
 			}
 	}
 }
 
 
+#[ cfg (feature = "hss-config") ]
+impl Default for EndpointAddress {
+	
+	fn default () -> Self {
+		EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 0)))
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hyper--http") ]
+impl Default for EndpointProtocol {
+	
+	fn default () -> Self {
+		
+		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (not (feature = "hyper--http2")) ]
+		return EndpointProtocol::Http1;
+		
+		#[ cfg (feature = "hyper--http2") ]
+		#[ cfg (not (feature = "hyper--http1")) ]
+		return EndpointProtocol::Http2;
+		
+		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--http2") ]
+		return EndpointProtocol::Http12;
+		
+//		panic_with_message (0x783a0cf3, "no protocol enabled");
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+impl Default for EndpointSecurity {
+	
+	fn default () -> Self {
+		EndpointSecurity::Insecure
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-config") ]
 impl Endpoint {
 	
 	pub fn localhost_http () -> Self {
@@ -101,12 +165,17 @@ impl Endpoint {
 		_endpoint
 	}
 	
+	#[ cfg (any (feature = "hss-tls-rust", feature = "hss-tls-native")) ]
 	pub fn localhost_https () -> Self {
 		
-		let _security = if false {
+		let _security = EndpointSecurity::Insecure;
+		#[ cfg (feature = "hss-tls-rust") ]
+		let _security = {
 			let _certificate = RustTlsCertificate::localhost () .or_panic (0xf64b30c4);
 			EndpointSecurity::RustTls (_certificate)
-		} else {
+		};
+		#[ cfg (feature = "hss-tls-native") ]
+		let _security = {
 			let _certificate = NativeTlsCertificate::localhost () .or_panic (0xf6a595a9);
 			EndpointSecurity::NativeTls (_certificate)
 		};
@@ -125,19 +194,25 @@ impl Endpoint {
 
 
 
+#[ cfg (feature = "hss-config") ]
 pub struct ConfigurationBuilder {
 	endpoint : Option<Endpoint>,
+	#[ cfg (feature = "hss-handler") ]
 	handler : Option<HandlerDynArc>,
+	#[ cfg (feature = "hss-routes") ]
 	routes : Option<RoutesBuilder>,
 }
 
 
+#[ cfg (feature = "hss-config") ]
 impl ConfigurationBuilder {
 	
 	pub fn new () -> Self {
 		Self {
 				endpoint : None,
+				#[ cfg (feature = "hss-handler") ]
 				handler : None,
+				#[ cfg (feature = "hss-routes") ]
 				routes : None,
 			}
 	}
@@ -146,7 +221,9 @@ impl ConfigurationBuilder {
 		
 		let ConfigurationBuilder {
 				endpoint : _endpoint,
+				#[ cfg (feature = "hss-handler") ]
 				handler : _handler,
+				#[ cfg (feature = "hss-routes") ]
 				routes : _routes,
 			} = self;
 		
@@ -156,22 +233,31 @@ impl ConfigurationBuilder {
 			Endpoint::default ()
 		};
 		
+		#[ cfg (feature = "hss-handler") ]
+		#[ cfg (feature = "hss-routes") ]
 		if _handler.is_some () && _routes.is_some () {
 			return Err (error_with_message (0xc7d24cd3, "both handler and routes specified"))
 		}
 		
-		let _handler = if let Some (_handler) = _handler {
-			Some (_handler)
-		} else if let Some (_routes) = _routes {
-			let _handler = _routes.build () ? .into_boxed ();
-			Some (_handler)
-		} else {
-			None
-		};
+		#[ cfg (feature = "hss-handler") ]
+		let mut _handler_0 = None;
+		#[ cfg (feature = "hss-handler") ]
+		if _handler_0.is_none () {
+			if let Some (_handler) = _handler {
+				_handler_0 = Some (_handler);
+			}
+		}
+		#[ cfg (feature = "hss-routes") ]
+		if _handler_0.is_none () {
+			if let Some (_routes) = _routes {
+				_handler_0 = Some (_routes.build () ? .into_boxed ());
+			}
+		}
 		
 		let _configuration = Configuration {
 				endpoint : _endpoint,
-				handler : _handler,
+				#[ cfg (feature = "hss-handler") ]
+				handler : _handler_0,
 			};
 		
 		Ok (_configuration)
@@ -179,6 +265,7 @@ impl ConfigurationBuilder {
 }
 
 
+#[ cfg (feature = "hss-config") ]
 impl ConfigurationBuilder {
 	
 	pub fn with_endpoint (mut self, _endpoint : Endpoint) -> Self {
@@ -196,6 +283,7 @@ impl ConfigurationBuilder {
 		self
 	}
 	
+	#[ cfg (feature = "hyper--http") ]
 	pub fn with_endpoint_protocol (mut self, _protocol : EndpointProtocol) -> Self {
 		self.endpoint_mut () .protocol = _protocol;
 		self
@@ -212,6 +300,8 @@ impl ConfigurationBuilder {
 }
 
 
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-tls-rust") ]
 impl ConfigurationBuilder {
 	
 	pub fn with_endpoint_certificate_rustls (mut self, _certificate : RustTlsCertificate) -> Self {
@@ -231,6 +321,8 @@ impl ConfigurationBuilder {
 }
 
 
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-tls-native") ]
 impl ConfigurationBuilder {
 	
 	pub fn with_endpoint_certificate_native (mut self, _certificate : NativeTlsCertificate) -> Self {
@@ -250,6 +342,8 @@ impl ConfigurationBuilder {
 }
 
 
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-handler") ]
 impl ConfigurationBuilder {
 	
 	pub fn with_handler <I, H, F, RB, RBE> (self, _handler : I) -> Self
@@ -295,6 +389,8 @@ impl ConfigurationBuilder {
 }
 
 
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-routes") ]
 impl ConfigurationBuilder {
 	
 	#[ allow (single_use_lifetimes) ]
@@ -353,6 +449,7 @@ impl ConfigurationBuilder {
 
 
 
+#[ cfg (feature = "hss-tls-rust") ]
 impl RustTlsCertificate {
 	
 	pub fn load_from_pem_file (_path : impl AsRef<path::Path>) -> ServerResult<Self> {
@@ -420,6 +517,7 @@ impl RustTlsCertificate {
 
 
 
+#[ cfg (feature = "hss-tls-native") ]
 impl NativeTlsCertificate {
 	
 	pub fn load_from_pkcs12_file (_path : impl AsRef<path::Path>, _password : &str) -> ServerResult<Self> {

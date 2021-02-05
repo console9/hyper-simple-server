@@ -3,19 +3,23 @@
 use crate::prelude::*;
 
 
+#[ cfg (feature = "hss-server") ]
 pub struct Server {
 	internals : ServerInternals,
 }
 
+#[ cfg (feature = "hss-server") ]
 struct ServerInternals0 {
 	configuration : Configuration,
 }
 
+#[ cfg (feature = "hss-server") ]
 type ServerInternals = Arc<RwLock<ServerInternals0>>;
 
 
 
 
+#[ cfg (feature = "hss-server") ]
 impl Server {
 	
 	pub fn new (_configuration : Configuration) -> ServerResult<Self> {
@@ -26,6 +30,22 @@ impl Server {
 				internals : Arc::new (RwLock::new (_self)),
 			};
 		Ok (_self)
+	}
+}
+
+
+#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-handler") ]
+impl Server {
+	
+	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
+		let _server = Server::new (_configuration) ?;
+		_server.serve_and_wait ()
+	}
+	
+	pub async fn run (_configuration : Configuration) -> ServerResult {
+		let _server = Server::new (_configuration) ?;
+		_server.serve () .await
 	}
 	
 	pub fn serve_and_wait (&self) -> ServerResult {
@@ -58,20 +78,7 @@ impl Server {
 }
 
 
-impl Server {
-	
-	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
-		let _server = Server::new (_configuration) ?;
-		_server.serve_and_wait ()
-	}
-	
-	pub async fn run (_configuration : Configuration) -> ServerResult {
-		let _server = Server::new (_configuration) ?;
-		_server.serve () .await
-	}
-}
-
-
+#[ cfg (feature = "hss-server") ]
 impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
@@ -128,8 +135,10 @@ impl Server {
 
 
 #[ derive (Clone) ]
+#[ cfg (feature = "hss-server") ]
 pub struct ServerExecutor ();
 
+#[ cfg (feature = "hss-server") ]
 impl <F> hyper::Executor<F> for ServerExecutor
 		where
 			F : Future<Output = ()> + Send + 'static,

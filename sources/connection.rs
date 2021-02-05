@@ -5,17 +5,23 @@ use crate::prelude::*;
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 pub enum Connection {
 	TcpStream (tokio::TcpStream, net::SocketAddr),
+	#[ cfg (feature = "hss-tls-rust") ]
 	RustTlsTcpStreamPending (tokio_rustls::Accept<tokio::TcpStream>, net::SocketAddr),
+	#[ cfg (feature = "hss-tls-rust") ]
 	RustTlsTcpStream (tokio_rustls::server::TlsStream<tokio::TcpStream>, net::SocketAddr),
+	#[ cfg (feature = "hss-tls-native") ]
 	NativeTlsTcpStreamPending (Arc<tokio_natls::TlsAcceptor>, Pin<Box<dyn Future<Output = Result<tokio_natls::TlsStream<tokio::TcpStream>, natls::Error>> + Send + 'static>>, net::SocketAddr),
+	#[ cfg (feature = "hss-tls-native") ]
 	NativeTlsTcpStream (tokio_natls::TlsStream<tokio::TcpStream>, net::SocketAddr),
 }
 
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 impl Connection {
 	
 	fn poll_stream (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Pin<&mut dyn AsyncStream>>> {
@@ -27,6 +33,7 @@ impl Connection {
 			Connection::TcpStream (_stream, _) =>
 				Poll::Ready (Ok (Pin::new (_stream))),
 			
+			#[ cfg (feature = "hss-tls-rust") ]
 			Connection::RustTlsTcpStreamPending (_accepter, _address) =>
 				match futures::ready! (Pin::new (_accepter) .poll (_context)) {
 					Ok (_stream) => {
@@ -37,9 +44,11 @@ impl Connection {
 						Poll::Ready (Err (_error)),
 				}
 			
+			#[ cfg (feature = "hss-tls-rust") ]
 			Connection::RustTlsTcpStream (_stream, _) =>
 				Poll::Ready (Ok (Pin::new (_stream))),
 			
+			#[ cfg (feature = "hss-tls-native") ]
 			Connection::NativeTlsTcpStreamPending (_tls, _accepter, _address) =>
 				match futures::ready! (_accepter.as_mut () .poll (_context)) {
 					Ok (_stream) => {
@@ -50,18 +59,24 @@ impl Connection {
 						Poll::Ready (Err (_error.wrap (0xba9facee))),
 				}
 			
+			#[ cfg (feature = "hss-tls-native") ]
 			Connection::NativeTlsTcpStream (_stream, _) =>
 				Poll::Ready (Ok (Pin::new (_stream))),
 		}
 	}
 }
 
+
+#[ cfg (feature = "hss-accepter") ]
 trait AsyncStream : tokio::AsyncRead + tokio::AsyncWrite + Unpin {}
+
+#[ cfg (feature = "hss-accepter") ]
 impl <Stream : tokio::AsyncRead + tokio::AsyncWrite + Unpin> AsyncStream for Stream {}
 
 
 
 
+#[ cfg (feature = "hss-accepter") ]
 impl tokio::AsyncRead for Connection {
 	
 	fn poll_read (self : Pin<&mut Self>, _context : &mut Context<'_>, _buffer : &mut tokio::ReadBuf<'_>) -> Poll<ServerResult> {
@@ -75,6 +90,7 @@ impl tokio::AsyncRead for Connection {
 }
 
 
+#[ cfg (feature = "hss-accepter") ]
 impl tokio::AsyncWrite for Connection {
 	
 	fn poll_write (self : Pin<&mut Self>, _context : &mut Context<'_>, _buffer : &[u8]) -> Poll<ServerResult<usize>> {

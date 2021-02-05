@@ -1,25 +1,33 @@
 
 
+#![ allow (unused_import_braces) ]
 #![ allow (unreachable_pub) ]
 
 
 
 
-pub use ::hyper::{
+#[ cfg (feature = "http") ]
+pub use ::http::{
 		
-		Request,
-		Response,
-		Body,
+		request::Request,
+		request::Parts as RequestParts,
+		request::Builder as RequestBuilder,
+		
+		response::Response,
+		response::Parts as ResponseParts,
+		response::Builder as ResponseBuilder,
+		
+		uri::Uri,
+		version::Version,
+		method::Method,
+		status::StatusCode as Status,
 		
 		header::HeaderMap,
+		header::HeaderName,
 		header::HeaderValue,
-		
-		body::Bytes,
-		body::Buf,
-		
-	};
+};
 
-
+#[ cfg (feature = "http-body") ]
 pub use ::http_body::{
 		
 		Body as BodyTrait,
@@ -28,8 +36,22 @@ pub use ::http_body::{
 		Trailers as BodyTrailers,
 	};
 
+#[ cfg (feature = "bytes") ]
+pub use ::bytes::{
+		
+		Bytes,
+		Buf,
+	};
+
+#[ cfg (feature = "hyper") ]
+pub use ::hyper::{
+		
+		body::Body,
+	};
 
 
 
+
+#[ cfg (feature = "http") ]
 pub type Headers = HeaderMap<HeaderValue>;
 

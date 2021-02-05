@@ -58,75 +58,99 @@
 
 
 
+pub use {
+	crate::accepter::*,
+	crate::connection::*,
+	crate::configuration::*,
+	crate::errors::*,
+	crate::handler::*,
+	crate::main::*,
+	crate::routes::*,
+	crate::server::*,
+};
+
+
+#[ cfg (feature = "hss-exports") ]
+pub use {
+	crate::exports::*,
+	crate::dependencies::*,
+};
+
+
+
+
 pub(crate) mod accepter;
 pub(crate) mod configuration;
 pub(crate) mod connection;
 pub(crate) mod errors;
 pub(crate) mod exports;
 pub(crate) mod handler;
-pub(crate) mod main;
 pub(crate) mod prelude;
 pub(crate) mod routes;
+
+
+#[ cfg (all (feature = "hss-server", feature = "hyper--http")) ]
 pub(crate) mod server;
+#[ cfg (all (feature = "hss-server", feature = "hyper--http")) ]
+pub(crate) mod main;
+
+
+#[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
+compile_error! ("enable any of HTTP/1 or HTTP/2");
+#[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
+pub(crate) mod server {}
+pub(crate) mod main {}
 
 
 
 
-pub use {
+mod dependencies {
 	
-	crate::accepter::*,
-	crate::connection::*,
-	crate::configuration::*,
-	crate::errors::*,
-	crate::exports::*,
-	crate::handler::*,
-	crate::routes::*,
-	crate::server::*,
+	#![ allow (unreachable_pub) ]
 	
-	crate::main::*,
-};
+	#[ cfg (feature = "hyper") ]
+	pub use ::hyper;
+	
+	#[ cfg (feature = "tokio") ]
+	pub use ::tokio;
+	
+	#[ cfg (feature = "http") ]
+	pub use ::http;
+	
+	#[ cfg (feature = "http-body") ]
+	pub use ::http_body;
+	
+	#[ cfg (feature = "bytes") ]
+	pub use ::bytes;
+	
+	
+	#[ cfg (feature = "rustls") ]
+	pub use ::rustls;
+	
+	#[ cfg (feature = "tokio-rustls") ]
+	pub use ::tokio_rustls;
+	
+	#[ cfg (feature = "rustls-pemfile") ]
+	pub use ::rustls_pemfile;
+	
+	
+	#[ cfg (feature = "native-tls") ]
+	pub use ::native_tls;
+	
+	#[ cfg (feature = "tokio-native-tls") ]
+	pub use ::tokio_native_tls;
+	
+	
+	#[ allow (unused_imports) ]
+	#[ cfg (feature = "futures") ]
+	pub(crate) use ::futures;
+	
+	#[ allow (unused_imports) ]
+	#[ cfg (feature = "path-tree") ]
+	pub(crate) use ::path_tree;
+}
 
-
-
-
-#[ cfg (feature = "hyper") ]
-pub use ::hyper;
-
-#[ cfg (feature = "tokio") ]
-pub use ::tokio;
-
-#[ cfg (feature = "http") ]
-pub use ::http;
-
-#[ cfg (feature = "http-body") ]
-pub use ::http_body;
-
-#[ cfg (feature = "bytes") ]
-pub use ::bytes;
-
-
-#[ cfg (feature = "rustls") ]
-pub use ::rustls;
-
-#[ cfg (feature = "tokio-rustls") ]
-pub use ::tokio_rustls;
-
-#[ cfg (feature = "rustls-pemfile") ]
-pub use ::rustls_pemfile;
-
-
-#[ cfg (feature = "native-tls") ]
-pub use ::native_tls;
-
-#[ cfg (feature = "tokio-native-tls") ]
-pub use ::tokio_native_tls;
-
-
+// NOTE:  Required so that `cargo docs` doesn't break...
 #[ allow (unused_imports) ]
-#[ cfg (feature = "futures") ]
-pub(crate) use ::futures;
-
-#[ allow (unused_imports) ]
-#[ cfg (feature = "path-tree") ]
-pub(crate) use ::path_tree;
+use crate::dependencies::*;
 

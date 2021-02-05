@@ -25,17 +25,40 @@ path = "./example.rs"
 
 [features]
 
-default = ["hss-full"]
+default = ["hss-full-common"]
 
 hss-full = [
+	"hss-full-http1",
+	"hss-full-http2",
+]
+
+hss-full-http1 = [
+	"hss-full-common",
+	"hss-server-mt",
+	"hss-server-http1",
+]
+
+hss-full-http2 = [
+	"hss-full-common",
+	"hss-server-mt",
+	"hss-server-http2",
+]
+
+hss-full-common = [
 	"hss-handler",
 	"hss-routes",
 	"hss-config",
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
-	"hss-server-mt",
+	"hss-exports",
 	"hss-main",
+]
+
+hss-server-full = [
+	"hss-server-mt",
+	"hss-server-http1",
+	"hss-server-http2",
 ]
 
 hss-server-mt = [
@@ -43,12 +66,20 @@ hss-server-mt = [
 	"tokio--rt-multi-thread",
 ]
 
+hss-server-http1 = [
+	"hss-server",
+	"hyper--http1",
+]
+
+hss-server-http2 = [
+	"hss-server",
+	"hyper--http2",
+]
+
 hss-server = [
 	"hss-config",
 	"hss-accepter",
 	"hyper--server",
-	"hyper--http1",
-	"hyper--http2",
 #	"hyper--runtime", # NOTE:  Optional for timeouts support.
 	"http",
 	"http-body",
@@ -92,6 +123,8 @@ hss-tls-native = [
 ]
 
 hss-tls-any = []
+
+hss-exports = []
 
 hss-main = [
 	"hss-server",

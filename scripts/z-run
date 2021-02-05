@@ -209,6 +209,15 @@
 			>| "${_EXAMPLES}/tls/self-signed--${_type}--bundle.pem" \
 		#
 		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/self-signed--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/self-signed--${_type}--bundle.p12" \
+		#
+		
 	done
 !!
 
@@ -311,6 +320,15 @@
 			>| "${_EXAMPLES}/tls/testing--server--${_type}--bundle.pem" \
 		#
 		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/testing--server--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/testing--server--${_type}--bundle.p12" \
+		#
+		
 	done
 !!
 
@@ -367,6 +385,15 @@
 				"${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
 				"${_EXAMPLES}/tls/testing--client--${_type}--private-key.pem" \
 			>| "${_EXAMPLES}/tls/testing--client--${_type}--bundle.pem" \
+		#
+		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/testing--client--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/testing--client--${_type}--bundle.p12" \
 		#
 		
 	done

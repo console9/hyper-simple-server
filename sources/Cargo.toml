@@ -34,8 +34,13 @@ hss-full = [
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
-	"hss-server",
+	"hss-server-mt",
 	"hss-main",
+]
+
+hss-server-mt = [
+	"hss-server",
+	"tokio--rt-multi-thread",
 ]
 
 hss-server = [
@@ -44,12 +49,11 @@ hss-server = [
 	"hyper--server",
 	"hyper--http1",
 	"hyper--http2",
-#	"hyper--runtime", # Note:  optional for timeouts.
+#	"hyper--runtime", # NOTE:  Optional for timeouts support.
 	"http",
 	"http-body",
 	"bytes",
 	"tokio--rt",
-	"tokio--rt-multi-thread", # FIXME
 ]
 
 hss-accepter = [

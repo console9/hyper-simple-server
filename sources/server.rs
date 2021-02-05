@@ -49,7 +49,7 @@ impl Server {
 	}
 	
 	pub fn serve_and_wait (&self) -> ServerResult {
-		let mut _runtime = tokio::Runtime::new () .or_panic (0x8b2d6703);
+		let _runtime = self.serve_runtime () ?;
 		return _runtime.block_on (self.serve ());
 	}
 	
@@ -162,6 +162,21 @@ impl Server {
 		}
 		
 		Ok (_http)
+	}
+	
+	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
+		
+		#[ cfg (not (feature = "tokio--rt-multi-thread")) ]
+		let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
+		
+		#[ cfg (feature = "tokio--rt-multi-thread") ]
+		let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
+		
+		_builder.enable_all ();
+		
+		let _runtime = _builder.build () .or_wrap (0xc29071d8) ?;
+		
+		Ok (_runtime)
 	}
 }
 

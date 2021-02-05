@@ -18,7 +18,7 @@ pub fn main () -> () {
 		Ok (Response::new (Body::from ("OK-2")))
 	};
 	
-	let _configuration = Configuration::localhost ()
+	let _configuration = Configuration::localhost_http ()
 			.with_route_fn_sync ("", _handler_0)
 			.with_route_fn_sync (&["/1", "/1/"], _handler_1)
 			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)

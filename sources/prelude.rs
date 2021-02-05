@@ -83,6 +83,7 @@ pub(crate) mod tokio {
 	#[ cfg (feature = "tokio--rt") ]
 	pub(crate) use ::tokio::runtime::{
 			Runtime,
+			Builder as RuntimeBuilder,
 		};
 	#[ cfg (feature = "tokio--rt") ]
 	pub(crate) use ::tokio::task::{

@@ -17,7 +17,6 @@ pub struct Configuration {
 #[ cfg (feature = "hss-config") ]
 pub struct Endpoint {
 	pub address : EndpointAddress,
-	#[ cfg (feature = "hyper--http") ]
 	pub protocol : EndpointProtocol,
 	pub security : EndpointSecurity,
 }
@@ -34,7 +33,6 @@ pub enum EndpointAddress {
 
 #[ derive (Clone) ]
 #[ cfg (feature = "hss-config") ]
-#[ cfg (feature = "hyper--http") ]
 pub enum EndpointProtocol {
 	#[ cfg (feature = "hyper--http1") ]
 	Http1,
@@ -43,6 +41,7 @@ pub enum EndpointProtocol {
 	#[ cfg (feature = "hyper--http1") ]
 	#[ cfg (feature = "hyper--http2") ]
 	Http12,
+	Generic,
 }
 
 
@@ -79,12 +78,19 @@ impl Configuration {
 		ConfigurationBuilder::new ()
 	}
 	
+	pub fn localhost () -> ConfigurationBuilder {
+		#[ cfg (feature = "hss-tls-any") ]
+		return Self::localhost_https ();
+		#[ cfg (not (feature = "hss-tls-any")) ]
+		return Self::localhost_http ();
+	}
+	
 	pub fn localhost_http () -> ConfigurationBuilder {
 		Configuration::builder ()
 			.with_endpoint (Endpoint::localhost_http ())
 	}
 	
-	#[ cfg (any (feature = "hss-tls-rust", feature = "hss-tls-native")) ]
+	#[ cfg (feature = "hss-tls-any") ]
 	pub fn localhost_https () -> ConfigurationBuilder {
 		Configuration::builder ()
 			.with_endpoint (Endpoint::localhost_https ())
@@ -100,7 +106,6 @@ impl Default for Endpoint {
 	fn default () -> Self {
 		Endpoint {
 				address : EndpointAddress::default (),
-				#[ cfg (feature = "hyper--http") ]
 				protocol : EndpointProtocol::default (),
 				security : EndpointSecurity::default (),
 			}
@@ -118,9 +123,9 @@ impl Default for EndpointAddress {
 
 
 #[ cfg (feature = "hss-config") ]
-#[ cfg (feature = "hyper--http") ]
 impl Default for EndpointProtocol {
 	
+	#[ cfg (feature = "hyper--http") ]
 	fn default () -> Self {
 		
 		#[ cfg (feature = "hyper--http1") ]
@@ -134,8 +139,11 @@ impl Default for EndpointProtocol {
 		#[ cfg (feature = "hyper--http1") ]
 		#[ cfg (feature = "hyper--http2") ]
 		return EndpointProtocol::Http12;
-		
-//		panic_with_message (0x783a0cf3, "no protocol enabled");
+	}
+	
+	#[ cfg (not (feature = "hyper--http")) ]
+	fn default () -> Self {
+		return EndpointProtocol::Generic;
 	}
 }
 
@@ -165,7 +173,7 @@ impl Endpoint {
 		_endpoint
 	}
 	
-	#[ cfg (any (feature = "hss-tls-rust", feature = "hss-tls-native")) ]
+	#[ cfg (feature = "hss-tls-any") ]
 	pub fn localhost_https () -> Self {
 		
 		let _security = EndpointSecurity::Insecure;
@@ -188,6 +196,45 @@ impl Endpoint {
 		_endpoint.security = _security;
 		
 		_endpoint
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+impl EndpointProtocol {
+	
+	pub fn supports_http1 (&self) -> bool {
+		match self {
+			#[ cfg (feature = "hyper--http1") ]
+			EndpointProtocol::Http1 => true,
+			#[ cfg (feature = "hyper--http2") ]
+			EndpointProtocol::Http2 => false,
+			#[ cfg (feature = "hyper--http1") ]
+			#[ cfg (feature = "hyper--http2") ]
+			EndpointProtocol::Http12 => true,
+			EndpointProtocol::Generic => false,
+		}
+	}
+	
+	pub fn supports_http2 (&self) -> bool {
+		match self {
+			#[ cfg (feature = "hyper--http1") ]
+			EndpointProtocol::Http1 => false,
+			#[ cfg (feature = "hyper--http2") ]
+			EndpointProtocol::Http2 => true,
+			#[ cfg (feature = "hyper--http1") ]
+			#[ cfg (feature = "hyper--http2") ]
+			EndpointProtocol::Http12 => true,
+			EndpointProtocol::Generic => false,
+		}
+	}
+	
+	pub fn supports_http1_only (&self) -> bool {
+		self.supports_http1 () && ! self.supports_http2 ()
+	}
+	
+	pub fn supports_http2_only (&self) -> bool {
+		self.supports_http2 () && ! self.supports_http1 ()
 	}
 }
 
@@ -283,7 +330,6 @@ impl ConfigurationBuilder {
 		self
 	}
 	
-	#[ cfg (feature = "hyper--http") ]
 	pub fn with_endpoint_protocol (mut self, _protocol : EndpointProtocol) -> Self {
 		self.endpoint_mut () .protocol = _protocol;
 		self

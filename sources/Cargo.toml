@@ -44,7 +44,7 @@ hss-server = [
 	"hyper--server",
 	"hyper--http1",
 	"hyper--http2",
-#	"hyper--runtime",
+#	"hyper--runtime", # Note:  optional for timeouts.
 	"http",
 	"http-body",
 	"bytes",
@@ -54,9 +54,6 @@ hss-server = [
 
 hss-accepter = [
 	"hss-config",
-	"hyper--server", # FIXME
-	"hyper--http1", # FIXME
-	"hyper--http2", # FIXME
 	"tokio--net",
 	"futures",
 ]
@@ -77,21 +74,24 @@ hss-routes = [
 ]
 
 hss-tls-rust = [
+	"hss-tls-any",
 	"rustls",
 	"rustls-pemfile",
 	"tokio-rustls",
 ]
 
 hss-tls-native = [
+	"hss-tls-any",
 	"native-tls",
 	"native-tls/alpn",
 	"tokio-native-tls",
 ]
 
+hss-tls-any = []
+
 hss-main = [
 	"hss-server",
 	"hss-routes",
-	"hss-tls-rust",
 ]
 
 

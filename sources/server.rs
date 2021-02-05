@@ -86,7 +86,7 @@ impl Server {
 		let _self = self.internals.read () .or_panic (0x6db68b39);
 		
 		let _accepter = Accepter::new (&_self.configuration.endpoint) ?;
-		let _protocol = _accepter.protocol () .deref () .clone ();
+		let _protocol = self.serve_protocol () ?;
 		let _executor = ServerExecutor ();
 		
 		let _builder = hyper::Builder::new (_accepter, _protocol);
@@ -128,6 +128,40 @@ impl Server {
 		let _service = hyper::make_service_fn (_make_service);
 		let _builder = self.serve_builder () ?;
 		_builder.serve (_service) .await .or_wrap (0x73080376)
+	}
+	
+	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {
+		
+		let _self = self.internals.read () .or_panic (0x6db68b39);
+		let _protocol = &_self.configuration.endpoint.protocol;
+		
+		let mut _http = hyper::Http::new ();
+		
+		#[ cfg (feature = "hyper--http1") ]
+		if _protocol.supports_http1_only () {
+			_http.http1_only (true);
+		}
+		#[ cfg (feature = "hyper--http1") ]
+		if _protocol.supports_http1 () {
+			_http.http1_keep_alive (true);
+			_http.http1_half_close (true);
+			_http.max_buf_size (16 * 1024);
+		}
+		
+		#[ cfg (feature = "hyper--http2") ]
+		if _protocol.supports_http2_only () {
+			_http.http2_only (true);
+		}
+		#[ cfg (feature = "hyper--http2") ]
+		if _protocol.supports_http2 () {
+			_http.http2_max_concurrent_streams (128);
+			#[ cfg (feature = "hyper--runtime") ]
+			_http.http2_keep_alive_interval (Some (time::Duration::new (6, 0)));
+			#[ cfg (feature = "hyper--runtime") ]
+			_http.http2_keep_alive_timeout (time::Duration::new (30, 0));
+		}
+		
+		Ok (_http)
 	}
 }
 

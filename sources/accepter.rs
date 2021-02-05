@@ -7,23 +7,20 @@ use crate::prelude::*;
 
 #[ cfg (feature = "hss-accepter") ]
 pub enum Accepter {
-	TcpListener (Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	TcpListener (Arc<tokio::TcpListener>),
 	#[ cfg (feature = "hss-tls-rust") ]
-	RustTlsTcpListener (Arc<tokio_rustls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	RustTlsTcpListener (Arc<tokio_rustls::TlsAcceptor>, Arc<tokio::TcpListener>),
 	#[ cfg (feature = "hss-tls-native") ]
-	NativeTlsTcpListener (Arc<tokio_natls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	NativeTlsTcpListener (Arc<tokio_natls::TlsAcceptor>, Arc<tokio::TcpListener>),
 }
 
 
 
 
 #[ cfg (feature = "hss-accepter") ]
-impl hyper::Accept for Accepter {
+impl Accepter {
 	
-	type Conn = Connection;
-	type Error = ServerError;
-	
-	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
+	pub fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Connection>>> {
 		
 		let _self = Pin::into_inner (self);
 		
@@ -37,20 +34,20 @@ impl hyper::Accept for Accepter {
 		
 		match _self {
 			
-			Accepter::TcpListener (_, _) => {
+			Accepter::TcpListener (_) => {
 				let _connection = Connection::TcpStream (_socket, _address);
 				Poll::Ready (Some (Ok (_connection)))
 			}
 			
 			#[ cfg (feature = "hss-tls-rust") ]
-			Accepter::RustTlsTcpListener (_tls, _, _) => {
+			Accepter::RustTlsTcpListener (_tls, _) => {
 				let _accepter = _tls.accept (_socket);
 				let _connection = Connection::RustTlsTcpStreamPending (_accepter, _address);
 				Poll::Ready (Some (Ok (_connection)))
 			}
 			
 			#[ cfg (feature = "hss-tls-native") ]
-			Accepter::NativeTlsTcpListener (_tls, _, _) => {
+			Accepter::NativeTlsTcpListener (_tls, _) => {
 				let _tls = _tls.clone ();
 				#[ allow (unsafe_code) ]
 				let _tls_static = unsafe { mem::transmute::<&tokio_natls::TlsAcceptor, &'static tokio_natls::TlsAcceptor> (_tls.deref ()) };
@@ -64,58 +61,44 @@ impl hyper::Accept for Accepter {
 }
 
 
+
+
 #[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
 	pub fn new (_endpoint : &Endpoint) -> ServerResult<Self> {
 		
-		let _http = new_protocol (&_endpoint.protocol) ?;
 		let _listener = new_listener (&_endpoint.address) ?;
-		
-		let _http = Arc::new (_http);
 		let _listener = Arc::new (_listener);
 		
 		match &_endpoint.security {
 			
 			EndpointSecurity::Insecure =>
-				Ok (Accepter::TcpListener (_listener, _http)),
+				Ok (Accepter::TcpListener (_listener)),
 			
 			#[ cfg (feature = "hss-tls-rust") ]
 			EndpointSecurity::RustTls (_certificate) => {
 				let _accepter = new_rustls_accepter (_certificate, &_endpoint.protocol) ?;
-				Ok (Accepter::RustTlsTcpListener (Arc::new (_accepter), _listener, _http))
+				Ok (Accepter::RustTlsTcpListener (Arc::new (_accepter), _listener))
 			}
 			
 			#[ cfg (feature = "hss-tls-native") ]
 			EndpointSecurity::NativeTls (_certificate) => {
 				let _accepter = new_native_accepter (_certificate, &_endpoint.protocol) ?;
-				Ok (Accepter::NativeTlsTcpListener (Arc::new (_accepter), _listener, _http))
+				Ok (Accepter::NativeTlsTcpListener (Arc::new (_accepter), _listener))
 			}
-		}
-	}
-	
-	pub(crate) fn protocol (&self) -> Arc<hyper::Http> {
-		match self {
-			Accepter::TcpListener (_, _protocol) =>
-				_protocol.clone (),
-			#[ cfg (feature = "hss-tls-rust") ]
-			Accepter::RustTlsTcpListener (_, _, _protocol) =>
-				_protocol.clone (),
-			#[ cfg (feature = "hss-tls-native") ]
-			Accepter::NativeTlsTcpListener (_, _, _protocol) =>
-				_protocol.clone (),
 		}
 	}
 	
 	pub(crate) fn listener (&self) -> &tokio::TcpListener {
 		match self {
-			Accepter::TcpListener (_listener, _) =>
+			Accepter::TcpListener (_listener) =>
 				_listener,
 			#[ cfg (feature = "hss-tls-rust") ]
-			Accepter::RustTlsTcpListener (_, _listener, _) =>
+			Accepter::RustTlsTcpListener (_, _listener) =>
 				_listener,
 			#[ cfg (feature = "hss-tls-native") ]
-			Accepter::NativeTlsTcpListener (_, _listener, _) =>
+			Accepter::NativeTlsTcpListener (_, _listener) =>
 				_listener,
 		}
 	}
@@ -125,58 +108,15 @@ impl Accepter {
 
 
 #[ cfg (feature = "hss-accepter") ]
-fn new_protocol (_protocol : &EndpointProtocol) -> ServerResult<hyper::Http> {
+#[ cfg (feature = "hyper--server") ]
+impl hyper::Accept for Accepter {
 	
-	let mut _http = hyper::Http::new ();
+	type Conn = Connection;
+	type Error = ServerError;
 	
-	match _protocol {
-		#[ cfg (feature = "hyper--http1") ]
-		EndpointProtocol::Http1 => {
-			_http.http1_only (true);
-		}
-		#[ cfg (feature = "hyper--http2") ]
-		EndpointProtocol::Http2 => {
-			_http.http2_only (true);
-		}
-		#[ cfg (feature = "hyper--http1") ]
-		#[ cfg (feature = "hyper--http2") ]
-		EndpointProtocol::Http12 =>
-			(),
+	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
+		self.poll (_context)
 	}
-	
-	#[ cfg (feature = "hyper--http1") ]
-	{
-		let _apply = match _protocol {
-			EndpointProtocol::Http1 => true,
-			#[ cfg (feature = "hyper--http2") ]
-			EndpointProtocol::Http12 => true,
-			_ => false,
-		};
-		if _apply {
-			_http.http1_keep_alive (true);
-			_http.http1_half_close (true);
-			_http.max_buf_size (16 * 1024);
-		}
-	}
-	
-	#[ cfg (feature = "hyper--http2") ]
-	{
-		let _apply = match _protocol {
-			EndpointProtocol::Http2 => true,
-			#[ cfg (feature = "hyper--http1") ]
-			EndpointProtocol::Http12 => true,
-			_ => false,
-		};
-		if _apply {
-			_http.http2_max_concurrent_streams (128);
-			#[ cfg (feature = "hyper--runtime") ]
-			_http.http2_keep_alive_interval (Some (time::Duration::new (6, 0)));
-			#[ cfg (feature = "hyper--runtime") ]
-			_http.http2_keep_alive_timeout (time::Duration::new (30, 0));
-		}
-	}
-	
-	Ok (_http)
 }
 
 
@@ -220,15 +160,11 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 	let _configuration = {
 		let mut _builder = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
 		_builder.cert_resolver = Arc::new (_resolver);
-		match _protocol {
-			EndpointProtocol::Http1 =>
-				_builder.alpn_protocols.push ("http/1.1".into ()),
-			EndpointProtocol::Http2 =>
-				_builder.alpn_protocols.push ("h2".into ()),
-			EndpointProtocol::Http12 => {
-				_builder.alpn_protocols.push ("h2".into ());
-				_builder.alpn_protocols.push ("http/1.1".into ());
-			}
+		if _protocol.supports_http1 () {
+			_builder.alpn_protocols.push ("http/1.1".into ());
+		}
+		if _protocol.supports_http2 () {
+			_builder.alpn_protocols.push ("h2".into ());
 		}
 		Arc::new (_builder)
 	};

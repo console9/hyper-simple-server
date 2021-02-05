@@ -67,6 +67,14 @@
 
 
 
+<< release / run / example
+	#! <bash+>
+	Z_zexec ':: cargo / run' run --bin example --release -- "${@}"
+!!
+
+
+
+
 <<== __ / generate
 	#! <template>
 	
@@ -82,6 +90,37 @@
 		Z_zexec ':: watch / run' ':: '{{ $_action | shell_quote }}
 	!!
 	{{ end }}
+!!
+
+
+
+
+<< wrk / http
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- wrk \
+			--threads 2 \
+			--connections 512 \
+			--timeout 1s \
+			--duration 30s \
+			--latency \
+			-- \
+			http://127.0.0.1:8080/ \
+	#
+!!
+
+<< wrk / https
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- wrk \
+			--threads 2 \
+			--connections 512 \
+			--timeout 1s \
+			--duration 30s \
+			--latency \
+			-- \
+			https://127.0.0.1:8443/ \
+	#
 !!
 
 

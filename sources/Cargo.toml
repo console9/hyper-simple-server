@@ -25,7 +25,7 @@ path = "./example.rs"
 
 [features]
 
-default = ["hss-full-common"]
+default = ["hss-full"]
 
 hss-full = [
 	"hss-full-http1",

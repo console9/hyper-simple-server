@@ -52,6 +52,7 @@ pub use ::hyper::{
 
 
 
+#[ allow (dead_code) ]
 #[ cfg (feature = "http") ]
 pub type Headers = HeaderMap<HeaderValue>;
 

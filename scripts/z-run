@@ -6,6 +6,7 @@
 ::// docs / ...
 ::// watch / ...
 ::// tls / ...
+::// features / ...
 
 
 
@@ -20,36 +21,36 @@
 << debug / build / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' build --lib
+	Z_zexec ':: cargo / run' build --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / run / example
 	#! <bash+>
-	Z_zexec ':: cargo / run' run --bin example -- "${@}"
+	Z_zexec ':: cargo / run' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
 !!
 
 << debug / check / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' check --lib
+	Z_zexec ':: cargo / run' check --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / lint / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' clippy --lib
+	Z_zexec ':: cargo / run' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << docs / crate / internals / build
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' doc --lib --no-deps --document-private-items
+	Z_zexec ':: cargo / run' doc --lib --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << docs / crate / exports / build
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' doc --lib --no-deps
+	Z_zexec ':: cargo / run' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << docs / crate / dependencies / build
@@ -75,8 +76,107 @@
 
 
 
+--<< features / build / lib / shuffle
+	#! <bash+>
+	Z_enforce 0xefe75a66 '' test "${#}" -eq 1
+	_expected="${1}"
+	shift -- 1
+	readarray -t -- _features < <( Z_zexec ':: features / shuffle' "${_expected}" )
+	Z_log_cut
+	for _feature in "${_features[@]}" ; do
+		Z_log_notice 0x7df50f92 'building with `%s`...' "${_feature}"
+		export -- _RUST_FEATURES="${_feature}"
+		if ! Z_zspawn_return ':: debug / build / lib' ; then
+			true
+		fi
+		Z_log_cut
+	done
+!!
+
+<< features / build / lib / x1
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: features / build / lib / shuffle' x1
+!!
+
+<< features / build / lib / x2
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: features / build / lib / shuffle' x2
+!!
+
+<< features / build / lib / x3
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: features / build / lib / shuffle' x3
+!!
+
+
+
+
+--<<.. features / list
+	hss-accepter
+	hss-config
+	hss-exports
+	hss-full
+	hss-full-common
+	hss-full-http1
+	hss-full-http2
+	hss-handler
+	hss-main
+	hss-routes
+	hss-server
+	hss-server-full
+	hss-server-http1
+	hss-server-http2
+	hss-server-mt
+	hss-tls-any
+	hss-tls-native
+	hss-tls-rust
+!!
+
+--<< features / shuffle
+	#! <bash+>
+	Z_enforce 0xd4e41961 '' test "${#}" -eq 1
+	_expected="${1}"
+	shift -- 1
+	Z_zspawn ':: features / combine' \
+	| while IFS=' ' read -r -- _category _features ; do
+		if ! test "${_expected}" == "${_category}" ; then
+			continue
+		fi
+		printf -- '%s\n' "${_features// /,}"
+	done \
+	| sort -R
+!!
+
+--<<~~.. features / combine
+	#! <template>
+	{{- $_features := Z_zspawn_capture ":: features / list" | split_lines -}}
+	{{- range $_index_1, $_feature_1 := $_features -}}
+	x1 {{ $_feature_1 }}
+	{{ range $_index_2, $_feature_2 := $_features }}{{ if gt $_index_2 $_index_1 -}}
+	x2 {{ $_feature_1 }} {{ $_feature_2 }}
+	{{ range $_index_3, $_feature_3 := $_features }}{{ if gt $_index_3 $_index_2 -}}
+	x3 {{ $_feature_1 }} {{ $_feature_2 }} {{ $_feature_3 }}
+	{{ end }}{{ end }}{{ end }}{{ end }}{{ end -}}
+!!
+
+--<< features / cargo
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' metadata --format-version 1 \
+	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .key' \
+	#
+!!
+
+
+
+
 <<== __ / generate
 	#! <template>
+	
+	{{ $_features := Z_zspawn_capture ":: features / list" | split_lines }}
 	
 	{{ $_watch_actions := array }}
 	{{ $_watch_actions = array_append $_watch_actions "debug / build / lib" "debug / check / lib" "debug / lint / lib" }}
@@ -89,6 +189,10 @@
 		Z_expect_no_arguments
 		Z_zexec ':: watch / run' ':: '{{ $_action | shell_quote }}
 	!!
+	{{ end }}
+	
+	{{ range $_, $_feature := $_features }}
+	:: features / set / {{ $_feature }} :: export -- _RUST_FEATURES={{ $_feature | shell_quote }}
 	{{ end }}
 !!
 
@@ -139,8 +243,13 @@
 	case "${_command}" in
 		( check | build | run | doc | clippy )
 			_arguments+=(
-					--manifest-path "${_RUST_SOURCES}/Cargo.toml" \
-					--target-dir "${_RUST_TARGET}" \
+					--manifest-path "${_RUST_SOURCES}/Cargo.toml"
+					--target-dir "${_RUST_TARGET}"
+				)
+		;;
+		( metadata )
+			_arguments+=(
+					--manifest-path "${_RUST_SOURCES}/Cargo.toml"
 				)
 		;;
 		( * )

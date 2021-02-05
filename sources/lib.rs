@@ -95,10 +95,11 @@ pub(crate) mod server;
 pub(crate) mod main;
 
 
-#[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
+#[ cfg (any (not (feature = "hss-server"), not (feature = "hyper--http"))) ]
 pub(crate) mod server {}
-#[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
+#[ cfg (any (not (feature = "hss-server"), not (feature = "hyper--http"))) ]
 pub(crate) mod main {}
+
 #[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
 compile_error! ("enable any of HTTP/1 or HTTP/2");
 

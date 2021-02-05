@@ -27,17 +27,17 @@ default = []
 
 [dependencies]
 
-hyper = { version = "*", default-features = true, features = ["full"] }
-tokio = { version = "*", default-features = true, features = ["full"] }
-http-body = { version = "*", default-features = true }
+hyper = { version = "*", default-features = false, features = ["http1", "http2", "server"] }
+tokio = { version = "*", default-features = false, features = ["rt", "rt-multi-thread", "net"] }
+http-body = { version = "*", default-features = false, features = [] }
 
-rustls = { version = "*", default-features = true }
-tokio-rustls = { version = "*", default-features = true }
-rustls-pemfile = { version = "*", default-features = true }
+rustls = { version = "*", default-features = false, features = [] }
+tokio-rustls = { version = "*", default-features = false, features = [] }
+rustls-pemfile = { version = "*", default-features = false, features = [] }
 
-native-tls = { version = "*", default-features = true }
-tokio-native-tls = { version = "*", default-features = true }
+native-tls = { version = "*", default-features = false, features = ["alpn"] }
+tokio-native-tls = { version = "*", default-features = false, features = [] }
 
-futures = { version = "*", default-features = true }
-path-tree = { version = "*", default-features = true }
+futures = { version = "*", default-features = false, features = [] }
+path-tree = { version = "*", default-features = false, features = [] }
 

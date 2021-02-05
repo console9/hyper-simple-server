@@ -136,7 +136,9 @@ fn new_protocol (_protocol : &EndpointProtocol) -> ServerResult<hyper::Http> {
 	match _protocol {
 		EndpointProtocol::Http2 | EndpointProtocol::Http12 => {
 			_http.http2_max_concurrent_streams (128);
+			#[ cfg (FIXME) ]
 			_http.http2_keep_alive_interval (Some (time::Duration::new (6, 0)));
+			#[ cfg (FIXME) ]
 			_http.http2_keep_alive_timeout (time::Duration::new (30, 0));
 		}
 		_ =>

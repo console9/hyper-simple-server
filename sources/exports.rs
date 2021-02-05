@@ -59,8 +59,81 @@ pub type Headers = HeaderMap<HeaderValue>;
 
 
 
+#[ derive (Copy, Clone) ]
+#[ allow (dead_code) ]
+#[ cfg (feature = "http") ]
+pub enum ContentType {
+	
+	// https://docs.rs/headers/0.3.3/headers/struct.ContentType.html
+	// https://docs.rs/mime/0.3.16/mime/#constants
+	
+	Text,
+	Html,
+	Css,
+	Js,
+	
+	Json,
+	Xml,
+	
+	Png,
+	Jpeg,
+	Svg,
+	Icon,
+	
+	FontTtf,
+	FontOtf,
+	FontWoff,
+	FontWoff2,
+	
+}
+
+
+#[ cfg (feature = "http") ]
+impl ContentType {
+	
+	pub fn to_str (&self) -> &'static str {
+		match self {
+			
+			ContentType::Text => "text/plain; charset=utf-8",
+			ContentType::Html => "text/html; charset=utf-8",
+			ContentType::Css => "text/css; charset=utf-8",
+			ContentType::Js => "application/javascript; charset=utf-8",
+			
+			ContentType::Json => "application/json; charset=utf-8",
+			ContentType::Xml => "application/xml; charset=utf-8",
+			
+			ContentType::Png => "image/png",
+			ContentType::Jpeg => "image/jpeg",
+			ContentType::Svg => "image/svg+xml",
+			ContentType::Icon => "image/vnd.microsoft.icon",
+			
+			ContentType::FontTtf => "font/ttf",
+			ContentType::FontOtf => "font/otf",
+			ContentType::FontWoff => "font/woff",
+			ContentType::FontWoff2 => "font/woff2",
+		}
+	}
+}
+
+
+#[ cfg (feature = "http") ]
+impl ::std::convert::Into<HeaderValue> for ContentType {
+	fn into (self) -> HeaderValue {
+		#[ allow (unsafe_code) ]
+		unsafe {
+			HeaderValue::from_maybe_shared_unchecked (Bytes::from_static (self.to_str () .as_bytes ()))
+		}
+	}
+}
+
+
+
+
+#[ allow (dead_code) ]
+#[ allow (clippy::declare_interior_mutable_const) ]
 #[ cfg (feature = "http") ]
 pub mod consts {
+	
 	
 	macro_rules! def_const {
 		( $_type : ty => $_from : ident => $( $_id : ident ),+ $(,)? ) => {

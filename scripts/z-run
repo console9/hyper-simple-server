@@ -87,7 +87,7 @@
 		Z_log_notice 0x7df50f92 'building with `%s`...' "${_feature}"
 		export -- _RUST_FEATURES="${_feature}"
 		if ! Z_zspawn_return ':: debug / build / lib' ; then
-			true
+			Z_panic 0x6d980282 'failed building with `%s`!' "${_feature}"
 		fi
 		Z_log_cut
 	done

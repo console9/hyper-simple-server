@@ -206,13 +206,46 @@ impl ConfigurationBuilder {
 		self
 	}
 	
-	pub fn with_endpoint_certificate (mut self, _certificate : RustTlsCertificate) -> Self {
+	fn endpoint_mut (&mut self) -> &mut Endpoint {
+		self.endpoint.get_or_insert_with (Endpoint::default)
+	}
+}
+
+
+impl ConfigurationBuilder {
+	
+	pub fn with_endpoint_certificate_rustls (mut self, _certificate : RustTlsCertificate) -> Self {
 		self.endpoint_mut () .security = EndpointSecurity::RustTls (_certificate);
 		self
 	}
 	
-	fn endpoint_mut (&mut self) -> &mut Endpoint {
-		self.endpoint.get_or_insert_with (Endpoint::default)
+	pub fn with_endpoint_certificate_rustls_from_pem_file (self, _path : impl AsRef<path::Path>) -> ServerResult<Self> {
+		let _certificate = RustTlsCertificate::load_from_pem_file (_path) ?;
+		Ok (self.with_endpoint_certificate_rustls (_certificate))
+	}
+	
+	pub fn with_endpoint_certificate_rustls_from_pem_data (self, _data : impl AsRef<[u8]>) -> ServerResult<Self> {
+		let _certificate = RustTlsCertificate::load_from_pem_data (_data) ?;
+		Ok (self.with_endpoint_certificate_rustls (_certificate))
+	}
+}
+
+
+impl ConfigurationBuilder {
+	
+	pub fn with_endpoint_certificate_native (mut self, _certificate : NativeTlsCertificate) -> Self {
+		self.endpoint_mut () .security = EndpointSecurity::NativeTls (_certificate);
+		self
+	}
+	
+	pub fn with_endpoint_certificate_native_from_pkcs12_file (self, _path : impl AsRef<path::Path>, _password : &str) -> ServerResult<Self> {
+		let _certificate = NativeTlsCertificate::load_from_pkcs12_file (_path, _password) ?;
+		Ok (self.with_endpoint_certificate_native (_certificate))
+	}
+	
+	pub fn with_endpoint_certificate_native_from_pkcs12_data (self, _data : impl AsRef<[u8]>, _password : &str) -> ServerResult<Self> {
+		let _certificate = NativeTlsCertificate::load_from_pkcs12_data (_data, _password) ?;
+		Ok (self.with_endpoint_certificate_native (_certificate))
 	}
 }
 
@@ -322,11 +355,14 @@ impl ConfigurationBuilder {
 
 impl RustTlsCertificate {
 	
-	pub fn load_from_pem_str (mut _data : &str) -> ServerResult<Self> {
-		Self::load_from_pem_bytes (_data.as_bytes ())
+	pub fn load_from_pem_file (_path : impl AsRef<path::Path>) -> ServerResult<Self> {
+		let _data = fs::read (_path) ?;
+		Self::load_from_pem_data (&_data)
 	}
 	
-	pub fn load_from_pem_bytes (_data : &[u8]) -> ServerResult<Self> {
+	pub fn load_from_pem_data (_data : impl AsRef<[u8]>) -> ServerResult<Self> {
+		
+		let _data = _data.as_ref ();
 		
 		let _certificates = {
 			let mut _data = _data;
@@ -377,7 +413,7 @@ impl RustTlsCertificate {
 	
 	pub fn localhost () -> ServerResult<Self> {
 		let _bundle = include_str! ("../examples/tls/testing--server--rsa--bundle.pem");
-		Self::load_from_pem_str (_bundle)
+		Self::load_from_pem_data (_bundle)
 	}
 }
 
@@ -386,7 +422,14 @@ impl RustTlsCertificate {
 
 impl NativeTlsCertificate {
 	
-	pub fn load_from_pkcs12_bytes (_data : &[u8], _password : &str) -> ServerResult<Self> {
+	pub fn load_from_pkcs12_file (_path : impl AsRef<path::Path>, _password : &str) -> ServerResult<Self> {
+		let _data = fs::read (_path) ?;
+		Self::load_from_pkcs12_data (&_data, _password)
+	}
+	
+	pub fn load_from_pkcs12_data (_data : impl AsRef<[u8]>, _password : &str) -> ServerResult<Self> {
+		
+		let _data = _data.as_ref ();
 		
 		let _identity = natls::Identity::from_pkcs12 (_data, _password) .or_wrap (0x93817715) ?;
 		
@@ -399,7 +442,7 @@ impl NativeTlsCertificate {
 	
 	pub fn localhost () -> ServerResult<Self> {
 		let _bundle = include_bytes! ("../examples/tls/testing--server--rsa--bundle.p12");
-		Self::load_from_pkcs12_bytes (_bundle, "bundle")
+		Self::load_from_pkcs12_data (_bundle, "bundle")
 	}
 }
 

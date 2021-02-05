@@ -79,7 +79,7 @@ impl Server {
 		let _self = self.internals.read () .or_panic (0x6db68b39);
 		
 		let _accepter = Accepter::new (&_self.configuration.endpoint) ?;
-		let _protocol = _accepter.protocol ();
+		let _protocol = _accepter.protocol () .deref () .clone ();
 		let _executor = ServerExecutor ();
 		
 		let _builder = hyper::Builder::new (_accepter, _protocol);

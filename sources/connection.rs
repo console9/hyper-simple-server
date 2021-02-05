@@ -9,6 +9,8 @@ pub enum Connection {
 	TcpStream (tokio::TcpStream, net::SocketAddr),
 	RustTlsTcpStreamPending (tokio_rustls::Accept<tokio::TcpStream>, net::SocketAddr),
 	RustTlsTcpStream (tokio_rustls::server::TlsStream<tokio::TcpStream>, net::SocketAddr),
+	NativeTlsTcpStreamPending (Arc<tokio_natls::TlsAcceptor>, Pin<Box<dyn Future<Output = Result<tokio_natls::TlsStream<tokio::TcpStream>, natls::Error>> + Send + 'static>>, net::SocketAddr),
+	NativeTlsTcpStream (tokio_natls::TlsStream<tokio::TcpStream>, net::SocketAddr),
 }
 
 
@@ -26,7 +28,7 @@ impl Connection {
 				Poll::Ready (Ok (Pin::new (_stream))),
 			
 			Connection::RustTlsTcpStreamPending (_accepter, _address) =>
-				match futures::ready! (Pin::new (_accepter).poll (_context)) {
+				match futures::ready! (Pin::new (_accepter) .poll (_context)) {
 					Ok (_stream) => {
 						*_self = Connection::RustTlsTcpStream (_stream, *_address);
 						Self::poll_stream (Pin::new (_self), _context)
@@ -36,6 +38,19 @@ impl Connection {
 				}
 			
 			Connection::RustTlsTcpStream (_stream, _) =>
+				Poll::Ready (Ok (Pin::new (_stream))),
+			
+			Connection::NativeTlsTcpStreamPending (_tls, _accepter, _address) =>
+				match futures::ready! (_accepter.as_mut () .poll (_context)) {
+					Ok (_stream) => {
+						*_self = Connection::NativeTlsTcpStream (_stream, *_address);
+						Self::poll_stream (Pin::new (_self), _context)
+					}
+					Err (_error) =>
+						Poll::Ready (Err (_error.wrap (0xba9facee))),
+				}
+			
+			Connection::NativeTlsTcpStream (_stream, _) =>
 				Poll::Ready (Ok (Pin::new (_stream))),
 		}
 	}

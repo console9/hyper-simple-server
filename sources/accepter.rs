@@ -6,8 +6,9 @@ use crate::prelude::*;
 
 
 pub enum Accepter {
-	TcpListener (tokio::TcpListener, hyper::Http),
-	RustTlsTcpListener (tokio_rustls::TlsAcceptor, tokio::TcpListener, hyper::Http),
+	TcpListener (Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	RustTlsTcpListener (Arc<tokio_rustls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
+	NativeTlsTcpListener (Arc<tokio_natls::TlsAcceptor>, Arc<tokio::TcpListener>, Arc<hyper::Http>),
 }
 
 
@@ -20,28 +21,38 @@ impl hyper::Accept for Accepter {
 	
 	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
 		
-		match self.deref () {
+		let _self = Pin::into_inner (self);
+		
+		let _listener = _self.listener ();
+		let (_socket, _address) = match futures::ready! (_listener.poll_accept (_context)) {
+			Ok ((_socket, _address)) =>
+				(_socket, _address),
+			Err (_error) =>
+				return Poll::Ready (Some (Err (_error))),
+		};
+		
+		match _self {
 			
-			Accepter::TcpListener (_listener, _) =>
-				match futures::ready! (_listener.poll_accept (_context)) {
-					Ok ((_socket, _address)) => {
-						let _connection = Connection::TcpStream (_socket, _address);
-						Poll::Ready (Some (Ok (_connection)))
-					}
-					Err (_error) =>
-						Poll::Ready (Some (Err (_error))),
-				},
+			Accepter::TcpListener (_, _) => {
+				let _connection = Connection::TcpStream (_socket, _address);
+				Poll::Ready (Some (Ok (_connection)))
+			}
 			
-			Accepter::RustTlsTcpListener (_tls, _listener, _) =>
-				match futures::ready! (_listener.poll_accept (_context)) {
-					Ok ((_socket, _address)) => {
-						let _accepter = _tls.accept (_socket);
-						let _connection = Connection::RustTlsTcpStreamPending (_accepter, _address);
-						Poll::Ready (Some (Ok (_connection)))
-					}
-					Err (_error) =>
-						Poll::Ready (Some (Err (_error))),
-				},
+			Accepter::RustTlsTcpListener (_tls, _, _) => {
+				let _accepter = _tls.accept (_socket);
+				let _connection = Connection::RustTlsTcpStreamPending (_accepter, _address);
+				Poll::Ready (Some (Ok (_connection)))
+			}
+			
+			Accepter::NativeTlsTcpListener (_tls, _, _) => {
+				let _tls = _tls.clone ();
+				#[ allow (unsafe_code) ]
+				let _tls_static = unsafe { mem::transmute::<&tokio_natls::TlsAcceptor, &'static tokio_natls::TlsAcceptor> (_tls.deref ()) };
+				let _accepter = _tls_static.accept (_socket);
+				let _accepter = Box::pin (_accepter);
+				let _connection = Connection::NativeTlsTcpStreamPending (_tls, _accepter, _address);
+				Poll::Ready (Some (Ok (_connection)))
+			}
 		}
 	}
 }
@@ -54,22 +65,42 @@ impl Accepter {
 		let _http = new_protocol (&_endpoint.protocol) ?;
 		let _listener = new_listener (&_endpoint.address) ?;
 		
+		let _http = Arc::new (_http);
+		let _listener = Arc::new (_listener);
+		
 		match &_endpoint.security {
 			EndpointSecurity::Insecure =>
 				Ok (Accepter::TcpListener (_listener, _http)),
 			EndpointSecurity::RustTls (_certificate) => {
 				let _accepter = new_rustls_accepter (_certificate, &_endpoint.protocol) ?;
-				Ok (Accepter::RustTlsTcpListener (_accepter, _listener, _http))
+				Ok (Accepter::RustTlsTcpListener (Arc::new (_accepter), _listener, _http))
+			}
+			EndpointSecurity::NativeTls (_certificate) => {
+				let _accepter = new_native_accepter (_certificate, &_endpoint.protocol) ?;
+				Ok (Accepter::NativeTlsTcpListener (Arc::new (_accepter), _listener, _http))
 			}
 		}
 	}
 	
-	pub(crate) fn protocol (&self) -> hyper::Http {
+	pub(crate) fn protocol (&self) -> Arc<hyper::Http> {
 		match self {
 			Accepter::TcpListener (_, _protocol) =>
 				_protocol.clone (),
 			Accepter::RustTlsTcpListener (_, _, _protocol) =>
 				_protocol.clone (),
+			Accepter::NativeTlsTcpListener (_, _, _protocol) =>
+				_protocol.clone (),
+		}
+	}
+	
+	pub(crate) fn listener (&self) -> &tokio::TcpListener {
+		match self {
+			Accepter::TcpListener (_listener, _) =>
+				_listener,
+			Accepter::RustTlsTcpListener (_, _listener, _) =>
+				_listener,
+			Accepter::NativeTlsTcpListener (_, _listener, _) =>
+				_listener,
 		}
 	}
 }
@@ -151,22 +182,38 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 	};
 	
 	let _configuration = {
-		let mut _tls = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
-		_tls.cert_resolver = Arc::new (_resolver);
+		let mut _builder = rustls::ServerConfig::new (rustls::NoClientAuth::new ());
+		_builder.cert_resolver = Arc::new (_resolver);
 		match _protocol {
 			EndpointProtocol::Http1 =>
-				_tls.alpn_protocols.push ("http/1.1".into ()),
+				_builder.alpn_protocols.push ("http/1.1".into ()),
 			EndpointProtocol::Http2 =>
-				_tls.alpn_protocols.push ("h2".into ()),
+				_builder.alpn_protocols.push ("h2".into ()),
 			EndpointProtocol::Http12 => {
-				_tls.alpn_protocols.push ("h2".into ());
-				_tls.alpn_protocols.push ("http/1.1".into ());
+				_builder.alpn_protocols.push ("h2".into ());
+				_builder.alpn_protocols.push ("http/1.1".into ());
 			}
 		}
-		Arc::new (_tls)
+		Arc::new (_builder)
 	};
 	
 	let _accepter = tokio_rustls::TlsAcceptor::from (_configuration);
+	
+	Ok (_accepter)
+}
+
+
+
+
+fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> ServerResult<tokio_natls::TlsAcceptor> {
+	
+	let _configuration = {
+		let mut _builder = natls::TlsAcceptor::builder (_certificate.identity.clone ());
+		_builder.min_protocol_version (Some (natls::Protocol::Tlsv12));
+		_builder.build () .or_wrap (0xaf2c7136) ?
+	};
+	
+	let _accepter = tokio_natls::TlsAcceptor::from (_configuration);
 	
 	Ok (_accepter)
 }

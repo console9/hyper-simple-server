@@ -27,6 +27,8 @@ pub(crate) use futures::TryFutureExt as _;
 
 pub(crate) use ::std::marker::PhantomData;
 
+pub(crate) use ::std::ops::Deref;
+
 pub(crate) use ::std::pin::Pin;
 
 pub(crate) use ::std::sync::Arc;
@@ -34,8 +36,6 @@ pub(crate) use ::std::sync::RwLock;
 
 pub(crate) use ::std::task::Poll;
 pub(crate) use ::std::task::Context;
-
-pub(crate) use ::std::ops::Deref as _;
 
 
 
@@ -81,9 +81,7 @@ pub(crate) use ::rustls;
 pub(crate) use ::tokio_rustls as tokio_rustls;
 pub(crate) use ::rustls_pemfile as rustls_pem;
 
-#[ allow (unused_imports) ]
 pub(crate) use ::native_tls as natls;
-#[ allow (unused_imports) ]
 pub(crate) use ::tokio_native_tls as tokio_natls;
 
 pub(crate) use ::path_tree;

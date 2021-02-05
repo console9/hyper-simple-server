@@ -39,12 +39,18 @@ pub enum EndpointProtocol {
 pub enum EndpointSecurity {
 	Insecure,
 	RustTls (RustTlsCertificate),
+	NativeTls (NativeTlsCertificate),
 }
 
 
 #[ derive (Clone) ]
 pub struct RustTlsCertificate {
-	pub certified : rustls::sign::CertifiedKey
+	pub certified : rustls::sign::CertifiedKey,
+}
+
+#[ derive (Clone) ]
+pub struct NativeTlsCertificate {
+	pub identity : natls::Identity,
 }
 
 
@@ -97,14 +103,20 @@ impl Endpoint {
 	
 	pub fn localhost_https () -> Self {
 		
-		let _certificate = RustTlsCertificate::localhost () .or_panic (0xf64b30c4);
+		let _security = if false {
+			let _certificate = RustTlsCertificate::localhost () .or_panic (0xf64b30c4);
+			EndpointSecurity::RustTls (_certificate)
+		} else {
+			let _certificate = NativeTlsCertificate::localhost () .or_panic (0xf6a595a9);
+			EndpointSecurity::NativeTls (_certificate)
+		};
 		
 		let mut _endpoint = Endpoint {
 				.. Default::default ()
 			};
 		
 		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8443)));
-		_endpoint.security = EndpointSecurity::RustTls (_certificate);
+		_endpoint.security = _security;
 		
 		_endpoint
 	}
@@ -366,6 +378,28 @@ impl RustTlsCertificate {
 	pub fn localhost () -> ServerResult<Self> {
 		let _bundle = include_str! ("../examples/tls/testing--server--rsa--bundle.pem");
 		Self::load_from_pem_str (_bundle)
+	}
+}
+
+
+
+
+impl NativeTlsCertificate {
+	
+	pub fn load_from_pkcs12_bytes (_data : &[u8], _password : &str) -> ServerResult<Self> {
+		
+		let _identity = natls::Identity::from_pkcs12 (_data, _password) .or_wrap (0x93817715) ?;
+		
+		let _certificate = NativeTlsCertificate {
+				identity : _identity,
+			};
+		
+		Ok (_certificate)
+	}
+	
+	pub fn localhost () -> ServerResult<Self> {
+		let _bundle = include_bytes! ("../examples/tls/testing--server--rsa--bundle.p12");
+		Self::load_from_pkcs12_bytes (_bundle, "bundle")
 	}
 }
 

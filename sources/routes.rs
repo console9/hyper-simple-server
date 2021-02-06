@@ -48,6 +48,35 @@ impl Routes {
 	pub fn routes (&self) -> impl Iterator<Item = Arc<Route>> + '_ {
 		self.internals.list.iter () .map (Arc::clone)
 	}
+	
+	pub fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+		match self.try_handle (_request) {
+			Ok (_future) =>
+				_future,
+			Err (_request) =>
+				HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched for `{}`", _request.uri_path ()))),
+		}
+	}
+	
+	pub fn try_handle (&self, _request : Request<Body>) -> Result<HandlerFutureDynBox, Request<Body>> {
+		let _path = _request.uri () .path ();
+		let _route_matched = match self.resolve (_path) {
+			Ok (_route_matched) =>
+				_route_matched,
+			Err (_error) =>
+				return Ok (HandlerFutureDynBox::ready_error (_error)),
+		};
+		if let Some (_route_matched) = _route_matched {
+			let _route = _route_matched.route.clone ();
+			let mut _request = _request;
+			_request.extensions_mut () .insert (_route_matched);
+			Ok (_route.handler.handle (_request))
+		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
+			Ok (_fallback.handle (_request))
+		} else {
+			Err (_request)
+		}
+	}
 }
 
 
@@ -59,23 +88,7 @@ impl Handler for Routes {
 	type ResponseBodyError = ServerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
-		let _path = _request.uri () .path ();
-		let _route_matched = match self.resolve (_path) {
-			Ok (_route_matched) =>
-				_route_matched,
-			Err (_error) =>
-				return HandlerFutureDynBox::ready_error (_error),
-		};
-		if let Some (_route_matched) = _route_matched {
-			let _route = _route_matched.route.clone ();
-			let mut _request = _request;
-			_request.extensions_mut () .insert (_route_matched);
-			_route.handler.handle (_request)
-		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
-			_fallback.handle (_request)
-		} else {
-			HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched path `{}`", _path)))
-		}
+		Routes::handle (self, _request)
 	}
 }
 
@@ -141,7 +154,7 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -154,7 +167,7 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -168,11 +181,21 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
+	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
+			where
+					H : HandlerDyn,
+					P : Into<RoutePaths<'a>>
+	{
+		let _handler = HandlerDynArc::new (_handler);
+		self.with_route_arc (_paths, _handler)
+	}
+	
+	#[ allow (single_use_lifetimes) ]
+	pub fn with_route_arc <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
 			where
 					P : Into<RoutePaths<'a>>
 	{
@@ -183,8 +206,13 @@ impl RoutesBuilder {
 					handler : _handler.clone (),
 					debug : None,
 				};
-			self.routes.push (_route);
+			self = self.with_route_object (_route);
 		}
+		self
+	}
+	
+	pub fn with_route_object (mut self, _route : Route) -> Self {
+		self.routes.push (_route);
 		self
 	}
 }

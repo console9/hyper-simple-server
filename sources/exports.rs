@@ -4,10 +4,13 @@
 #![ allow (unreachable_pub) ]
 
 
+use crate::prelude::*;
+
+
 
 
 #[ cfg (feature = "http") ]
-pub use ::http::{
+pub use http::{
 		
 		request::Request,
 		request::Parts as RequestParts,
@@ -20,15 +23,18 @@ pub use ::http::{
 		uri::Uri,
 		version::Version,
 		method::Method,
-		status::StatusCode as Status,
+		status::StatusCode,
 		
 		header::HeaderMap,
 		header::HeaderName,
 		header::HeaderValue,
+		
+		header::AsHeaderName,
+		header::IntoHeaderName,
 };
 
 #[ cfg (feature = "http-body") ]
-pub use ::http_body::{
+pub use http_body::{
 		
 		Body as BodyTrait,
 		SizeHint as BodySizeHint,
@@ -37,7 +43,7 @@ pub use ::http_body::{
 	};
 
 #[ cfg (feature = "bytes") ]
-pub use ::bytes::{
+pub use bytes::{
 		
 		Bytes,
 		Buf,
@@ -117,7 +123,7 @@ impl ContentType {
 
 
 #[ cfg (feature = "http") ]
-impl ::std::convert::Into<HeaderValue> for ContentType {
+impl Into<HeaderValue> for ContentType {
 	fn into (self) -> HeaderValue {
 		#[ allow (unsafe_code) ]
 		unsafe {
@@ -155,7 +161,7 @@ pub mod consts {
 	
 	// NOTE:  https://docs.rs/http/0.2.3/src/http/status.rs.html#323-515
 	// x-selection co | sed -r -e '\#^\s*$#d' -e 's#^\s+##' -e '\#^//#d' -e 's#\([0-9]+,\s*([^,]+).*$#\1#' -e 's#^#\t\t\t#' -e 's#$#,#' | LC_ALL=C sort | x-selection pi
-	def_const! (super::Status =>
+	def_const! (super::StatusCode =>
 			ACCEPTED,
 			ALREADY_REPORTED,
 			BAD_GATEWAY,

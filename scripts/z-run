@@ -89,7 +89,7 @@
 	_features="${*}"
 	_features="${_features// /,}"
 	shift -- "${#}"
-	Z_expect_no_arguments
+	test "${#}" -eq 0
 	export -- _RUST_FEATURES="${_features}"
 	Z_zexec "${_scriptlet}"
 !!
@@ -100,6 +100,7 @@
 	_scriptlet="${1}"
 	_expected="${2}"
 	shift -- 2
+	test "${#}" -eq 0
 	readarray -t -- _features < <( Z_zexec ':: features / list / shuffle' "${_expected}" )
 	Z_log_cut
 	for _feature in "${_features[@]}" ; do
@@ -568,5 +569,24 @@
 		#
 		
 	done
+!!
+
+
+
+
+<< iptables / initialize
+	#! <bash+>
+	Z_expect_no_arguments
+	root-exec iptables -t nat -I OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 80 -m state --state NEW -j DNAT --to-destination :8080
+	root-exec iptables -t nat -I OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 443 -m state --state NEW -j DNAT --to-destination :8443
+	root-exec iptables -t nat -S OUTPUT
+!!
+
+<< iptables / finalize
+	#! <bash+>
+	Z_expect_no_arguments
+	root-exec iptables -t nat -D OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 80 -m state --state NEW -j DNAT --to-destination :8080 || true
+	root-exec iptables -t nat -D OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 443 -m state --state NEW -j DNAT --to-destination :8443 || true
+	root-exec iptables -t nat -S OUTPUT
 !!
 

@@ -13,10 +13,6 @@ pub trait Handler : Send + Sync + 'static {
 	type ResponseBodyError : Error + Send + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
-	
-	fn into_boxed (self) -> HandlerDynArc where Self : Sized {
-		HandlerDynArc (Arc::new (self))
-	}
 }
 
 
@@ -134,20 +130,8 @@ impl <H, F> HandlerDyn for H
 {
 	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
 		let _future = Handler::handle (self, _request);
-		let _future = _future.map_ok (|_response| _response.map (BodyDynBox::from));
-		HandlerFutureDynBox::from (_future)
-	}
-}
-
-
-#[ cfg (feature = "hss-handler") ]
-impl <H, F> From<H> for HandlerDynArc
-		where
-			H : Handler<Future = F> + Send + Sync + 'static,
-			F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
-{
-	fn from (_handler : H) -> Self {
-		_handler.into_boxed ()
+		let _future = _future.map_ok (|_response| _response.map (BodyDynBox::new));
+		HandlerFutureDynBox::new (_future)
 	}
 }
 
@@ -157,6 +141,15 @@ impl <H, F> From<H> for HandlerDynArc
 #[ derive (Clone) ]
 #[ cfg (feature = "hss-handler") ]
 pub struct HandlerDynArc (Arc<dyn HandlerDyn>);
+
+
+#[ cfg (feature = "hss-handler") ]
+impl HandlerDynArc {
+	
+	pub fn new (_handler : impl HandlerDyn) -> Self {
+		HandlerDynArc (Arc::new (_handler))
+	}
+}
 
 
 #[ cfg (feature = "hss-handler") ]
@@ -271,6 +264,10 @@ impl BodyTrait for BodyDynBox {
 #[ cfg (feature = "hss-handler") ]
 impl BodyDynBox {
 	
+	pub fn new (_body : impl BodyDyn) -> Self {
+		Self (Box::pin (_body))
+	}
+	
 	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut dyn BodyDyn> {
 		let _self = Pin::into_inner (self);
 		_self.0.as_mut ()
@@ -278,10 +275,6 @@ impl BodyDynBox {
 	
 	fn delegate (&self) -> Pin<&dyn BodyDyn> {
 		self.0.as_ref ()
-	}
-	
-	fn from (_body : impl BodyDyn) -> Self {
-		Self (Box::pin (_body))
 	}
 }
 
@@ -307,7 +300,7 @@ impl Future for HandlerFutureDynBox {
 #[ cfg (feature = "hss-handler") ]
 impl HandlerFutureDynBox {
 	
-	pub fn from <F> (_future : F) -> Self
+	pub fn new <F> (_future : F) -> Self
 			where
 				F : Future<Output = ServerResult<Response<BodyDynBox>>> + Send + 'static
 	{
@@ -315,7 +308,7 @@ impl HandlerFutureDynBox {
 	}
 	
 	pub fn ready (_result : ServerResult<Response<BodyDynBox>>) -> Self {
-		Self::from (future::ready (_result))
+		Self::new (future::ready (_result))
 	}
 	
 	pub fn ready_response (_response : Response<BodyDynBox>) -> Self {
@@ -324,6 +317,99 @@ impl HandlerFutureDynBox {
 	
 	pub fn ready_error (_error : ServerError) -> Self {
 		Self::ready (Err (_error))
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <Body, BodyError> From<Response<Body>> for HandlerFutureDynBox
+		where
+			Body : BodyTrait<Data = Bytes, Error = BodyError> + Send + 'static,
+			BodyError : Error + Send + 'static,
+{
+	fn from (_response : Response<Body>) -> Self {
+		Self::ready_response (_response.map (BodyDynBox::new))
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl From<ServerError> for HandlerFutureDynBox
+{
+	fn from (_error : ServerError) -> Self {
+		Self::ready_error (_error)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+pub trait HandlerSimpleAsync : Send + Sync + 'static {
+	
+	type Future : Future<Output = ServerResult<Response<Body>>> + Send + 'static;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future;
+	
+	fn wrap (self) -> HandlerSimpleAsyncWrapper<Self> where Self : Sized {
+		HandlerSimpleAsyncWrapper (self)
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct HandlerSimpleAsyncWrapper <Handler : HandlerSimpleAsync> (Handler);
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+impl <H> HandlerDyn for HandlerSimpleAsyncWrapper<H>
+		where
+			H : HandlerSimpleAsync,
+{
+	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+		let _future = HandlerSimpleAsync::handle (&self.0, _request);
+		let _future = _future.map_ok (|_response| _response.map (BodyDynBox::new));
+		HandlerFutureDynBox::new (_future)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+pub trait HandlerSimpleSync : Send + Sync + 'static {
+	
+	fn handle (&self, _request : &Request<Body>, _response : &mut Response<Body>) -> ServerResult;
+	
+	fn wrap (self) -> HandlerSimpleSyncWrapper<Self> where Self : Sized {
+		HandlerSimpleSyncWrapper (self)
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct HandlerSimpleSyncWrapper <Handler : HandlerSimpleSync> (Handler);
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+impl <H> HandlerDyn for HandlerSimpleSyncWrapper<H>
+		where
+			H : HandlerSimpleSync,
+{
+	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+		let mut _response = Response::new_empty ();
+		match HandlerSimpleSync::handle (&self.0, &_request, &mut _response) {
+			Ok (()) =>
+				HandlerFutureDynBox::ready_response (_response.map (BodyDynBox::new)),
+			Err (_error) =>
+				HandlerFutureDynBox::ready_error (_error),
+		}
 	}
 }
 

@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 
 
+#[ derive (Clone) ]
 #[ cfg (feature = "hss-server") ]
 pub struct Server {
 	internals : ServerInternals,

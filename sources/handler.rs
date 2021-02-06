@@ -122,7 +122,7 @@ impl <C, RB, RBE> From<C> for HandlerFnSync<C, RB, RBE>
 #[ cfg (feature = "hss-handler") ]
 pub trait HandlerDyn : Send + Sync + 'static {
 	
-	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
+	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox;
 }
 
 
@@ -132,10 +132,10 @@ impl <H, F> HandlerDyn for H
 			H : Handler<Future = F> + Send + Sync + 'static,
 			F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
 {
-	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>> {
+	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
 		let _future = Handler::handle (self, _request);
 		let _future = _future.map_ok (|_response| _response.map (BodyDynBox::from));
-		Box::pin (_future)
+		HandlerFutureDynBox::from (_future)
 	}
 }
 
@@ -162,7 +162,7 @@ pub struct HandlerDynArc (Arc<dyn HandlerDyn>);
 #[ cfg (feature = "hss-handler") ]
 impl HandlerDyn for HandlerDynArc {
 	
-	fn handle (&self, _request : Request<Body>) -> Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>> {
+	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
 		self.0.handle (_request)
 	}
 }
@@ -171,7 +171,7 @@ impl HandlerDyn for HandlerDynArc {
 #[ cfg (feature = "hss-handler") ]
 impl hyper::Service<Request<Body>> for HandlerDynArc {
 	
-	type Future = Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
+	type Future = HandlerFutureDynBox;
 	type Response = Response<BodyDynBox>;
 	type Error = ServerError;
 	
@@ -282,6 +282,48 @@ impl BodyDynBox {
 	
 	fn from (_body : impl BodyDyn) -> Self {
 		Self (Box::pin (_body))
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+pub struct HandlerFutureDynBox (Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>);
+
+
+#[ cfg (feature = "hss-handler") ]
+impl Future for HandlerFutureDynBox {
+	
+	type Output = ServerResult<Response<BodyDynBox>>;
+	
+	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
+		let _self = Pin::into_inner (self);
+		_self.0.as_mut () .poll (_context)
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl HandlerFutureDynBox {
+	
+	pub fn from <F> (_future : F) -> Self
+			where
+				F : Future<Output = ServerResult<Response<BodyDynBox>>> + Send + 'static
+	{
+		Self (Box::pin (_future))
+	}
+	
+	pub fn ready (_result : ServerResult<Response<BodyDynBox>>) -> Self {
+		Self::from (future::ready (_result))
+	}
+	
+	pub fn ready_response (_response : Response<BodyDynBox>) -> Self {
+		Self::ready (Ok (_response))
+	}
+	
+	pub fn ready_error (_error : ServerError) -> Self {
+		Self::ready (Err (_error))
 	}
 }
 

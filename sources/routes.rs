@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 
 
+#[ derive (Clone) ]
 #[ cfg (feature = "hss-routes") ]
 pub struct Routes {
 	internals : RoutesInternals,
@@ -53,7 +54,7 @@ impl Routes {
 #[ cfg (feature = "hss-routes") ]
 impl Handler for Routes {
 	
-	type Future = Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>;
+	type Future = HandlerFutureDynBox;
 	type ResponseBody = BodyDynBox;
 	type ResponseBodyError = ServerError;
 	
@@ -63,7 +64,7 @@ impl Handler for Routes {
 			Ok (_route_matched) =>
 				_route_matched,
 			Err (_error) =>
-				return Box::pin (future::ready (Err (_error))),
+				return HandlerFutureDynBox::ready_error (_error),
 		};
 		if let Some (_route_matched) = _route_matched {
 			let _route = _route_matched.route.clone ();
@@ -73,7 +74,7 @@ impl Handler for Routes {
 		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
 			_fallback.handle (_request)
 		} else {
-			Box::pin (future::ready (Err (error_with_format (0x15c0a773, format_args! ("no route matched path `{}`", _path)))))
+			HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched path `{}`", _path)))
 		}
 	}
 }

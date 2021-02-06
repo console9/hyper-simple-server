@@ -136,6 +136,8 @@ fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener
 			},
 	};
 	
+	_listener.set_nonblocking (true) ?;
+	
 	let _listener = tokio::TcpListener::from_std (_listener) ?;
 	
 	Ok (_listener)

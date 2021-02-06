@@ -331,7 +331,8 @@ impl ConfigurationBuilder {
 		#[ cfg (feature = "hss-routes") ]
 		if _handler_0.is_none () {
 			if let Some (_routes) = _routes {
-				_handler_0 = Some (_routes.build () ? .into_boxed ());
+				let _routes = _routes.build () ?;
+				_handler_0 = Some (HandlerDynArc::new (_routes));
 			}
 		}
 		
@@ -445,7 +446,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_handler_dyn (_handler.into_boxed ())
+		self.with_handler_dyn (_handler)
 	}
 	
 	pub fn with_handler_fn_sync <H, C, RB, RBE> (self, _handler : H) -> Self
@@ -456,7 +457,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_handler_dyn (_handler.into_boxed ())
+		self.with_handler_dyn (_handler)
 	}
 	
 	pub fn with_handler_fn_async <H, C, F, RB, RBE> (self, _handler : H) -> Self
@@ -468,11 +469,17 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_handler_dyn (_handler.into_boxed ())
+		self.with_handler_dyn (_handler)
 	}
 	
-	pub fn with_handler_dyn (mut self, _handler : HandlerDynArc) -> Self
+	pub fn with_handler_dyn <H> (self, _handler : H) -> Self
+			where
+				H : HandlerDyn,
 	{
+		self.with_handler_arc (HandlerDynArc::new (_handler))
+	}
+	
+	pub fn with_handler_arc (mut self, _handler : HandlerDynArc) -> Self {
 		self.handler = Some (_handler);
 		self
 	}
@@ -494,7 +501,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -507,7 +514,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -521,16 +528,25 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler.into_boxed ())
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_dyn <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
+	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
+			where
+				H : HandlerDyn,
+				P : Into<RoutePaths<'a>>,
+	{
+		self.with_route_arc (_paths, HandlerDynArc::new (_handler))
+	}
+	
+	#[ allow (single_use_lifetimes) ]
+	pub fn with_route_arc <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
 	{
 		let _routes = self.routes.take () .unwrap_or_else (RoutesBuilder::new);
-		let _routes = _routes.with_route_dyn (_paths, _handler);
+		let _routes = _routes.with_route_arc (_paths, _handler);
 		self.routes = Some (_routes);
 		self
 	}

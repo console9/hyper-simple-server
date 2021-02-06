@@ -168,7 +168,7 @@ impl Endpoint {
 				.. Default::default ()
 			};
 		
-		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8080)));
+		_endpoint.address = EndpointAddress::localhost_http ();
 		
 		_endpoint
 	}
@@ -192,10 +192,44 @@ impl Endpoint {
 				.. Default::default ()
 			};
 		
-		_endpoint.address = EndpointAddress::Socket (net::SocketAddr::from (([127,0,0,1], 8443)));
+		_endpoint.address = EndpointAddress::localhost_https ();
 		_endpoint.security = _security;
 		
 		_endpoint
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+impl EndpointAddress {
+	
+	pub fn localhost_http () -> Self {
+		Self::from_socket_address (([127,0,0,1], 8080))
+	}
+	
+	pub fn localhost_https () -> Self {
+		Self::from_socket_address (([127,0,0,1], 8443))
+	}
+	
+	pub fn from_socket_address (_address : impl Into<net::SocketAddr>) -> Self {
+		EndpointAddress::Socket (_address.into ())
+	}
+	
+	pub fn from_socket_address_parse (_address : &(impl net::ToSocketAddrs + ?Sized)) -> ServerResult<Self> {
+		let mut _addresses = _address.to_socket_addrs () ?;
+		let _address = if let Some (_address) = _addresses.next () {
+			_address
+		} else {
+			return Err (error_with_message (0x3a20b501, "no socket addresses resolved"));
+		};
+		if _addresses.next () .is_some () {
+			return Err (error_with_message (0x093c154c9, "multiple socket addresses resolved"));
+		}
+		Ok (Self::from_socket_address (_address))
+	}
+	
+	pub fn from_descriptor (_descriptor : u32) -> Self {
+		EndpointAddress::Descriptor (_descriptor)
 	}
 }
 
@@ -325,9 +359,19 @@ impl ConfigurationBuilder {
 		self
 	}
 	
-	pub fn with_endpoint_socket_address (mut self, _address : net::SocketAddr) -> Self {
-		self.endpoint_mut () .address = EndpointAddress::Socket (_address);
-		self
+	pub fn with_endpoint_socket_address (self, _address : impl Into<net::SocketAddr>) -> Self {
+		let _address = EndpointAddress::from_socket_address (_address);
+		self.with_endpoint_address (_address)
+	}
+	
+	pub fn with_endpoint_socket_address_parse (self, _address : &(impl net::ToSocketAddrs + ?Sized)) -> ServerResult<Self> {
+		let _address = EndpointAddress::from_socket_address_parse (_address) ?;
+		Ok (self.with_endpoint_address (_address))
+	}
+	
+	pub fn with_endpoint_descriptor (self, _descriptor : u32) -> Self {
+		let _address = EndpointAddress::from_descriptor (_descriptor);
+		self.with_endpoint_address (_address)
 	}
 	
 	pub fn with_endpoint_protocol (mut self, _protocol : EndpointProtocol) -> Self {

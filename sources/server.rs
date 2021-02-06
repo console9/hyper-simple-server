@@ -169,6 +169,13 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
 		
+		#[ cfg (debug_assertions) ]
+		if false {
+			process::Command::new ("strace")
+					.args (&["-f", "-p", & process::id () .to_string ()])
+					.spawn () .or_panic (0xff87ffef);
+		}
+		
 		#[ cfg (not (feature = "tokio--rt-multi-thread")) ]
 		let mut _builder = {
 			#[ cfg (debug_assertions) ]

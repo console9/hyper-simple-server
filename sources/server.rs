@@ -170,10 +170,18 @@ impl Server {
 	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
 		
 		#[ cfg (not (feature = "tokio--rt-multi-thread")) ]
-		let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
+		let mut _builder = {
+			#[ cfg (debug_assertions) ]
+			eprintln! ("[ii] [25065ee8]  starting tokio current-thread executor...");
+			tokio::RuntimeBuilder::new_current_thread ()
+		};
 		
 		#[ cfg (feature = "tokio--rt-multi-thread") ]
-		let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
+		let mut _builder = {
+			#[ cfg (debug_assertions) ]
+			eprintln! ("[ii] [cf4d96e6]  starting tokio multi-threaded executor...");
+			tokio::RuntimeBuilder::new_multi_thread ()
+		};
 		
 		_builder.enable_all ();
 		

@@ -34,17 +34,16 @@ hss-full = [
 
 hss-full-http1 = [
 	"hss-full-common",
-	"hss-server-mt",
 	"hss-server-http1",
 ]
 
 hss-full-http2 = [
 	"hss-full-common",
-	"hss-server-mt",
 	"hss-server-http2",
 ]
 
 hss-full-common = [
+	"hss-server-mt",
 	"hss-handler",
 	"hss-routes",
 	"hss-config",

@@ -118,11 +118,13 @@
 	hss-accepter
 	hss-config
 	hss-exports
+	hss-extensions
 	hss-full
 	hss-full-common
 	hss-full-http1
 	hss-full-http2
 	hss-handler
+	hss-http
 	hss-main
 	hss-routes
 	hss-server

@@ -51,7 +51,9 @@ hss-full-common = [
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
+	"hss-http",
 	"hss-exports",
+	"hss-extensions",
 	"hss-main",
 ]
 
@@ -123,6 +125,10 @@ hss-tls-native = [
 ]
 
 hss-tls-any = []
+
+hss-http = []
+
+hss-extensions = []
 
 hss-exports = []
 

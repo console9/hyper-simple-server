@@ -66,6 +66,7 @@ pub use {
 	crate::connection::*,
 	crate::configuration::*,
 	crate::errors::*,
+	crate::extensions::*,
 	crate::handler::*,
 	crate::main::*,
 	crate::routes::*,
@@ -87,6 +88,7 @@ pub(crate) mod configuration;
 pub(crate) mod connection;
 pub(crate) mod errors;
 pub(crate) mod exports;
+pub(crate) mod extensions;
 pub(crate) mod handler;
 pub(crate) mod prelude;
 pub(crate) mod routes;

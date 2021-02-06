@@ -42,6 +42,24 @@
 	Z_zexec ':: cargo / run' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
+
+
+
+<< dependencies / update / conservative
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' update
+!!
+
+<< dependencies / update / aggressive
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' update --aggressive
+!!
+
+
+
+
 << docs / crate / internals / build
 	#! <bash+>
 	Z_expect_no_arguments
@@ -251,6 +269,18 @@
 	#
 !!
 
+<< curl / http
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- curl -v -s -- http://127.0.0.1:8080/
+!!
+
+<< curl / https
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- curl -v -s -- https://127.0.0.1:8443/
+!!
+
 
 
 
@@ -271,7 +301,7 @@
 					--target-dir "${_RUST_TARGET}"
 				)
 		;;
-		( metadata )
+		( metadata | update )
 			_arguments+=(
 					--manifest-path "${_RUST_SOURCES}/Cargo.toml"
 				)

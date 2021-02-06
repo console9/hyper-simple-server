@@ -129,6 +129,7 @@ fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener
 	let _listener = match _address {
 		EndpointAddress::Socket (_address) =>
 			net::TcpListener::bind (_address) ?,
+		#[ cfg (unix) ]
 		EndpointAddress::Descriptor (_descriptor) =>
 			unsafe {
 				os::unix::io::FromRawFd::from_raw_fd (*_descriptor as i32)

@@ -27,6 +27,7 @@ pub struct Endpoint {
 #[ cfg (feature = "hss-config") ]
 pub enum EndpointAddress {
 	Socket (net::SocketAddr),
+	#[ cfg (unix) ]
 	Descriptor (u32),
 }
 
@@ -228,6 +229,7 @@ impl EndpointAddress {
 		Ok (Self::from_socket_address (_address))
 	}
 	
+	#[ cfg (unix) ]
 	pub fn from_descriptor (_descriptor : u32) -> Self {
 		EndpointAddress::Descriptor (_descriptor)
 	}
@@ -370,6 +372,7 @@ impl ConfigurationBuilder {
 		Ok (self.with_endpoint_address (_address))
 	}
 	
+	#[ cfg (unix) ]
 	pub fn with_endpoint_descriptor (self, _descriptor : u32) -> Self {
 		let _address = EndpointAddress::from_descriptor (_descriptor);
 		self.with_endpoint_address (_address)

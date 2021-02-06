@@ -403,7 +403,7 @@ impl <H> HandlerDyn for HandlerSimpleSyncWrapper<H>
 			H : HandlerSimpleSync,
 {
 	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
-		let mut _response = Response::new_empty ();
+		let mut _response = Response::new (Body::empty ());
 		match HandlerSimpleSync::handle (&self.0, &_request, &mut _response) {
 			Ok (()) =>
 				HandlerFutureDynBox::ready_response (_response.map (BodyDynBox::new)),

@@ -126,7 +126,12 @@ hss-tls-native = [
 
 hss-tls-any = []
 
-hss-http = []
+hss-http = [
+	"http",
+	"http-body",
+	"bytes",
+	"hyper",
+]
 
 hss-extensions = []
 
@@ -135,6 +140,7 @@ hss-exports = []
 hss-main = [
 	"hss-server",
 	"hss-routes",
+	"hss-extensions",
 ]
 
 

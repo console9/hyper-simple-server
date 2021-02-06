@@ -54,7 +54,7 @@ impl Routes {
 			Ok (_future) =>
 				_future,
 			Err (_request) =>
-				HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched for `{}`", _request.uri_path ()))),
+				HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched for `{}`", _request.uri () .path ()))),
 		}
 	}
 	

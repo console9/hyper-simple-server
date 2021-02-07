@@ -128,23 +128,12 @@ impl Default for EndpointProtocol {
 	
 	#[ cfg (feature = "hyper--http") ]
 	fn default () -> Self {
-		
-		#[ cfg (feature = "hyper--http1") ]
-		#[ cfg (not (feature = "hyper--http2")) ]
-		return EndpointProtocol::Http1;
-		
-		#[ cfg (feature = "hyper--http2") ]
-		#[ cfg (not (feature = "hyper--http1")) ]
-		return EndpointProtocol::Http2;
-		
-		#[ cfg (feature = "hyper--http1") ]
-		#[ cfg (feature = "hyper--http2") ]
-		return EndpointProtocol::Http12;
+		Self::with_http_support (true, true)
 	}
 	
 	#[ cfg (not (feature = "hyper--http")) ]
 	fn default () -> Self {
-		return EndpointProtocol::Generic;
+		EndpointProtocol::Generic
 	}
 }
 
@@ -271,6 +260,28 @@ impl EndpointProtocol {
 	
 	pub fn supports_http2_only (&self) -> bool {
 		self.supports_http2 () && ! self.supports_http1 ()
+	}
+	
+	#[ cfg (feature = "hyper--http") ]
+	pub fn with_http_support (_http1 : bool, _http2 : bool) -> Self {
+		
+		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--http2") ]
+		if _http1 && _http2 {
+			return EndpointProtocol::Http12;
+		}
+		
+		#[ cfg (feature = "hyper--http1") ]
+		if _http1 {
+			return EndpointProtocol::Http1;
+		}
+		
+		#[ cfg (feature = "hyper--http2") ]
+		if _http2 {
+			return EndpointProtocol::Http2;
+		}
+		
+		return EndpointProtocol::Generic;
 	}
 }
 

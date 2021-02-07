@@ -160,52 +160,56 @@ impl RoutesBuilder {
 				RBE : Error + Send + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn (_paths, _handler)
+		self.with_route_dyn::<_, _, H> (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_fn_sync <'a, P, H, C, RB, RBE> (self, _paths : P, _handler : H) -> Self
+	pub fn with_route_fn_sync <'a, P, I, C, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				H : Into<HandlerFnSync<C, RB, RBE>>,
+				I : Into<HandlerFnSync<C, RB, RBE>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler)
+		self.with_route_dyn::<_, _, HandlerFnSync<C, RB, RBE>> (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_fn_async <'a, P, H, C, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
+	pub fn with_route_fn_async <'a, P, I, C, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				H : Into<HandlerFnAsync<C, F, RB, RBE>>,
+				I : Into<HandlerFnAsync<C, F, RB, RBE>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn (_paths, _handler)
+		self.with_route_dyn::<_, _, HandlerFnAsync<C, F, RB, RBE>> (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
+	pub fn with_route_dyn <'a, P, I, H> (self, _paths : P, _handler : I) -> Self
 			where
+					I : Into<H>,
 					H : HandlerDyn,
-					P : Into<RoutePaths<'a>>
+					P : Into<RoutePaths<'a>>,
 	{
+		let _handler : H = _handler.into ();
 		let _handler = HandlerDynArc::new (_handler);
 		self.with_route_arc (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_arc <'a, P> (mut self, _paths : P, _handler : HandlerDynArc) -> Self
+	pub fn with_route_arc <'a, P, I> (mut self, _paths : P, _handler : I) -> Self
 			where
-					P : Into<RoutePaths<'a>>
+					I : Into<HandlerDynArc>,
+					P : Into<RoutePaths<'a>>,
 	{
 		let mut _paths = _paths.into ();
+		let _handler = _handler.into ();
 		while let Some (_path) = _paths.next () {
 			let _route = Route {
 					path : String::from (_path),

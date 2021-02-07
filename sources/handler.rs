@@ -200,178 +200,6 @@ impl Handler for HandlerDynArc {
 }
 
 
-#[ cfg (feature = "hss-handler") ]
-impl hyper::Service<Request<Body>> for HandlerDynArc {
-	
-	type Future = HandlerFutureDynBox;
-	type Response = Response<BodyDynBox>;
-	type Error = ServerError;
-	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServerResult> {
-		Poll::Ready (Ok (()))
-	}
-	
-	fn call (&mut self, _request : Request<Body>) -> Self::Future {
-		self.delegate (_request)
-	}
-}
-
-
-
-
-#[ cfg (feature = "hss-handler") ]
-pub struct BodyWrapper <B> (B)
-	where
-		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
-;
-
-
-#[ cfg (feature = "hss-handler") ]
-impl <B> BodyTrait for BodyWrapper<B>
-	where
-		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
-{
-	type Data = Bytes;
-	type Error = ServerError;
-	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
-		let _future = self.delegate_pin_mut () .poll_data (_context);
-		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0x4e33a117))));
-		_future
-	}
-	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
-		let _future = self.delegate_pin_mut () .poll_trailers (_context);
-		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x3a25b983)));
-		_future
-	}
-	
-	fn is_end_stream (&self) -> bool {
-		self.delegate () .is_end_stream ()
-	}
-	
-	fn size_hint (&self) -> BodySizeHint {
-		self.delegate () .size_hint ()
-	}
-}
-
-
-#[ cfg (feature = "hss-handler") ]
-impl <B> BodyWrapper<B>
-	where
-		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
-{
-	pub fn new (_body : B) -> Self {
-		Self (_body)
-	}
-	
-	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut B> {
-		#[ allow (unsafe_code) ]
-		unsafe {
-			self.map_unchecked_mut (|_self| &mut _self.0)
-		}
-	}
-	
-	fn delegate (&self) -> Pin<&B> {
-		Pin::new (&self.0)
-	}
-}
-
-
-
-
-#[ cfg (feature = "hss-handler") ]
-pub trait BodyDyn
-	where
-		Self : Send + 'static,
-{
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>>;
-	
-	fn is_end_stream (&self) -> bool;
-	fn size_hint (&self) -> BodySizeHint;
-}
-
-
-#[ cfg (feature = "hss-handler") ]
-impl <B> BodyDyn for B
-	where
-		B : BodyTrait<Data = Bytes> + Send + 'static,
-		B::Error : Error + Send + Sync + 'static,
-{
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
-		let _future = BodyTrait::poll_data (self, _context);
-		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0xd89897d4))));
-		_future
-	}
-	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
-		let _future = BodyTrait::poll_trailers (self, _context);
-		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x8adea6a0)));
-		_future
-	}
-	
-	fn is_end_stream (&self) -> bool {
-		BodyTrait::is_end_stream (self)
-	}
-	
-	fn size_hint (&self) -> BodySizeHint {
-		BodyTrait::size_hint (self)
-	}
-}
-
-
-
-
-#[ cfg (feature = "hss-handler") ]
-pub struct BodyDynBox (Pin<Box<dyn BodyDyn>>);
-
-
-#[ cfg (feature = "hss-handler") ]
-impl BodyTrait for BodyDynBox {
-	
-	type Data = Bytes;
-	type Error = ServerError;
-	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
-		self.delegate_pin_mut () .poll_data (_context)
-	}
-	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
-		self.delegate_pin_mut () .poll_trailers (_context)
-	}
-	
-	fn is_end_stream (&self) -> bool {
-		self.delegate () .is_end_stream ()
-	}
-	
-	fn size_hint (&self) -> BodySizeHint {
-		self.delegate () .size_hint ()
-	}
-}
-
-
-#[ cfg (feature = "hss-handler") ]
-impl BodyDynBox {
-	
-	pub fn new (_body : impl BodyDyn) -> Self {
-		Self (Box::pin (_body))
-	}
-	
-	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut dyn BodyDyn> {
-		let _self = Pin::into_inner (self);
-		_self.0.as_mut ()
-	}
-	
-	fn delegate (&self) -> Pin<&dyn BodyDyn> {
-		self.0.as_ref ()
-	}
-}
-
-
 
 
 #[ cfg (feature = "hss-handler") ]
@@ -547,6 +375,161 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 			Err (_error) =>
 				future::ready (Err (_error)),
 		}
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+pub struct BodyWrapper <B> (B)
+	where
+		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
+		B::Error : Error + Send + Sync + 'static,
+;
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <B> BodyTrait for BodyWrapper<B>
+	where
+		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
+		B::Error : Error + Send + Sync + 'static,
+{
+	type Data = Bytes;
+	type Error = ServerError;
+	
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+		let _future = self.delegate_pin_mut () .poll_data (_context);
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0x4e33a117))));
+		_future
+	}
+	
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+		let _future = self.delegate_pin_mut () .poll_trailers (_context);
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x3a25b983)));
+		_future
+	}
+	
+	fn is_end_stream (&self) -> bool {
+		self.delegate () .is_end_stream ()
+	}
+	
+	fn size_hint (&self) -> BodySizeHint {
+		self.delegate () .size_hint ()
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <B> BodyWrapper<B>
+	where
+		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
+		B::Error : Error + Send + Sync + 'static,
+{
+	pub fn new (_body : B) -> Self {
+		Self (_body)
+	}
+	
+	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut B> {
+		#[ allow (unsafe_code) ]
+		unsafe {
+			self.map_unchecked_mut (|_self| &mut _self.0)
+		}
+	}
+	
+	fn delegate (&self) -> Pin<&B> {
+		Pin::new (&self.0)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+pub trait BodyDyn
+	where
+		Self : Send + 'static,
+{
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>>;
+	
+	fn is_end_stream (&self) -> bool;
+	fn size_hint (&self) -> BodySizeHint;
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <B> BodyDyn for B
+	where
+		B : BodyTrait<Data = Bytes> + Send + 'static,
+		B::Error : Error + Send + Sync + 'static,
+{
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+		let _future = BodyTrait::poll_data (self, _context);
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0xd89897d4))));
+		_future
+	}
+	
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+		let _future = BodyTrait::poll_trailers (self, _context);
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x8adea6a0)));
+		_future
+	}
+	
+	fn is_end_stream (&self) -> bool {
+		BodyTrait::is_end_stream (self)
+	}
+	
+	fn size_hint (&self) -> BodySizeHint {
+		BodyTrait::size_hint (self)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
+pub struct BodyDynBox (Pin<Box<dyn BodyDyn>>);
+
+
+#[ cfg (feature = "hss-handler") ]
+impl BodyTrait for BodyDynBox {
+	
+	type Data = Bytes;
+	type Error = ServerError;
+	
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+		self.delegate_pin_mut () .poll_data (_context)
+	}
+	
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+		self.delegate_pin_mut () .poll_trailers (_context)
+	}
+	
+	fn is_end_stream (&self) -> bool {
+		self.delegate () .is_end_stream ()
+	}
+	
+	fn size_hint (&self) -> BodySizeHint {
+		self.delegate () .size_hint ()
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl BodyDynBox {
+	
+	pub fn new (_body : impl BodyDyn) -> Self {
+		Self (Box::pin (_body))
+	}
+	
+	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut dyn BodyDyn> {
+		let _self = Pin::into_inner (self);
+		_self.0.as_mut ()
+	}
+	
+	fn delegate (&self) -> Pin<&dyn BodyDyn> {
+		self.0.as_ref ()
 	}
 }
 

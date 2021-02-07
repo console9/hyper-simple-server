@@ -293,6 +293,7 @@ pub struct HandlerSimpleAsyncWrapper <H> (H)
 impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 	where
 		H : HandlerSimpleAsync,
+		H::Future : Unpin,
 {
 	type Future = HandlerSimpleAsyncWrapperFuture<H::Future>;
 	type ResponseBody = BodyWrapper<Body>;
@@ -310,22 +311,20 @@ impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 #[ cfg (feature = "hss-extensions") ]
 pub struct HandlerSimpleAsyncWrapperFuture <F> (F)
 	where
-		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static,
+		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static + Unpin,
 ;
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl <F> Future for HandlerSimpleAsyncWrapperFuture<F>
 	where
-		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static,
+		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static + Unpin,
 {
 	type Output = ServerResult<Response<BodyWrapper<Body>>>;
 	
 	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
-		#[ allow (unsafe_code) ]
-		let _delegate = unsafe {
-			self.map_unchecked_mut (|_self| &mut _self.0)
-		};
+		let _self = Pin::into_inner (self);
+		let _delegate = Pin::new (&mut _self.0);
 		let _poll = _delegate.poll (_context);
 		let _poll = _poll.map_ok (|_response| _response.map (BodyWrapper::new));
 		_poll
@@ -431,10 +430,8 @@ impl <B> BodyWrapper<B>
 	}
 	
 	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut B> {
-		#[ allow (unsafe_code) ]
-		unsafe {
-			self.map_unchecked_mut (|_self| &mut _self.0)
-		}
+		let _self = Pin::into_inner (self);
+		Pin::new (&mut _self.0)
 	}
 	
 	fn delegate (&self) -> Pin<&B> {

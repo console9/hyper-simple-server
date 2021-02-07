@@ -122,10 +122,10 @@ impl hyper::Accept for Accepter {
 
 
 
-#[ allow (unsafe_code) ]
 #[ cfg (feature = "hss-accepter") ]
 fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener> {
 	
+	#[ allow (unsafe_code) ]
 	let _listener = match _address {
 		EndpointAddress::Socket (_address) =>
 			net::TcpListener::bind (_address) ?,

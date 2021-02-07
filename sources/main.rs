@@ -50,6 +50,7 @@ pub fn main_configuration () -> ServerResult<Configuration> {
 	let mut _configuration = Configuration::localhost_http ()
 			.build () ?;
 	
+	#[ cfg (feature = "hss-cli") ]
 	ConfigurationArguments::parse_and_update (&mut _configuration) ?;
 	
 	Ok (_configuration)

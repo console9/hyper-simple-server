@@ -21,6 +21,7 @@ name = "example"
 path = "./example.rs"
 required-features = [
 	"hss-main",
+	"hss-cli",
 	"hss-server-http",
 	"hss-routes",
 	"hss-http",
@@ -55,7 +56,6 @@ hss-full-common = [
 	"hss-handler",
 	"hss-routes",
 	"hss-config",
-	"hss-config-cli",
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
@@ -63,6 +63,7 @@ hss-full-common = [
 	"hss-exports",
 	"hss-extensions",
 	"hss-main",
+	"hss-cli",
 ]
 
 hss-server-full = [
@@ -111,10 +112,6 @@ hss-accepter = [
 ]
 
 hss-config = []
-hss-config-cli = [
-	"hss-config",
-	"argparse",
-]
 
 hss-handler = [
 	"hyper",
@@ -157,6 +154,10 @@ hss-extensions = []
 hss-exports = []
 
 hss-main = []
+
+hss-cli = [
+	"argparse",
+]
 
 hss-jemalloc = [
 	"jemallocator",

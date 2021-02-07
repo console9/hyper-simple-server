@@ -6,6 +6,8 @@ use crate::prelude::*;
 
 
 #[ derive (Default) ]
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
 pub struct ConfigurationArguments {
 	
 	pub endpoint_socket_address : Option<String>,
@@ -16,25 +18,36 @@ pub struct ConfigurationArguments {
 	#[ cfg (unix) ]
 	pub endpoint_descriptor_help : String,
 	
+	#[ cfg (feature = "hyper--http1") ]
 	pub endpoint_protocol_http1 : Option<bool>,
+	#[ cfg (feature = "hyper--http1") ]
 	pub endpoint_protocol_http1_help : String,
+	#[ cfg (feature = "hyper--http2") ]
 	pub endpoint_protocol_http2 : Option<bool>,
+	#[ cfg (feature = "hyper--http2") ]
 	pub endpoint_protocol_http2_help : String,
 	
 	pub endpoint_insecure : Option<bool>,
 	pub endpoint_insecure_help : String,
 	
+	#[ cfg (feature = "hss-tls-rust") ]
 	pub endpoint_rust_tls_certificate_pem_path : Option<String>,
+	#[ cfg (feature = "hss-tls-rust") ]
 	pub endpoint_rust_tls_certificate_pem_path_help : String,
 	
+	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_path : Option<String>,
+	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_password : Option<String>,
+	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_path_help : String,
 }
 
 
 
 
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
 impl ConfigurationArguments {
 	
 	pub fn with_defaults (_configuration : &Configuration) -> Self {
@@ -50,10 +63,14 @@ impl ConfigurationArguments {
 		}
 		
 		match _configuration.endpoint.protocol {
+			#[ cfg (feature = "hyper--http1") ]
 			EndpointProtocol::Http1 =>
 				_arguments.endpoint_protocol_http1 = Some (true),
+			#[ cfg (feature = "hyper--http2") ]
 			EndpointProtocol::Http2 =>
 				_arguments.endpoint_protocol_http2 = Some (true),
+			#[ cfg (feature = "hyper--http1") ]
+			#[ cfg (feature = "hyper--http2") ]
 			EndpointProtocol::Http12 => {
 				_arguments.endpoint_protocol_http1 = Some (true);
 				_arguments.endpoint_protocol_http2 = Some (true);
@@ -65,8 +82,10 @@ impl ConfigurationArguments {
 		match _configuration.endpoint.security {
 			EndpointSecurity::Insecure =>
 				_arguments.endpoint_insecure = Some (true),
+			#[ cfg (feature = "hss-tls-rust") ]
 			EndpointSecurity::RustTls (_) =>
 				(),
+			#[ cfg (feature = "hss-tls-native") ]
 			EndpointSecurity::NativeTls (_) =>
 				(),
 		}
@@ -101,19 +120,25 @@ impl ConfigurationArguments {
 				.add_option (&["--listen-descriptor"], argparse::StoreOption, &self.endpoint_descriptor_help);
 		}
 		
+		#[ cfg (feature = "hyper--http1") ]
+		{
 		self.endpoint_protocol_http1_help = self.endpoint_protocol_http1.as_ref () .map_or_else (
 				|| format! ("enable HTTP/1 support"),
 				|_enabled| format! ("enable HTTP/1 support (default `{}`)", _enabled));
 		_parser.refer (&mut self.endpoint_protocol_http1)
 				.add_option (&["--enable-http1"], argparse::StoreConst (Some (true)), &self.endpoint_protocol_http1_help)
 				.add_option (&["--disable-http1"], argparse::StoreConst (Some (false)), "");
+		}
 		
+		#[ cfg (feature = "hyper--http2") ]
+		{
 		self.endpoint_protocol_http2_help = self.endpoint_protocol_http2.as_ref () .map_or_else (
 				|| format! ("enable HTTP/2 support"),
 				|_enabled| format! ("enable HTTP/2 support (default `{}`)", _enabled));
 		_parser.refer (&mut self.endpoint_protocol_http2)
 				.add_option (&["--enable-http2"], argparse::StoreConst (Some (true)), &self.endpoint_protocol_http2_help)
 				.add_option (&["--disable-http2"], argparse::StoreConst (Some (false)), "");
+		}
 		
 		self.endpoint_insecure_help = self.endpoint_insecure.as_ref () .map_or_else (
 				|| format! ("disable TLS support"),
@@ -122,13 +147,18 @@ impl ConfigurationArguments {
 				.add_option (&["--disable-tls"], argparse::StoreConst (Some (false)), &self.endpoint_insecure_help)
 				.add_option (&["--enable-tls"], argparse::StoreConst (Some (true)), "");
 		
+		#[ cfg (feature = "hss-tls-rust") ]
+		{
 		self.endpoint_rust_tls_certificate_pem_path_help = self.endpoint_rust_tls_certificate_pem_path.as_ref () .map_or_else (
 				|| format! ("load TLS certificate in PEM format (with Rust TLS library) from path"),
 				|_path| format! ("load TLS certificate in PEM format (with Rust TLS library) from path (default `{}`)", _path));
 		_parser.refer (&mut self.endpoint_rust_tls_certificate_pem_path)
 				.metavar ("<path>")
 				.add_option (&["--load-rust-tls-pem-path"], argparse::StoreOption, &self.endpoint_rust_tls_certificate_pem_path_help);
+		}
 		
+		#[ cfg (feature = "hss-tls-native") ]
+		{
 		self.endpoint_native_tls_certificate_pkcs12_path_help = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () .map_or_else (
 				|| format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path"),
 				|_path| format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path (default `{}`)", _path));
@@ -138,6 +168,7 @@ impl ConfigurationArguments {
 		_parser.refer (&mut self.endpoint_native_tls_certificate_pkcs12_password)
 				.metavar ("<password>")
 				.add_option (&["--load-native-tls-pkcs12-password"], argparse::StoreOption, "");
+		}
 	}
 	
 	
@@ -156,22 +187,31 @@ impl ConfigurationArguments {
 			_configuration.endpoint.address = EndpointAddress::from_descriptor (_descriptor);
 		}
 		
+		#[ cfg (feature = "hyper--http") ]
+		{
 		let mut _http1_enabled = _configuration.endpoint.protocol.supports_http1 ();
+		#[ cfg (feature = "hyper--http1") ]
 		if let Some (_enabled) = self.endpoint_protocol_http1 {
 			_http1_enabled = _enabled;
 		}
 		let mut _http2_enabled = _configuration.endpoint.protocol.supports_http2 ();
+		#[ cfg (feature = "hyper--http2") ]
 		if let Some (_enabled) = self.endpoint_protocol_http2 {
 			_http2_enabled = _enabled;
 		}
 		_configuration.endpoint.protocol = EndpointProtocol::with_http_support (_http1_enabled, _http2_enabled);
+		}
 		
+		#[ cfg (feature = "hss-tls-rust") ]
+		#[ cfg (feature = "hss-tls-native") ]
 		if self.endpoint_rust_tls_certificate_pem_path.is_some () && self.endpoint_native_tls_certificate_pkcs12_path.is_some () {
 			return Err (error_with_message (0x7ce8d799, "conflicting load TLS certificate options specified"));
 		}
+		#[ cfg (feature = "hss-tls-rust") ]
 		if let Some (_path) = self.endpoint_rust_tls_certificate_pem_path.as_ref () {
 			_configuration.endpoint.security = EndpointSecurity::RustTls (RustTlsCertificate::load_from_pem_file (_path) ?);
 		}
+		#[ cfg (feature = "hss-tls-native") ]
 		if let Some (_path) = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () {
 			let _password = self.endpoint_native_tls_certificate_pkcs12_password.as_ref () .map_or_else (|| "", String::as_str);
 			_configuration.endpoint.security = EndpointSecurity::NativeTls (NativeTlsCertificate::load_from_pkcs12_file (_path, _password) ?);

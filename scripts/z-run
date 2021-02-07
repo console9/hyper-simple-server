@@ -141,8 +141,8 @@
 
 <<.. features / list
 	hss-accepter
+	hss-cli
 	hss-config
-	hss-config-cli
 	hss-exports
 	hss-extensions
 	hss-full

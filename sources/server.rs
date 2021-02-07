@@ -42,41 +42,84 @@ impl Server {
 impl Server {
 	
 	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
-		let _server = Server::new (_configuration) ?;
-		_server.serve_and_wait ()
+		let _handler = Self::handler_0 (&_configuration) ?;
+		Self::run_and_wait_with_handler (_configuration, _handler)
 	}
 	
 	pub async fn run (_configuration : Configuration) -> ServerResult {
-		let _server = Server::new (_configuration) ?;
-		_server.serve () .await
+		let _handler = Self::handler_0 (&_configuration) ?;
+		Self::run_with_handler (_configuration, _handler) .await
 	}
 	
 	pub fn serve_and_wait (&self) -> ServerResult {
-		let _runtime = self.serve_runtime () ?;
-		return _runtime.block_on (self.serve ());
+		let _handler = self.handler () ?;
+		self.serve_and_wait_with_handler (_handler)
 	}
 	
 	pub async fn serve (&self) -> ServerResult {
-		
-		let _handler = if let Some (_handler) = self.handler () {
-			_handler
+		let _handler = self.handler () ?;
+		self.serve_with_handler (_handler) .await
+	}
+	
+	fn handler (&self) -> ServerResult<HandlerDynArc> {
+		let _self = self.internals.read () .or_wrap (0x0f9770a1) ?;
+		Self::handler_0 (&_self.configuration)
+	}
+	
+	fn handler_0 (_configuration : &Configuration) -> ServerResult<HandlerDynArc> {
+		if let Some (_handler) = _configuration.handler.clone () {
+			Ok (_handler)
 		} else {
-			return Err (error_with_message (0x55a5104c, "no handler specified"));
-		};
-		
+			Err (error_with_message (0x55a5104c, "no handler specified"))
+		}
+	}
+}
+
+
+#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-handler") ]
+impl Server
+{
+	pub fn run_and_wait_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
+			where
+				H : Handler<Future = F> + Send + Sync + 'static + Clone,
+				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_and_wait_with_handler (_handler)
+	}
+	
+	pub async fn run_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
+			where
+				H : Handler<Future = F> + Send + Sync + 'static + Clone,
+				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_with_handler (_handler) .await
+	}
+	
+	pub fn serve_and_wait_with_handler <H, F> (&self, _handler : H) -> ServerResult
+			where
+				H : Handler<Future = F> + Send + Sync + 'static + Clone,
+				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+	{
+		let _runtime = self.serve_runtime () ?;
+		return _runtime.block_on (self.serve_with_handler (_handler));
+	}
+	
+	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
+			where
+				H : Handler<Future = F> + Send + Sync + 'static + Clone,
+				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+	{
 		let _service = move |_ : &Connection| {
-				let _handler = _handler.clone ();
+				let _handler = _handler.clone () .wrap ();
 				async {
 					ServerResult::Ok (_handler)
 				}
 			};
 		
 		self.serve_with_make_service_fn (_service) .await
-	}
-	
-	fn handler (&self) -> Option<HandlerDynArc> {
-		let _self = self.internals.read () .or_panic (0x6db68b39);
-		_self.configuration.handler.clone ()
 	}
 }
 

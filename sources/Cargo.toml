@@ -151,14 +151,17 @@ hss-exports = []
 hss-main = []
 
 
-"hyper--server" = ["hyper", "hyper/server"]
-"hyper--http1" = ["hyper", "hyper/http1", "hyper--http"]
-"hyper--http2" = ["hyper", "hyper/http2", "hyper--http"]
-"hyper--http" = ["hyper", "hyper/http2"]
-"hyper--runtime" = ["hyper", "hyper/runtime"]
-"tokio--rt" = ["tokio", "tokio/rt"]
-"tokio--rt-multi-thread" = ["tokio", "tokio/rt-multi-thread"]
-"tokio--net" = ["tokio", "tokio/net"]
+hyper--server = ["hyper", "hyper/server"]
+hyper--http1 = ["hyper", "hyper/http1", "hyper--http"]
+hyper--http2 = ["hyper", "hyper/http2", "hyper--http"]
+hyper--http = ["hyper", "hyper/http2"]
+hyper--runtime = ["hyper", "hyper/runtime"]
+tokio--rt = ["tokio", "tokio/rt"]
+tokio--rt-multi-thread = ["tokio", "tokio/rt-multi-thread"]
+tokio--net = ["tokio", "tokio/net"]
+
+
+features-fuzzing = []
 
 
 

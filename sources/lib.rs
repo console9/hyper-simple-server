@@ -96,7 +96,7 @@ pub(crate) mod routes;
 pub(crate) mod server;
 
 
-#[ cfg (all (feature = "hss-server", not (feature = "hss-server-http"))) ]
+#[ cfg (all (feature = "hss-server", not (feature = "hss-server-http"), not (feature = "features-fuzzing"))) ]
 compile_error! ("enable any of HTTP/1 or HTTP/2");
 
 

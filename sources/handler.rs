@@ -10,7 +10,7 @@ pub trait Handler : Send + Sync + 'static {
 	
 	type Future : Future<Output = ServerResult<Response<Self::ResponseBody>>> + Send + 'static;
 	type ResponseBody : BodyTrait<Data = Bytes, Error = Self::ResponseBodyError> + Send + 'static;
-	type ResponseBodyError : Error + Send + 'static;
+	type ResponseBodyError : Error + Send + Sync + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
 }
@@ -24,7 +24,7 @@ pub struct HandlerFnAsync <C, F, RB, RBE>
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 			F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	function : C,
 	phantom : PhantomData<fn(RB, RBE)>,
@@ -37,7 +37,7 @@ impl <C, F, RB, RBE> Handler for HandlerFnAsync<C, F, RB, RBE>
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 			F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	type Future = F;
 	type ResponseBody = RB;
@@ -55,7 +55,7 @@ impl <C, F, RB, RBE> From<C> for HandlerFnAsync<C, F, RB, RBE>
 			C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 			F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
 		Self {
@@ -73,7 +73,7 @@ pub struct HandlerFnSync <C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	function : C,
 	phantom : PhantomData<fn(RB, RBE)>,
@@ -85,7 +85,7 @@ impl <C, RB, RBE> Handler for HandlerFnSync<C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	type Future = future::Ready<ServerResult<Response<RB>>>;
 	type ResponseBody = RB;
@@ -102,7 +102,7 @@ impl <C, RB, RBE> From<C> for HandlerFnSync<C, RB, RBE>
 		where
 			C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 			RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-			RBE : Error + Send + 'static,
+			RBE : Error + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
 		Self {
@@ -197,7 +197,7 @@ pub trait BodyDyn : Send + 'static {
 impl <B, E> BodyDyn for B
 		where
 			B : BodyTrait<Data = Bytes, Error = E> + Send + 'static,
-			E : Error + Send + 'static,
+			E : Error + Send + Sync + 'static,
 {
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
 		match futures::ready! (BodyTrait::poll_data (self, _context)) {
@@ -325,7 +325,7 @@ impl HandlerFutureDynBox {
 impl <Body, BodyError> From<Response<Body>> for HandlerFutureDynBox
 		where
 			Body : BodyTrait<Data = Bytes, Error = BodyError> + Send + 'static,
-			BodyError : Error + Send + 'static,
+			BodyError : Error + Send + Sync + 'static,
 {
 	fn from (_response : Response<Body>) -> Self {
 		Self::ready_response (_response.map (BodyDynBox::new))

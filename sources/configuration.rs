@@ -446,7 +446,7 @@ impl ConfigurationBuilder {
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
 		self.with_handler_dyn::<_, H> (_handler)
@@ -457,7 +457,7 @@ impl ConfigurationBuilder {
 				I : Into<HandlerFnSync<C, RB, RBE>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
 		self.with_handler_dyn::<_, HandlerFnSync<C, RB, RBE>> (_handler)
@@ -469,7 +469,7 @@ impl ConfigurationBuilder {
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
 		self.with_handler_dyn::<_, HandlerFnAsync<C, F, RB, RBE>> (_handler)
@@ -507,7 +507,7 @@ impl ConfigurationBuilder {
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
 		self.with_route_dyn::<_, _, H> (_paths, _handler)
@@ -520,7 +520,7 @@ impl ConfigurationBuilder {
 				I : Into<HandlerFnSync<C, RB, RBE>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
 		self.with_route_dyn::<_, _, HandlerFnSync<C, RB, RBE>> (_paths, _handler)
@@ -534,7 +534,7 @@ impl ConfigurationBuilder {
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + 'static,
+				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
 		self.with_route_dyn::<_, _, HandlerFnAsync<C, F, RB, RBE>> (_paths, _handler)

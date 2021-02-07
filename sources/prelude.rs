@@ -6,6 +6,7 @@
 
 
 pub(crate) use crate::accepter::*;
+pub(crate) use crate::cli::*;
 pub(crate) use crate::configuration::*;
 pub(crate) use crate::connection::*;
 pub(crate) use crate::errors::*;
@@ -126,4 +127,7 @@ pub(crate) use ::tokio_native_tls as tokio_natls;
 
 #[ cfg (feature = "path-tree") ]
 pub(crate) use ::path_tree;
+
+#[ cfg (feature = "argparse") ]
+pub(crate) use ::argparse;
 

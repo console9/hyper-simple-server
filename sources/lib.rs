@@ -63,6 +63,7 @@
 
 pub use {
 	crate::accepter::*,
+	crate::cli::*,
 	crate::connection::*,
 	crate::configuration::*,
 	crate::errors::*,
@@ -84,6 +85,7 @@ pub use {
 
 
 pub(crate) mod accepter;
+pub(crate) mod cli;
 pub(crate) mod configuration;
 pub(crate) mod connection;
 pub(crate) mod errors;
@@ -153,6 +155,10 @@ mod dependencies {
 	#[ allow (unused_imports) ]
 	#[ cfg (feature = "path-tree") ]
 	pub(crate) use ::path_tree;
+	
+	#[ allow (unused_imports) ]
+	#[ cfg (feature = "argparse") ]
+	pub(crate) use ::argparse;
 	
 	#[ allow (unused_imports) ]
 	#[ cfg (feature = "jemallocator") ]

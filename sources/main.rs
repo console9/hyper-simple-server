@@ -10,9 +10,8 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_handler (_handler : impl Handler) -> ServerResult {
 	
-	let _configuration = Configuration::localhost_http ()
-			.with_handler (_handler)
-			.build () ?;
+	let mut _configuration = main_configuration () ?;
+	_configuration.handler = HandlerDynArc::new (_handler) .into ();
 	
 	Server::run_and_wait (_configuration)
 }
@@ -23,9 +22,8 @@ pub fn main_with_handler (_handler : impl Handler) -> ServerResult {
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_handler_dyn (_handler : impl HandlerDyn) -> ServerResult {
 	
-	let _configuration = Configuration::localhost_http ()
-			.with_handler_dyn (_handler)
-			.build () ?;
+	let mut _configuration = main_configuration () ?;
+	_configuration.handler = HandlerDynArc::new (_handler) .into ();
 	
 	Server::run_and_wait (_configuration)
 }
@@ -36,10 +34,24 @@ pub fn main_with_handler_dyn (_handler : impl HandlerDyn) -> ServerResult {
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_routes (_routes : impl Into<Routes>) -> ServerResult {
 	
-	let _configuration = Configuration::localhost_http ()
-			.with_routes (_routes)
-			.build () ?;
+	let mut _configuration = main_configuration () ?;
+	_configuration.handler = HandlerDynArc::new (_routes.into ()) .into ();
 	
 	Server::run_and_wait (_configuration)
+}
+
+
+
+
+#[ cfg (feature = "hss-main") ]
+#[ cfg (feature = "hss-server-http") ]
+pub fn main_configuration () -> ServerResult<Configuration> {
+	
+	let mut _configuration = Configuration::localhost_http ()
+			.build () ?;
+	
+	ConfigurationArguments::parse_and_update (&mut _configuration) ?;
+	
+	Ok (_configuration)
 }
 

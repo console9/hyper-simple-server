@@ -31,6 +31,13 @@ impl Routes {
 		RoutesBuilder::new ()
 	}
 	
+	pub fn into_builder (self) -> RoutesBuilder {
+		let _routes = self.internals.list.clone ();
+		RoutesBuilder {
+				routes : _routes,
+			}
+	}
+	
 	pub fn resolve (&self, _path : &str) -> ServerResult<Option<RouteMatched>> {
 		if let Some ((_route, _parameters)) = self.internals.tree.find (_path) {
 			let _route = _route.clone ();
@@ -97,7 +104,7 @@ impl Handler for Routes {
 
 #[ cfg (feature = "hss-routes") ]
 pub struct RoutesBuilder {
-	pub routes : Vec<Route>,
+	pub routes : Vec<Arc<Route>>,
 }
 
 
@@ -113,7 +120,6 @@ impl RoutesBuilder {
 	pub fn build (self) -> ServerResult<Routes> {
 		
 		let _routes = self.routes;
-		let _routes = _routes.into_iter () .map (Arc::new) .collect::<Vec<_>> ();
 		
 		let mut _tree = path_tree::PathTree::new ();
 		let mut _list = Vec::with_capacity (_routes.len ());
@@ -212,6 +218,7 @@ impl RoutesBuilder {
 	}
 	
 	pub fn with_route_object (mut self, _route : Route) -> Self {
+		let _route = Arc::new (_route);
 		self.routes.push (_route);
 		self
 	}

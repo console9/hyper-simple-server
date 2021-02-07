@@ -55,6 +55,7 @@ hss-full-common = [
 	"hss-handler",
 	"hss-routes",
 	"hss-config",
+	"hss-config-cli",
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
@@ -110,6 +111,10 @@ hss-accepter = [
 ]
 
 hss-config = []
+hss-config-cli = [
+	"hss-config",
+	"argparse",
+]
 
 hss-handler = [
 	"hyper",
@@ -196,6 +201,7 @@ tokio-native-tls = { version = "*", default-features = false, features = [], opt
 
 futures = { version = "*", default-features = false, features = [], optional = true }
 path-tree = { version = "*", default-features = false, features = [], optional = true }
+argparse = { version = "*", default-features = false, features = [], optional = true }
 
 jemallocator = { version = "*", default-features = false, features = [], optional = true }
 jemalloc-sys = { version = "*", default-features = false, features = [], optional = true }

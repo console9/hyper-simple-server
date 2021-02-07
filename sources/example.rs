@@ -2,10 +2,24 @@
 
 use ::hyper_simple_server as hss;
 
+use hss::ResponseExtBuild as _;
+
+
+
 
 fn main () -> hss::ServerResult {
 	
-	use hss::ResponseExtBuild as _;
+	if true {
+		return main_with_static ();
+	} else {
+		return main_with_routes ();
+	}
+}
+
+
+
+
+fn main_with_routes () -> hss::ServerResult {
 	
 	let _handler_0 = |_request| {
 		hss::Response::new_200 () .ok ()
@@ -28,5 +42,18 @@ fn main () -> hss::ServerResult {
 			.build () ?;
 	
 	return hss::main_with_routes (_routes);
+}
+
+
+
+
+fn main_with_static () -> hss::ServerResult {
+	
+	let _handler = |_request : hss::Request<hss::Body>| {
+		hss::Response::new_200 () .ok_0 ()
+	};
+	let _handler = hss::HandlerFnSync::from (_handler);
+	
+	return hss::main_with_handler (_handler);
 }
 

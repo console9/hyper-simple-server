@@ -214,6 +214,70 @@ impl hyper::Service<Request<Body>> for HandlerDynArc {
 
 
 #[ cfg (feature = "hss-handler") ]
+pub struct BodyWrapper <B, BE> (B)
+	where
+		B : BodyTrait<Data = Bytes, Error = BE> + Send + 'static + Unpin,
+		BE : Error + Send + Sync + 'static,
+;
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <B, BE> BodyTrait for BodyWrapper<B, BE>
+	where
+		B : BodyTrait<Data = Bytes, Error = BE> + Send + 'static + Unpin,
+		BE : Error + Send + Sync + 'static,
+{
+	type Data = Bytes;
+	type Error = ServerError;
+	
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+		let _future = self.delegate_pin_mut () .poll_data (_context);
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0x4e33a117))));
+		_future
+	}
+	
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+		let _future = self.delegate_pin_mut () .poll_trailers (_context);
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x3a25b983)));
+		_future
+	}
+	
+	fn is_end_stream (&self) -> bool {
+		self.delegate () .is_end_stream ()
+	}
+	
+	fn size_hint (&self) -> BodySizeHint {
+		self.delegate () .size_hint ()
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+impl <B, BE> BodyWrapper<B, BE>
+	where
+		B : BodyTrait<Data = Bytes, Error = BE> + Send + 'static + Unpin,
+		BE : Error + Send + Sync + 'static,
+{
+	pub fn new (_body : B) -> Self {
+		Self (_body)
+	}
+	
+	fn delegate_pin_mut (self : Pin<&mut Self>) -> Pin<&mut B> {
+		#[ allow (unsafe_code) ]
+		unsafe {
+			self.map_unchecked_mut (|_self| &mut _self.0)
+		}
+	}
+	
+	fn delegate (&self) -> Pin<&B> {
+		Pin::new (&self.0)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-handler") ]
 pub trait BodyDyn : Send + 'static {
 	
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
@@ -233,25 +297,15 @@ impl <B, E> BodyDyn for B
 			E : Error + Send + Sync + 'static,
 {
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
-		match futures::ready! (BodyTrait::poll_data (self, _context)) {
-			Some (Ok (_bytes)) =>
-				Poll::Ready (Some (Ok (_bytes))),
-			Some (Err (_error)) =>
-				Poll::Ready (Some (Err (_error.wrap (0xd89897d4)))),
-			None =>
-				Poll::Ready (None),
-		}
+		let _future = BodyTrait::poll_data (self, _context);
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0xd89897d4))));
+		_future
 	}
 	
 	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
-		match futures::ready! (BodyTrait::poll_trailers (self, _context)) {
-			Ok (Some (_headers)) =>
-				Poll::Ready (Ok (Some (_headers))),
-			Ok (None) =>
-				Poll::Ready (Ok (None)),
-			Err (_error) =>
-				Poll::Ready (Err (_error.wrap (0x8adea6a0))),
-		}
+		let _future = BodyTrait::poll_trailers (self, _context);
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x8adea6a0)));
+		_future
 	}
 	
 	fn is_end_stream (&self) -> bool {
@@ -398,14 +452,45 @@ pub struct HandlerSimpleAsyncWrapper <Handler : HandlerSimpleAsync> (Handler);
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
-impl <H> HandlerDyn for HandlerSimpleAsyncWrapper<H>
+impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 		where
 			H : HandlerSimpleAsync,
 {
-	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+	type Future = HandlerSimpleAsyncWrapperFuture<H::Future>;
+	type ResponseBody = BodyWrapper<Body, ::hyper::Error>;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _future = HandlerSimpleAsync::handle (&self.0, _request);
-		let _future = _future.map_ok (|_response| _response.map (BodyDynBox::new));
-		HandlerFutureDynBox::new (_future)
+		let _future = HandlerSimpleAsyncWrapperFuture (_future);
+		_future
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct HandlerSimpleAsyncWrapperFuture <F> (F)
+	where
+		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static,
+;
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+impl <F> Future for HandlerSimpleAsyncWrapperFuture<F>
+	where
+		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static,
+{
+	type Output = ServerResult<Response<BodyWrapper<Body, ::hyper::Error>>>;
+	
+	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
+		#[ allow (unsafe_code) ]
+		let _delegate = unsafe {
+			self.map_unchecked_mut (|_self| &mut _self.0)
+		};
+		let _poll = _delegate.poll (_context);
+		let _poll = _poll.map_ok (|_response| _response.map (BodyWrapper::new));
+		_poll
 	}
 }
 
@@ -431,17 +516,21 @@ pub struct HandlerSimpleSyncWrapper <Handler : HandlerSimpleSync> (Handler);
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
-impl <H> HandlerDyn for HandlerSimpleSyncWrapper<H>
+impl <H> Handler for HandlerSimpleSyncWrapper<H>
 		where
 			H : HandlerSimpleSync,
 {
-	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type ResponseBody = BodyWrapper<Body, ::hyper::Error>;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let mut _response = Response::new (Body::empty ());
 		match HandlerSimpleSync::handle (&self.0, &_request, &mut _response) {
 			Ok (()) =>
-				HandlerFutureDynBox::ready_response (_response.map (BodyDynBox::new)),
+				future::ready (Ok (_response.map (BodyWrapper::new))),
 			Err (_error) =>
-				HandlerFutureDynBox::ready_error (_error),
+				future::ready (Err (_error)),
 		}
 	}
 }

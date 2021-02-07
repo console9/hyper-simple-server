@@ -19,6 +19,14 @@ path = "./lib.rs"
 [[bin]]
 name = "example"
 path = "./example.rs"
+required-features = [
+	"hss-main",
+	"hss-server-http",
+	"hss-routes",
+	"hss-http",
+	"hss-extensions",
+	"hss-exports",
+]
 
 
 
@@ -140,11 +148,7 @@ hss-extensions = []
 
 hss-exports = []
 
-hss-main = [
-	"hss-server",
-	"hss-routes",
-	"hss-extensions",
-]
+hss-main = []
 
 
 "hyper--server" = ["hyper", "hyper/server"]

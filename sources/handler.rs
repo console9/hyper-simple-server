@@ -13,6 +13,31 @@ pub trait Handler : Send + Sync + 'static {
 	type ResponseBodyError : Error + Send + Sync + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
+	
+	fn wrap (self) -> HandlerWrapper<Self> where Self : Sized {
+		HandlerWrapper (self)
+	}
+}
+
+
+
+
+pub struct HandlerWrapper <H : Handler> (H);
+
+#[ cfg (feature = "hss-handler") ]
+impl <H : Handler> hyper::Service<Request<Body>> for HandlerWrapper<H> {
+	
+	type Future = H::Future;
+	type Response = Response<H::ResponseBody>;
+	type Error = ServerError;
+	
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServerResult> {
+		Poll::Ready (Ok (()))
+	}
+	
+	fn call (&mut self, _request : Request<Body>) -> Self::Future {
+		self.0.handle (_request)
+	}
 }
 
 

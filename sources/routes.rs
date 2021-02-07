@@ -150,42 +150,42 @@ impl RoutesBuilder {
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route <'a, P, H, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
+	pub fn with_route <'a, P, H, F, RB> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
+				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RB::Error> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB::Error : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
 		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_fn_sync <'a, P, I, C, RB, RBE> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route_fn_sync <'a, P, I, C, RB> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				I : Into<HandlerFnSync<C, RB, RBE>>,
+				I : Into<HandlerFnSync<C, RB>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
-				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB::Error : Error + Send + Sync + 'static,
 	{
-		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
+		let _handler : HandlerFnSync<C, RB> = _handler.into ();
 		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_fn_async <'a, P, I, C, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route_fn_async <'a, P, I, C, F, RB> (self, _paths : P, _handler : I) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				I : Into<HandlerFnAsync<C, F, RB, RBE>>,
+				I : Into<HandlerFnAsync<C, F, RB>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
-				RBE : Error + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB::Error : Error + Send + Sync + 'static,
 	{
-		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
+		let _handler : HandlerFnAsync<C, F, RB> = _handler.into ();
 		self.with_route_dyn (_paths, _handler)
 	}
 	

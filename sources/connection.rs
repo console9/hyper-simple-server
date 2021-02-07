@@ -71,7 +71,7 @@ impl Connection {
 trait AsyncStream : tokio::AsyncRead + tokio::AsyncWrite + Unpin {}
 
 #[ cfg (feature = "hss-accepter") ]
-impl <Stream : tokio::AsyncRead + tokio::AsyncWrite + Unpin> AsyncStream for Stream {}
+impl <S : tokio::AsyncRead + tokio::AsyncWrite + Unpin> AsyncStream for S {}
 
 
 

@@ -6,16 +6,16 @@ use crate::prelude::*;
 
 
 pub type ServerError = io::Error;
-pub type ServerResult<Value = ()> = Result<Value, ServerError>;
+pub type ServerResult<V = ()> = Result<V, ServerError>;
 
 
 
 
-pub(crate) trait ResultExtPanic<Value, Error : error::Error> : Sized {
+pub(crate) trait ResultExtPanic<V, E : Error> : Sized {
 	
-	fn result (self) -> Result<Value, Error>;
+	fn result (self) -> Result<V, E>;
 	
-	fn or_panic (self, _code : u32) -> Value {
+	fn or_panic (self, _code : u32) -> V {
 		match self.result () {
 			Ok (_value) =>
 				_value,
@@ -26,7 +26,7 @@ pub(crate) trait ResultExtPanic<Value, Error : error::Error> : Sized {
 }
 
 
-impl <Value, Error : error::Error> ResultExtPanic<Value, Error> for Result<Value, Error> {
+impl <V, E : Error> ResultExtPanic<V, E> for Result<V, E> {
 	
 	fn result (self) -> Self {
 		self
@@ -34,9 +34,9 @@ impl <Value, Error : error::Error> ResultExtPanic<Value, Error> for Result<Value
 }
 
 
-impl <Value> ResultExtPanic<Value, io::Error> for Result<Value, ()> {
+impl <V> ResultExtPanic<V, io::Error> for Result<V, ()> {
 	
-	fn result (self) -> Result<Value, io::Error> {
+	fn result (self) -> Result<V, io::Error> {
 		self.map_err (|_| io::Error::new (io::ErrorKind::Other, "unspecified error"))
 	}
 }
@@ -44,9 +44,9 @@ impl <Value> ResultExtPanic<Value, io::Error> for Result<Value, ()> {
 
 
 
-pub(crate) trait ErrorExtPanic<Error : error::Error> : Sized {
+pub(crate) trait ErrorExtPanic<E : Error> : Sized {
 	
-	fn error (self) -> Error;
+	fn error (self) -> E;
 	
 	fn panic (self, _code : u32) -> ! {
 		panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self.error ());
@@ -54,7 +54,7 @@ pub(crate) trait ErrorExtPanic<Error : error::Error> : Sized {
 }
 
 
-impl <Error : error::Error> ErrorExtPanic<Error> for Error {
+impl <E : Error> ErrorExtPanic<E> for E {
 	
 	fn error (self) -> Self {
 		self
@@ -64,15 +64,15 @@ impl <Error : error::Error> ErrorExtPanic<Error> for Error {
 
 
 
-pub(crate) trait ResultExtWrap<Value> : Sized {
+pub(crate) trait ResultExtWrap<V> : Sized {
 	
-	fn or_wrap (self, _code : u32) -> ServerResult<Value>;
+	fn or_wrap (self, _code : u32) -> ServerResult<V>;
 }
 
 
-impl <Value, Error : error::Error> ResultExtWrap<Value> for Result<Value, Error> {
+impl <V, E : Error> ResultExtWrap<V> for Result<V, E> {
 	
-	fn or_wrap (self, _code : u32) -> ServerResult<Value> {
+	fn or_wrap (self, _code : u32) -> ServerResult<V> {
 		match self {
 			Ok (_value) =>
 				Ok (_value),
@@ -88,7 +88,7 @@ pub(crate) trait ErrorExtWrap : Sized {
 	fn wrap (self, _code : u32) -> ServerError;
 }
 
-impl <Error : error::Error> ErrorExtWrap for Error {
+impl <E : Error> ErrorExtWrap for E {
 	
 	fn wrap (self, _code : u32) -> ServerError {
 		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, self))

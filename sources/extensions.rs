@@ -7,8 +7,10 @@ use crate::prelude::*;
 
 #[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
-pub trait RequestExt <Body : BodyTrait> {
-	
+pub trait RequestExt <B>
+	where
+		B : BodyTrait,
+{
 	fn is_get (&self) -> bool;
 	fn is_head (&self) -> bool;
 	fn is_put (&self) -> bool;
@@ -28,8 +30,10 @@ pub trait RequestExt <Body : BodyTrait> {
 
 #[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
-impl <Body : BodyTrait> RequestExt<Body> for Request<Body> {
-	
+impl <B> RequestExt<B> for Request<B>
+	where
+		B : BodyTrait
+{
 	fn is_get (&self) -> bool {
 		self.method () == Method::GET
 	}
@@ -74,14 +78,16 @@ impl <Body : BodyTrait> RequestExt<Body> for Request<Body> {
 
 #[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
-pub trait ResponseExt <Body : BodyTrait> {
-	
+pub trait ResponseExt <B>
+	where
+		B : BodyTrait,
+{
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self;
 	
 	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	
-	fn set_body (&mut self, _body : impl Into<Body>) -> &mut Self;
+	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self;
 	
 	fn set_status_200 (&mut self) -> &mut Self {
 		self.set_status (consts::OK)
@@ -95,8 +101,10 @@ pub trait ResponseExt <Body : BodyTrait> {
 
 #[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
-impl <Body : BodyTrait> ResponseExt<Body> for Response<Body> {
-	
+impl <B> ResponseExt<B> for Response<B>
+	where
+		B : BodyTrait,
+{
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self {
 		*self.status_mut () = _status;
 		self
@@ -112,7 +120,7 @@ impl <Body : BodyTrait> ResponseExt<Body> for Response<Body> {
 		self
 	}
 	
-	fn set_body (&mut self, _body : impl Into<Body>) -> &mut Self {
+	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self {
 		*self.body_mut () = _body.into ();
 		self
 	}
@@ -123,36 +131,39 @@ impl <Body : BodyTrait> ResponseExt<Body> for Response<Body> {
 
 #[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
-pub trait ResponseExtBuild <Body : BodyTrait> : Sized {
+pub trait ResponseExtBuild <B>
+	where
+		B : BodyTrait,
+		Self : Sized,
+{
+	fn new_with_status_and_body (_status : StatusCode, _content_type : Option<impl Into<HeaderValue>>, _body : impl Into<B>) -> Self;
 	
-	fn new_with_status_and_body (_status : StatusCode, _content_type : Option<impl Into<HeaderValue>>, _body : impl Into<Body>) -> Self;
-	
-	fn new_empty () -> Self where Body : Default {
+	fn new_empty () -> Self where B : Default {
 		let _content_type : Option<ContentType> = None;
-		Self::new_with_status_and_body (consts::OK, _content_type, Body::default ())
+		Self::new_with_status_and_body (consts::OK, _content_type, B::default ())
 	}
 	
-	fn new_200_with_text (_body : impl Into<Body>) -> Self {
+	fn new_200_with_text (_body : impl Into<B>) -> Self {
 		Self::new_with_status_and_body (consts::OK, Some (ContentType::Text), _body)
 	}
 	
-	fn new_200_with_html (_body : impl Into<Body>) -> Self {
+	fn new_200_with_html (_body : impl Into<B>) -> Self {
 		Self::new_with_status_and_body (consts::OK, Some (ContentType::Html), _body)
 	}
 	
-	fn new_200 () -> Self where Body : From<&'static str> {
+	fn new_200 () -> Self where B : From<&'static str> {
 		Self::new_with_status_and_body (consts::OK, Some (ContentType::Text), "OK\n")
 	}
 	
-	fn new_404 () -> Self where Body : From<&'static str> {
+	fn new_404 () -> Self where B : From<&'static str> {
 		Self::new_with_status_and_body (consts::NOT_FOUND, Some (ContentType::Text), "404\n")
 	}
 	
-	fn new_method_not_allowed () -> Self where Body : From<&'static str> {
+	fn new_method_not_allowed () -> Self where B : From<&'static str> {
 		Self::new_with_status_and_body (consts::METHOD_NOT_ALLOWED, Some (ContentType::Text), "method-not-allowed\n")
 	}
 	
-	fn ok <Error> (self) -> Result<Self, Error> {
+	fn ok <E> (self) -> Result<Self, E> {
 		Ok (self)
 	}
 	
@@ -160,7 +171,7 @@ pub trait ResponseExtBuild <Body : BodyTrait> : Sized {
 		Ok (self)
 	}
 	
-	fn ready <Error> (self) -> future::Ready<Result<Self, Error>> {
+	fn ready <E> (self) -> future::Ready<Result<Self, E>> {
 		future::ready (Ok (self))
 	}
 	

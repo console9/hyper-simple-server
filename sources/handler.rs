@@ -174,14 +174,22 @@ impl HandlerDynArc {
 	pub fn new (_handler : impl HandlerDyn) -> Self {
 		HandlerDynArc (Arc::new (_handler))
 	}
+	
+	pub fn delegate (&self, _request : Request<Body>) -> HandlerFutureDynBox {
+		self.0.handle (_request)
+	}
 }
 
 
 #[ cfg (feature = "hss-handler") ]
-impl HandlerDyn for HandlerDynArc {
+impl Handler for HandlerDynArc {
 	
-	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
-		self.0.handle (_request)
+	type Future = HandlerFutureDynBox;
+	type ResponseBody = BodyDynBox;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
+		self.delegate (_request)
 	}
 }
 
@@ -198,7 +206,7 @@ impl hyper::Service<Request<Body>> for HandlerDynArc {
 	}
 	
 	fn call (&mut self, _request : Request<Body>) -> Self::Future {
-		self.0.handle (_request)
+		self.delegate (_request)
 	}
 }
 

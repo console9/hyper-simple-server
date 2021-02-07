@@ -77,9 +77,9 @@ impl Routes {
 			let _route = _route_matched.route.clone ();
 			let mut _request = _request;
 			_request.extensions_mut () .insert (_route_matched);
-			Ok (_route.handler.handle (_request))
+			Ok (_route.handler.delegate (_request))
 		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
-			Ok (_fallback.handle (_request))
+			Ok (_fallback.delegate (_request))
 		} else {
 			Err (_request)
 		}

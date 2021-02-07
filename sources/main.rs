@@ -8,7 +8,7 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-http") ]
-pub fn main_with_handler <I : Into<H>, H : Handler> (_handler : I) -> ServerResult {
+pub fn main_with_handler <H : Handler> (_handler : H) -> ServerResult {
 	
 	let _configuration = Configuration::localhost_http ()
 			.with_handler (_handler)
@@ -21,7 +21,7 @@ pub fn main_with_handler <I : Into<H>, H : Handler> (_handler : I) -> ServerResu
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-http") ]
-pub fn main_with_handler_dyn <I : Into<H>, H : HandlerDyn> (_handler : I) -> ServerResult {
+pub fn main_with_handler_dyn <H : HandlerDyn> (_handler : H) -> ServerResult {
 	
 	let _configuration = Configuration::localhost_http ()
 			.with_handler_dyn (_handler)

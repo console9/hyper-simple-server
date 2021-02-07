@@ -212,12 +212,8 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
 		
-		#[ cfg (debug_assertions) ]
-		if false {
-			process::Command::new ("strace")
-					.args (&["-f", "-p", & process::id () .to_string ()])
-					.spawn () .or_panic (0xff87ffef);
-		}
+		maybe_start_jemalloc_stats ();
+		maybe_start_strace ();
 		
 		#[ cfg (not (feature = "tokio--rt-multi-thread")) ]
 		let mut _builder = {
@@ -255,6 +251,47 @@ impl <F> hyper::Executor<F> for ServerExecutor
 {
 	fn execute (&self, _future : F) {
 		tokio::spawn (_future);
+	}
+}
+
+
+
+
+fn maybe_start_strace () -> () {
+	#[ cfg (feature = "hss-server-debug-strace") ]
+	{
+		process::Command::new ("strace")
+				.args (&["-f", "-p", & process::id () .to_string ()])
+				.spawn ()
+				.or_panic (0xff87ffef);
+	}
+}
+
+fn maybe_start_jemalloc_stats () -> () {
+	#[ cfg (feature = "hss-server-debug-jemalloc") ]
+	{
+		extern "C" fn _write (_ : * mut os::raw::c_void, _message : * const os::raw::c_char) {
+			#[ allow (unsafe_code) ]
+			let _message = unsafe { ffi::CStr::from_ptr (_message) };
+			let _message = _message.to_str () .or_panic (0x2d88d281);
+			for _message in _message.split_terminator ("\n") {
+				if (_message == "___ Begin jemalloc statistics ___") || (_message == "--- End jemalloc statistics ---") {
+					continue;
+				}
+				if _message == "Background threads: 0, num_runs: 0, run_interval: 0 ns" {
+					continue;
+				}
+				eprintln! ("[dd] [35256205]  jemalloc statistics:  {}", _message);
+			}
+		}
+		thread::spawn (|| {
+			let _options = &b"gmdablxe\0"[..];
+				loop {
+					#[ allow (unsafe_code) ]
+					unsafe { ::jemalloc_sys::malloc_stats_print (Some (_write), ptr::null_mut (), _options.as_ptr () as * const os::raw::c_char) };
+					thread::sleep (time::Duration::from_secs (1));
+			}
+		});
 	}
 }
 

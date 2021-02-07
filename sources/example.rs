@@ -9,7 +9,7 @@ use hss::ResponseExtBuild as _;
 
 fn main () -> hss::ServerResult {
 	
-	if true {
+	if false {
 		return main_with_static ();
 	} else {
 		return main_with_routes ();

@@ -98,6 +98,9 @@ hss-server = [
 	"http-body",
 	"bytes",
 	"tokio--rt",
+#	"hss-jemalloc",
+#	"hss-server-debug-strace",
+#	"hss-server-debug-jemalloc",
 ]
 
 hss-accepter = [
@@ -150,6 +153,16 @@ hss-exports = []
 
 hss-main = []
 
+hss-jemalloc = [
+	"jemallocator",
+]
+
+hss-server-debug-strace = []
+
+hss-server-debug-jemalloc = [
+	"jemalloc-sys/stats",
+]
+
 
 hyper--server = ["hyper", "hyper/server"]
 hyper--http1 = ["hyper", "hyper/http1", "hyper--http"]
@@ -183,4 +196,7 @@ tokio-native-tls = { version = "*", default-features = false, features = [], opt
 
 futures = { version = "*", default-features = false, features = [], optional = true }
 path-tree = { version = "*", default-features = false, features = [], optional = true }
+
+jemallocator = { version = "*", default-features = false, features = [], optional = true }
+jemalloc-sys = { version = "*", default-features = false, features = [], optional = true }
 

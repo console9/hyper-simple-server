@@ -102,6 +102,13 @@ compile_error! ("enable any of HTTP/1 or HTTP/2");
 
 
 
+#[ cfg (feature = "hss-jemalloc") ]
+#[global_allocator]
+static ALLOCATOR : ::jemallocator::Jemalloc = jemallocator::Jemalloc;
+
+
+
+
 mod dependencies {
 	
 	#![ allow (unreachable_pub) ]
@@ -146,6 +153,10 @@ mod dependencies {
 	#[ allow (unused_imports) ]
 	#[ cfg (feature = "path-tree") ]
 	pub(crate) use ::path_tree;
+	
+	#[ allow (unused_imports) ]
+	#[ cfg (feature = "jemallocator") ]
+	pub(crate) use ::jemallocator;
 }
 
 // NOTE:  Required so that `cargo docs` doesn't break...

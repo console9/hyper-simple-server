@@ -156,7 +156,15 @@ pub trait ResponseExtBuild <Body : BodyTrait> : Sized {
 		Ok (self)
 	}
 	
+	fn ok_0 (self) -> Result<Self, ServerError> {
+		Ok (self)
+	}
+	
 	fn ready <Error> (self) -> future::Ready<Result<Self, Error>> {
+		future::ready (Ok (self))
+	}
+	
+	fn ready_0 (self) -> future::Ready<Result<Self, ServerError>> {
 		future::ready (Ok (self))
 	}
 }

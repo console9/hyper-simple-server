@@ -24,6 +24,7 @@ pub trait Handler
 
 
 
+#[ cfg (feature = "hss-handler") ]
 pub struct HandlerWrapper <H : Handler> (H);
 
 #[ cfg (feature = "hss-handler") ]
@@ -243,6 +244,7 @@ impl HandlerFutureDynBox {
 
 
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 impl <B> From<Response<B>> for HandlerFutureDynBox
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static,
@@ -255,6 +257,7 @@ impl <B> From<Response<B>> for HandlerFutureDynBox
 
 
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 impl From<ServerError> for HandlerFutureDynBox {
 	fn from (_error : ServerError) -> Self {
 		Self::ready_error (_error)
@@ -381,6 +384,7 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 
 
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 pub struct BodyWrapper <B> (B)
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
@@ -389,6 +393,7 @@ pub struct BodyWrapper <B> (B)
 
 
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 impl <B> BodyTrait for BodyWrapper<B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
@@ -420,6 +425,7 @@ impl <B> BodyTrait for BodyWrapper<B>
 
 
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 impl <B> BodyWrapper<B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,

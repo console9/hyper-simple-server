@@ -257,6 +257,7 @@ impl <F> hyper::Executor<F> for ServerExecutor
 
 
 
+#[ cfg (feature = "hss-server-http") ]
 fn maybe_start_strace () -> () {
 	#[ cfg (feature = "hss-server-debug-strace") ]
 	{
@@ -267,6 +268,7 @@ fn maybe_start_strace () -> () {
 	}
 }
 
+#[ cfg (feature = "hss-server-http") ]
 fn maybe_start_jemalloc_stats () -> () {
 	#[ cfg (feature = "hss-server-debug-jemalloc") ]
 	{

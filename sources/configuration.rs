@@ -440,16 +440,15 @@ impl ConfigurationBuilder {
 #[ cfg (feature = "hss-handler") ]
 impl ConfigurationBuilder {
 	
-	pub fn with_handler <I, H, F, RB, RBE> (self, _handler : I) -> Self
+	pub fn with_handler <H, F, RB, RBE> (self, _handler : H) -> Self
 			where
-				I : Into<H>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_handler_dyn::<_, H> (_handler)
+		self.with_handler_dyn (_handler)
 	}
 	
 	pub fn with_handler_fn_sync <I, C, RB, RBE> (self, _handler : I) -> Self
@@ -460,7 +459,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_handler_dyn::<_, HandlerFnSync<C, RB, RBE>> (_handler)
+		self.with_handler_dyn (_handler)
 	}
 	
 	pub fn with_handler_fn_async <I, C, F, RB, RBE> (self, _handler : I) -> Self
@@ -472,12 +471,11 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_handler_dyn::<_, HandlerFnAsync<C, F, RB, RBE>> (_handler)
+		self.with_handler_dyn (_handler)
 	}
 	
-	pub fn with_handler_dyn <I, H> (self, _handler : I) -> Self
+	pub fn with_handler_dyn <H> (self, _handler : H) -> Self
 			where
-				I : Into<H>,
 				H : HandlerDyn,
 	{
 		let _handler : H = _handler.into ();
@@ -500,17 +498,16 @@ impl ConfigurationBuilder {
 impl ConfigurationBuilder {
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route <'a, P, H, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				I : Into<H>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn::<_, _, H> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -523,7 +520,7 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn::<_, _, HandlerFnSync<C, RB, RBE>> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -537,13 +534,12 @@ impl ConfigurationBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn::<_, _, HandlerFnAsync<C, F, RB, RBE>> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_dyn <'a, P, I, H> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
 			where
-				I : Into<H>,
 				H : HandlerDyn,
 				P : Into<RoutePaths<'a>>,
 	{

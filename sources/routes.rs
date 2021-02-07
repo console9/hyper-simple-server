@@ -150,17 +150,16 @@ impl RoutesBuilder {
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route <'a, P, I, H, F, RB, RBE> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route <'a, P, H, F, RB, RBE> (self, _paths : P, _handler : H) -> Self
 			where
 				P : Into<RoutePaths<'a>>,
-				I : Into<H>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RBE> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes, Error = RBE> + Send + 'static,
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
-		self.with_route_dyn::<_, _, H> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -173,7 +172,7 @@ impl RoutesBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB, RBE> = _handler.into ();
-		self.with_route_dyn::<_, _, HandlerFnSync<C, RB, RBE>> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
@@ -187,13 +186,12 @@ impl RoutesBuilder {
 				RBE : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB, RBE> = _handler.into ();
-		self.with_route_dyn::<_, _, HandlerFnAsync<C, F, RB, RBE>> (_paths, _handler)
+		self.with_route_dyn (_paths, _handler)
 	}
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn with_route_dyn <'a, P, I, H> (self, _paths : P, _handler : I) -> Self
+	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
 			where
-					I : Into<H>,
 					H : HandlerDyn,
 					P : Into<RoutePaths<'a>>,
 	{

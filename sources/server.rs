@@ -6,23 +6,23 @@ use crate::prelude::*;
 
 
 #[ derive (Clone) ]
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 pub struct Server {
 	internals : ServerInternals,
 }
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 struct ServerInternals0 {
 	configuration : Configuration,
 }
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 type ServerInternals = Arc<RwLock<ServerInternals0>>;
 
 
 
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 impl Server {
 	
 	pub fn new (_configuration : Configuration) -> ServerResult<Self> {
@@ -37,7 +37,7 @@ impl Server {
 }
 
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 #[ cfg (feature = "hss-handler") ]
 impl Server {
 	
@@ -81,7 +81,7 @@ impl Server {
 }
 
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
@@ -202,10 +202,10 @@ impl Server {
 
 
 #[ derive (Clone) ]
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 pub struct ServerExecutor ();
 
-#[ cfg (feature = "hss-server") ]
+#[ cfg (feature = "hss-server-http") ]
 impl <F> hyper::Executor<F> for ServerExecutor
 		where
 			F : Future<Output = ()> + Send + 'static,

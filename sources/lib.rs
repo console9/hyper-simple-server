@@ -90,20 +90,11 @@ pub(crate) mod errors;
 pub(crate) mod exports;
 pub(crate) mod extensions;
 pub(crate) mod handler;
+pub(crate) mod main;
 pub(crate) mod prelude;
 pub(crate) mod routes;
-
-
-#[ cfg (all (feature = "hss-server", feature = "hyper--http")) ]
 pub(crate) mod server;
-#[ cfg (all (feature = "hss-server", feature = "hyper--http")) ]
-pub(crate) mod main;
 
-
-#[ cfg (any (not (feature = "hss-server"), not (feature = "hyper--http"))) ]
-pub(crate) mod server {}
-#[ cfg (any (not (feature = "hss-server"), not (feature = "hyper--http"))) ]
-pub(crate) mod main {}
 
 #[ cfg (all (feature = "hss-server", not (feature = "hyper--http"))) ]
 compile_error! ("enable any of HTTP/1 or HTTP/2");

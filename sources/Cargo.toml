@@ -69,13 +69,17 @@ hss-server-mt = [
 
 hss-server-http1 = [
 	"hss-server",
+	"hss-server-http",
 	"hyper--http1",
 ]
 
 hss-server-http2 = [
 	"hss-server",
+	"hss-server-http",
 	"hyper--http2",
 ]
+
+hss-server-http = []
 
 hss-server = [
 	"hss-config",

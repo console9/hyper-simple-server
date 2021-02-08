@@ -143,12 +143,16 @@ pub trait ResponseExtBuild <B>
 		Self::new_with_status_and_body (consts::OK, _content_type, B::default ())
 	}
 	
+	fn new_200_with_body (_content_type : Option<impl Into<HeaderValue>>, _body : impl Into<B>) -> Self {
+		Self::new_with_status_and_body (consts::OK, _content_type, _body)
+	}
+	
 	fn new_200_with_text (_body : impl Into<B>) -> Self {
-		Self::new_with_status_and_body (consts::OK, Some (ContentType::Text), _body)
+		Self::new_200_with_body (Some (ContentType::Text), _body)
 	}
 	
 	fn new_200_with_html (_body : impl Into<B>) -> Self {
-		Self::new_with_status_and_body (consts::OK, Some (ContentType::Html), _body)
+		Self::new_200_with_body (Some (ContentType::Html), _body)
 	}
 	
 	fn new_200 () -> Self where B : From<&'static str> {

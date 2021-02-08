@@ -199,3 +199,151 @@ impl ResponseExtBuild<Body> for Response<Body> {
 	}
 }
 
+
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct FileResource {
+	pub path : path::PathBuf,
+	pub content_type : Option<ContentType>,
+	pub cache : Option<Arc<RwLock<Option<Bytes>>>>,
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl FileResource {
+	
+	pub fn new (_path : impl AsRef<path::Path>, _content_type : Option<ContentType>, _should_cache : bool) -> Self {
+		FileResource {
+				path : _path.as_ref () .into (),
+				content_type : _content_type,
+				cache : if _should_cache {
+						Some (Arc::new (RwLock::new (None)))
+					} else {
+						None
+					},
+			}
+	}
+	
+	pub fn load (&self) -> ServerResult<Bytes> {
+		if let Some (_cache) = self.cache.as_ref () {
+			let _cache = _cache.read () .or_wrap (0x6801d05a) ?;
+			if let Some (_data) = _cache.as_ref () {
+				return Ok (_data.clone ());
+			}
+			drop (_cache);
+		}
+		let _data = fs::read (&self.path) .or_wrap (0x0db95839) ?;
+		let _data = Bytes::from (_data);
+		if let Some (_cache) = self.cache.as_ref () {
+			let mut _cache = _cache.write () .or_panic (0xf103624b);
+			*_cache = Some (_data.clone ());
+		}
+		Ok (_data)
+	}
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl Handler for FileResource {
+	
+	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type ResponseBody = BodyWrapper<Body>;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
+		match self.load () {
+			Ok (_data) => {
+				let mut _response = Response::new_200_with_body (self.content_type, _data);
+				future::ready (Ok (_response.map (BodyWrapper::new)))
+			}
+			Err (_error) =>
+				future::ready (Err (_error)),
+		}
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct StaticResource {
+	pub data : Bytes,
+	pub content_type : Option<ContentType>,
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl StaticResource {
+	
+	pub fn new (_data : impl Into<Bytes>, _content_type : Option<ContentType>) -> Self {
+		StaticResource {
+				data : _data.into (),
+				content_type : _content_type,
+			}
+	}
+	
+	pub fn load_from_path (_path : impl AsRef<path::Path>, _content_type : Option<ContentType>) -> ServerResult<Self> {
+		let _data = fs::read (_path) ?;
+		Ok (Self::new (_data, _content_type))
+	}
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl Handler for StaticResource {
+	
+	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type ResponseBody = BodyWrapper<Body>;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
+		let mut _response = Response::new_200_with_body (self.content_type, self.data.clone ());
+		future::ready (Ok (_response.map (BodyWrapper::new)))
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+pub struct EmbeddedResource {
+	pub data : &'static [u8],
+	pub content_type : Option<ContentType>,
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl EmbeddedResource {
+	
+	pub const fn new (_content_type : Option<ContentType>, _data : &'static [u8]) -> Self {
+		EmbeddedResource {
+				data : _data,
+				content_type : _content_type,
+			}
+	}
+}
+
+
+#[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-extensions") ]
+impl Handler for EmbeddedResource {
+	
+	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type ResponseBody = BodyWrapper<Body>;
+	type ResponseBodyError = ServerError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
+		let mut _response = Response::new_200_with_body (self.content_type, self.data.clone ());
+		future::ready (Ok (_response.map (BodyWrapper::new)))
+	}
+}
+

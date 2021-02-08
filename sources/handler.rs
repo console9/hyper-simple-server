@@ -293,6 +293,18 @@ pub struct HandlerSimpleAsyncWrapper <H> (H)
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
+impl <H> HandlerSimpleAsyncWrapper<H>
+	where
+		H : HandlerSimpleAsync,
+{
+	pub fn new (_handler : H) -> Self {
+		Self (_handler)
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
 impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 	where
 		H : HandlerSimpleAsync,
@@ -357,6 +369,18 @@ pub struct HandlerSimpleSyncWrapper <H> (H)
 	where
 		H : HandlerSimpleSync,
 ;
+
+
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-extensions") ]
+impl <H> HandlerSimpleSyncWrapper<H>
+	where
+		H : HandlerSimpleSync,
+{
+	pub fn new (_handler : H) -> Self {
+		Self (_handler)
+	}
+}
 
 
 #[ cfg (feature = "hss-handler") ]

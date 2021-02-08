@@ -191,7 +191,7 @@ impl ResponseExtBuild<Body> for Response<Body> {
 	
 	fn new_with_status_and_body (_status : StatusCode, _content_type : Option<impl Into<HeaderValue>>, _body : impl Into<Body>) -> Self {
 		let mut _response = Response::new (_body.into ());
-		_response.set_status_200 ();
+		_response.set_status (_status);
 		if let Some (_content_type) = _content_type {
 			_response.set_content_type (_content_type);
 		}

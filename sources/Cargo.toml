@@ -177,23 +177,23 @@ features-fuzzing = []
 
 [dependencies]
 
-hyper = { version = "*", default-features = false, features = [], optional = true }
-tokio = { version = "*", default-features = false, features = [], optional = true }
-http = { version = "*", default-features = false, features = [], optional = true }
-http-body = { version = "*", default-features = false, features = [], optional = true }
-bytes = { version = "*", default-features = false, features = [], optional = true }
+hyper = { version = "0.14.4", default-features = false, features = [], optional = true }
+tokio = { version = "1.2.0", default-features = false, features = [], optional = true }
+http = { version = "0.2.3", default-features = false, features = [], optional = true }
+http-body = { version = "0.4.0", default-features = false, features = [], optional = true }
+bytes = { version = "1.0.1", default-features = false, features = [], optional = true }
 
-rustls = { version = "*", default-features = false, features = [], optional = true }
-tokio-rustls = { version = "*", default-features = false, features = [], optional = true }
-rustls-pemfile = { version = "*", default-features = false, features = [], optional = true }
+rustls = { version = "0.19.0", default-features = false, features = [], optional = true }
+tokio-rustls = { version = "0.22.0", default-features = false, features = [], optional = true }
+rustls-pemfile = { version = "0.2.0", default-features = false, features = [], optional = true }
 
-native-tls = { version = "*", default-features = false, features = [], optional = true }
-tokio-native-tls = { version = "*", default-features = false, features = [], optional = true }
+native-tls = { version = "0.2.7", default-features = false, features = [], optional = true }
+tokio-native-tls = { version = "0.3.0", default-features = false, features = [], optional = true }
 
-futures = { version = "*", default-features = false, features = [], optional = true }
-path-tree = { version = "*", default-features = false, features = [], optional = true }
-argparse = { version = "*", default-features = false, features = [], optional = true }
+futures = { version = "0.3.12", default-features = false, features = [], optional = true }
+path-tree = { version = "0.1.12", default-features = false, features = [], optional = true }
+argparse = { version = "0.2.2", default-features = false, features = [], optional = true }
 
-jemallocator = { version = "*", default-features = false, features = [], optional = true }
-jemalloc-sys = { version = "*", default-features = false, features = [], optional = true }
+jemallocator = { version = "0.3.2", default-features = false, features = [], optional = true }
+jemalloc-sys = { version = "0.3.2", default-features = false, features = [], optional = true }
 

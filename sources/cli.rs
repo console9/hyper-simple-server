@@ -34,6 +34,8 @@ pub struct ConfigurationArguments {
 	pub endpoint_rust_tls_certificate_pem_path : Option<String>,
 	#[ cfg (feature = "hss-tls-rust") ]
 	pub endpoint_rust_tls_certificate_pem_path_help : String,
+	#[ cfg (feature = "hss-tls-rust") ]
+	pub endpoint_rust_tls_certificate_fallback : Option<RustTlsCertificate>,
 	
 	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_path : Option<String>,
@@ -41,6 +43,8 @@ pub struct ConfigurationArguments {
 	pub endpoint_native_tls_certificate_pkcs12_password : Option<String>,
 	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_path_help : String,
+	#[ cfg (feature = "hss-tls-native") ]
+	pub endpoint_native_tls_certificate_fallback : Option<NativeTlsCertificate>,
 }
 
 
@@ -83,11 +87,15 @@ impl ConfigurationArguments {
 			EndpointSecurity::Insecure =>
 				_arguments.endpoint_insecure = Some (true),
 			#[ cfg (feature = "hss-tls-rust") ]
-			EndpointSecurity::RustTls (_) =>
-				(),
+			EndpointSecurity::RustTls (ref _certificate) => {
+				_arguments.endpoint_insecure = Some (false);
+				_arguments.endpoint_rust_tls_certificate_fallback = Some (_certificate.clone ());
+			}
 			#[ cfg (feature = "hss-tls-native") ]
-			EndpointSecurity::NativeTls (_) =>
-				(),
+			EndpointSecurity::NativeTls (ref _certificate) => {
+				_arguments.endpoint_insecure = Some (false);
+				_arguments.endpoint_native_tls_certificate_fallback = Some (_certificate.clone ());
+			}
 		}
 		
 		_arguments
@@ -140,17 +148,24 @@ impl ConfigurationArguments {
 				.add_option (&["--disable-http2"], argparse::StoreConst (Some (false)), "");
 		}
 		
-		self.endpoint_insecure_help = self.endpoint_insecure.as_ref () .map_or_else (
-				|| format! ("disable TLS support"),
-				|_enabled| format! ("disable TLS support (default `{}`)", _enabled));
+		self.endpoint_insecure_help = if self.endpoint_insecure.unwrap_or (false) {
+				format! ("disable TLS support (default disabled)")
+			} else {
+				format! ("disable TLS support (default enabled)")
+			};
 		_parser.refer (&mut self.endpoint_insecure)
-				.add_option (&["--disable-tls"], argparse::StoreConst (Some (false)), &self.endpoint_insecure_help)
-				.add_option (&["--enable-tls"], argparse::StoreConst (Some (true)), "");
+				.add_option (&["--disable-tls"], argparse::StoreConst (Some (true)), &self.endpoint_insecure_help)
+				.add_option (&["--enable-tls"], argparse::StoreConst (Some (false)), "");
 		
 		#[ cfg (feature = "hss-tls-rust") ]
 		{
+		let _endpoint_has_certificate_fallback = self.endpoint_rust_tls_certificate_fallback.is_some ();
 		self.endpoint_rust_tls_certificate_pem_path_help = self.endpoint_rust_tls_certificate_pem_path.as_ref () .map_or_else (
-				|| format! ("load TLS certificate in PEM format (with Rust TLS library) from path"),
+				|| if _endpoint_has_certificate_fallback {
+					format! ("load TLS certificate in PEM format (with Rust TLS library) from path (default embedded in binary)")
+				} else {
+					format! ("load TLS certificate in PEM format (with Rust TLS library) from path")
+				},
 				|_path| format! ("load TLS certificate in PEM format (with Rust TLS library) from path (default `{}`)", _path));
 		_parser.refer (&mut self.endpoint_rust_tls_certificate_pem_path)
 				.metavar ("<path>")
@@ -159,8 +174,13 @@ impl ConfigurationArguments {
 		
 		#[ cfg (feature = "hss-tls-native") ]
 		{
+		let _endpoint_has_certificate_fallback = self.endpoint_native_tls_certificate_fallback.is_some ();
 		self.endpoint_native_tls_certificate_pkcs12_path_help = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () .map_or_else (
-				|| format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path"),
+				|| if _endpoint_has_certificate_fallback {
+					format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path (default embedded in binary)")
+				} else {
+					format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path")
+				},
 				|_path| format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path (default `{}`)", _path));
 		_parser.refer (&mut self.endpoint_native_tls_certificate_pkcs12_path)
 				.metavar ("<path>")
@@ -202,6 +222,10 @@ impl ConfigurationArguments {
 		_configuration.endpoint.protocol = EndpointProtocol::with_http_support (_http1_enabled, _http2_enabled);
 		}
 		
+		if let Some (true) = self.endpoint_insecure {
+			_configuration.endpoint.security = EndpointSecurity::Insecure;
+		}
+		
 		#[ cfg (feature = "hss-tls-rust") ]
 		#[ cfg (feature = "hss-tls-native") ]
 		if self.endpoint_rust_tls_certificate_pem_path.is_some () && self.endpoint_native_tls_certificate_pkcs12_path.is_some () {
@@ -210,11 +234,38 @@ impl ConfigurationArguments {
 		#[ cfg (feature = "hss-tls-rust") ]
 		if let Some (_path) = self.endpoint_rust_tls_certificate_pem_path.as_ref () {
 			_configuration.endpoint.security = EndpointSecurity::RustTls (RustTlsCertificate::load_from_pem_file (_path) ?);
+		} else if let Some (_certificate) = self.endpoint_rust_tls_certificate_fallback.as_ref () {
+			if let Some (false) = self.endpoint_insecure {
+				_configuration.endpoint.security = EndpointSecurity::RustTls (_certificate.clone ());
+			}
 		}
 		#[ cfg (feature = "hss-tls-native") ]
 		if let Some (_path) = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () {
 			let _password = self.endpoint_native_tls_certificate_pkcs12_password.as_ref () .map_or_else (|| "", String::as_str);
 			_configuration.endpoint.security = EndpointSecurity::NativeTls (NativeTlsCertificate::load_from_pkcs12_file (_path, _password) ?);
+		} else if let Some (_certificate) = self.endpoint_native_tls_certificate_fallback.as_ref () {
+			if let Some (false) = self.endpoint_insecure {
+				_configuration.endpoint.security = EndpointSecurity::NativeTls (_certificate.clone ());
+			}
+		}
+		
+		if let Some (_endpoint_insecure) = self.endpoint_insecure {
+			if _endpoint_insecure {
+				if let EndpointSecurity::Insecure = _configuration.endpoint.security {
+					// NOP
+				} else {
+					return Err (error_with_message (0x1111c2cc, "conflicting insecure and load TLS certificate options"));
+				}
+			} else {
+				if let EndpointSecurity::Insecure = _configuration.endpoint.security {
+					#[ cfg (feature = "hss-tls-any") ]
+					return Err (error_with_message (0x6621c453, "conflicting secure and missing load TLS certificate options"));
+					#[ cfg (not (feature = "hss-tls-any")) ]
+					return Err (error_with_message (0x0e0edc6a, "conflicting secure and unavailable TLS engine options"));
+				} else {
+					// NOP
+				}
+			}
 		}
 		
 		Ok (())

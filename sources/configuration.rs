@@ -641,7 +641,7 @@ impl RustTlsCertificate {
 	}
 	
 	pub fn localhost () -> ServerResult<Self> {
-		let _bundle = include_str! ("../examples/tls/testing--server--rsa--bundle.pem");
+		let _bundle = include_str! ("./tls-testing-bundle.pem");
 		Self::load_from_pem_data (_bundle)
 	}
 }
@@ -671,7 +671,7 @@ impl NativeTlsCertificate {
 	}
 	
 	pub fn localhost () -> ServerResult<Self> {
-		let _bundle = include_bytes! ("../examples/tls/testing--server--rsa--bundle.p12");
+		let _bundle = include_bytes! ("./tls-testing-bundle.p12");
 		Self::load_from_pkcs12_data (_bundle, "bundle")
 	}
 }

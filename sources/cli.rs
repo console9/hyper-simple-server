@@ -249,6 +249,7 @@ impl ConfigurationArguments {
 			}
 		}
 		
+		#[ allow (irrefutable_let_patterns) ]
 		if let Some (_endpoint_insecure) = self.endpoint_insecure {
 			if _endpoint_insecure {
 				if let EndpointSecurity::Insecure = _configuration.endpoint.security {

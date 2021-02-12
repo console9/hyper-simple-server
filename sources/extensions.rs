@@ -203,6 +203,7 @@ impl ResponseExtBuild<Body> for Response<Body> {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct FileResource {
 	pub path : path::PathBuf,
@@ -212,6 +213,7 @@ pub struct FileResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl FileResource {
 	
@@ -247,6 +249,7 @@ impl FileResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for FileResource {
 	
@@ -270,6 +273,7 @@ impl Handler for FileResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct StaticResource {
 	pub data : Bytes,
@@ -278,6 +282,7 @@ pub struct StaticResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl StaticResource {
 	
@@ -296,6 +301,7 @@ impl StaticResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for StaticResource {
 	
@@ -313,6 +319,7 @@ impl Handler for StaticResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct EmbeddedResource {
 	pub data : &'static [u8],
@@ -321,6 +328,7 @@ pub struct EmbeddedResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl EmbeddedResource {
 	
@@ -334,6 +342,7 @@ impl EmbeddedResource {
 
 
 #[ cfg (feature = "hss-http") ]
+#[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for EmbeddedResource {
 	

@@ -61,6 +61,57 @@
 
 
 
+<< dependencies / show / tree
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--format '{p}' \
+			--prefix indent \
+	#
+!!
+
+<< dependencies / show / list
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--format ' | {p}' \
+			--prefix depth \
+	| tail -n +2 \
+	| sort \
+	#
+!!
+
+<< dependencies / show / unique
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--no-dedupe \
+			--format '{p}' \
+			--prefix none \
+	| tail -n +2 \
+	| sort -u \
+	#
+!!
+
+<< dependencies / show / licenses
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--no-dedupe \
+			--format '{l} | {p}' \
+			--prefix none \
+	| tail -n +2 \
+	| sort -u \
+	#
+!!
+
+
+
+
 << docs / crate / internals / build
 	#! <bash+>
 	Z_expect_no_arguments
@@ -337,7 +388,7 @@
 					--target-dir "${_RUST_TARGET}"
 				)
 		;;
-		( metadata | update )
+		( metadata | update | tree )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 				)

@@ -27,6 +27,7 @@
 
 << debug / run / example
 	#! <bash+>
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
 	Z_zexec ':: cargo / run' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
 !!
 
@@ -92,7 +93,35 @@
 
 << release / run / example
 	#! <bash+>
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
 	Z_zexec ':: cargo / run' run --bin example --release -- "${@}"
+!!
+
+
+
+
+<< publish
+	#! <bash+>
+	
+	if test "${#}" -eq 0 ; then
+		set -- test
+	fi
+	
+	Z_enforce 0x690bbeb3 '' test "${#}" -eq 1
+	case "${1}" in
+		( confirm )
+			_token="${RANDOM}"
+			read -p "[>>]  please confirm action by entering \`${_token}\`: " -r -- _input
+			Z_enforce 0xcb389fe6 'invalid confirmation token!' test "${_token}" == "${_input}"
+			Z_zexec ':: cargo / run' publish
+		;;
+		( test )
+			Z_zexec ':: cargo / run' publish --dry-run
+		;;
+		( * )
+			Z_panic 0x95e0ea2f 'invalid arguments!'
+		;;
+	esac
 !!
 
 
@@ -302,15 +331,15 @@
 	_arguments=()
 	
 	case "${_command}" in
-		( check | build | run | doc | clippy )
+		( check | build | run | doc | clippy | publish )
 			_arguments+=(
-					--manifest-path "${_RUST_SOURCES}/Cargo.toml"
+					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 					--target-dir "${_RUST_TARGET}"
 				)
 		;;
 		( metadata | update )
 			_arguments+=(
-					--manifest-path "${_RUST_SOURCES}/Cargo.toml"
+					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 				)
 		;;
 		( * )
@@ -344,6 +373,7 @@
 	watchexec \
 			\
 			--watch "${_RUST_SOURCES}" \
+			--watch "${_EXAMPLES}" \
 			\
 			--restart \
 			--debounce 100 \

@@ -1,0 +1,38 @@
+#!/dev/null
+
+
+
+
+--<< watch / run
+	#! <bash+>
+	exec -- \
+		nodaemon \
+	watchexec \
+			\
+			--watch "${_RUST_SOURCES}" \
+			--watch "${_EXAMPLES}" \
+			\
+			--restart \
+			--debounce 100 \
+			\
+			--no-shell \
+			--no-ignore \
+			--no-vcs-ignore \
+			--no-default-ignore \
+			\
+			-- \
+			\
+		nodaemon \
+	"${ZRUN[@]}" \
+			':: watch / delegate' \
+			"${@}"
+	#
+!!
+
+
+--<< watch / delegate
+	#! <bash+>
+	Z_log_cut
+	Z_zexec "${@}"
+!!
+

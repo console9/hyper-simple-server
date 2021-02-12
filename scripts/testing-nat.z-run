@@ -1,0 +1,21 @@
+#!/dev/null
+
+
+
+
+<< iptables / initialize
+	#! <bash+>
+	Z_expect_no_arguments
+	root-exec iptables -t nat -I OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 80 -m state --state NEW -j DNAT --to-destination :8080
+	root-exec iptables -t nat -I OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 443 -m state --state NEW -j DNAT --to-destination :8443
+	root-exec iptables -t nat -S OUTPUT
+!!
+
+<< iptables / finalize
+	#! <bash+>
+	Z_expect_no_arguments
+	root-exec iptables -t nat -D OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 80 -m state --state NEW -j DNAT --to-destination :8080 || true
+	root-exec iptables -t nat -D OUTPUT -d 127.0.0.1/8 -p tcp -m tcp --dport 443 -m state --state NEW -j DNAT --to-destination :8443 || true
+	root-exec iptables -t nat -S OUTPUT
+!!
+

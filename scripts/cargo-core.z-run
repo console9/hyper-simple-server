@@ -1,0 +1,48 @@
+#!/dev/null
+
+
+
+
+--<< cargo / run
+	#! <bash+>
+	
+	Z_enforce 0xd425e0f4 'expected command!' test "${#}" -ge 1
+	
+	_command="${1}"
+	shift -- 1
+	
+	_arguments=()
+	
+	case "${_command}" in
+		( check | build | run | doc | clippy | publish )
+			_arguments+=(
+					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
+					--target-dir "${_RUST_TARGET}"
+				)
+		;;
+		( metadata | update | tree )
+			_arguments+=(
+					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
+				)
+		;;
+		( * )
+			Z_panic 0x510d7e97 'invalid command `%s`!' "${_command}"
+		;;
+	esac
+	
+	if test ! -e "${_RUST_TARGET}" -a -h "${_RUST_TARGET}" ; then
+		mkdir -- "$( exec -- readlink -f -- "${_RUST_TARGET}" )"
+	fi
+	if test ! -e "${_RUST_TARGET}" ; then
+		mkdir -- "${_RUST_TARGET}"
+	fi
+	
+	exec -- \
+		nice -n 19 -- \
+	cargo \
+			"${_command}" \
+			"${_arguments[@]}" \
+			"${@}" \
+	#
+!!
+

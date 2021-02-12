@@ -1,0 +1,68 @@
+#!/dev/null
+
+
+
+
+<< dependencies / update / conservative
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' update
+!!
+
+<< dependencies / update / aggressive
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: cargo / run' update --aggressive
+!!
+
+
+
+
+<< dependencies / show / tree
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--format '{p}' \
+			--prefix indent \
+	#
+!!
+
+<< dependencies / show / list
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--format ' | {p}' \
+			--prefix depth \
+	| tail -n +2 \
+	| sort \
+	#
+!!
+
+<< dependencies / show / unique
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--no-dedupe \
+			--format '{p}' \
+			--prefix none \
+	| tail -n +2 \
+	| sort -u \
+	#
+!!
+
+<< dependencies / show / licenses
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: cargo / run' tree \
+			--all-features \
+			--no-dedupe \
+			--format '{l} | {p}' \
+			--prefix none \
+	| tail -n +2 \
+	| sort -u \
+	#
+!!
+

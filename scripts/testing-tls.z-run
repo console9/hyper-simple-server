@@ -1,0 +1,248 @@
+#!/dev/null
+
+
+
+
+<< tls / generate / all
+	#! <bash+>
+	
+	Z_expect_no_arguments
+	
+	Z_zspawn ':: tls / generate / self-signed'
+	Z_zspawn ':: tls / generate / testing / ca'
+	Z_zspawn ':: tls / generate / testing / server'
+	Z_zspawn ':: tls / generate / testing / client'
+!!
+
+
+
+
+<< tls / generate / self-signed
+	#! <bash+>
+	
+	Z_expect_no_arguments
+	
+	for _type in rsa:sha256 ed25519:sha512 ; do
+		_hash="${_type#*:}"
+		_type="${_type%:*}"
+		
+		certtool \
+				--generate-privkey \
+				--key-type "${_type}" \
+				--sec-param medium \
+				--pkcs8 \
+				--pkcs-cipher aes-128 \
+				--password '' \
+				--outfile "${_EXAMPLES}/tls/self-signed--${_type}--private-key.pem" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		certtool \
+				--generate-self-signed \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-privkey "${_EXAMPLES}/tls/self-signed--${_type}--private-key.pem" \
+				--outfile "${_EXAMPLES}/tls/self-signed--${_type}--certificate.pem" \
+				--template "${_EXAMPLES}/tls/self-signed--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		cat -- \
+				"${_EXAMPLES}/tls/self-signed--${_type}--certificate.pem" \
+				"${_EXAMPLES}/tls/self-signed--${_type}--private-key.pem" \
+			>| "${_EXAMPLES}/tls/self-signed--${_type}--bundle.pem" \
+		#
+		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/self-signed--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/self-signed--${_type}--bundle.p12" \
+		#
+		
+	done
+!!
+
+
+
+
+<< tls / generate / testing / ca
+	#! <bash+>
+	
+	Z_expect_no_arguments
+	
+	for _type in rsa:sha256 ed25519:sha512 ; do
+		_hash="${_type#*:}"
+		_type="${_type%:*}"
+		
+		certtool \
+				--generate-privkey \
+				--key-type "${_type}" \
+				--sec-param medium \
+				--pkcs8 \
+				--pkcs-cipher aes-128 \
+				--password '' \
+				--outfile "${_EXAMPLES}/tls/testing--ca--${_type}--private-key.pem" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		certtool \
+				--generate-self-signed \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-privkey "${_EXAMPLES}/tls/testing--ca--${_type}--private-key.pem" \
+				--outfile "${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
+				--template "${_EXAMPLES}/tls/testing--ca--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+	done
+	
+	cat -- \
+			"${_EXAMPLES}/tls/testing--ca--rsa--certificate.pem" \
+			"${_EXAMPLES}/tls/testing--ca--ed25519--certificate.pem" \
+		>| "${_EXAMPLES}/tls/testing--ca.pem" \
+	#
+!!
+
+
+<< tls / generate / testing / server
+	#! <bash+>
+	
+	Z_expect_no_arguments
+	
+	for _type in rsa:sha256 ed25519:sha512 ; do
+		_hash="${_type#*:}"
+		_type="${_type%:*}"
+		
+		certtool \
+				--generate-privkey \
+				--key-type "${_type}" \
+				--sec-param medium \
+				--pkcs8 \
+				--pkcs-cipher aes-128 \
+				--password '' \
+				--outfile "${_EXAMPLES}/tls/testing--server--${_type}--private-key.pem" \
+				--no-text \
+		2> /dev/null \
+		#
+		
+		certtool \
+				--generate-request \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-privkey "${_EXAMPLES}/tls/testing--server--${_type}--private-key.pem" \
+				--outfile "${_EXAMPLES}/tls/testing--server--${_type}--request.pem" \
+				--template "${_EXAMPLES}/tls/testing--server--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		certtool \
+				--generate-certificate \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-ca-privkey "${_EXAMPLES}/tls/testing--ca--${_type}--private-key.pem" \
+				--load-ca-certificate "${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
+				--load-request "${_EXAMPLES}/tls/testing--server--${_type}--request.pem" \
+				--outfile "${_EXAMPLES}/tls/testing--server--${_type}--certificate.pem" \
+				--template "${_EXAMPLES}/tls/testing--server--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		cat -- \
+				"${_EXAMPLES}/tls/testing--server--${_type}--certificate.pem" \
+				"${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
+				"${_EXAMPLES}/tls/testing--server--${_type}--private-key.pem" \
+			>| "${_EXAMPLES}/tls/testing--server--${_type}--bundle.pem" \
+		#
+		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/testing--server--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/testing--server--${_type}--bundle.p12" \
+		#
+		
+	done
+!!
+
+
+<< tls / generate / testing / client
+	#! <bash+>
+	
+	Z_expect_no_arguments
+	
+	for _type in rsa:sha256 ed25519:sha512 ; do
+		_hash="${_type#*:}"
+		_type="${_type%:*}"
+		
+		certtool \
+				--generate-privkey \
+				--key-type "${_type}" \
+				--sec-param medium \
+				--pkcs8 \
+				--pkcs-cipher aes-128 \
+				--password '' \
+				--outfile "${_EXAMPLES}/tls/testing--client--${_type}--private-key.pem" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		certtool \
+				--generate-request \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-privkey "${_EXAMPLES}/tls/testing--client--${_type}--private-key.pem" \
+				--outfile "${_EXAMPLES}/tls/testing--client--${_type}--request.pem" \
+				--template "${_EXAMPLES}/tls/testing--client--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		certtool \
+				--generate-certificate \
+				--hash "${_hash}" \
+				--pkcs8 \
+				--password '' \
+				--load-ca-privkey "${_EXAMPLES}/tls/testing--ca--${_type}--private-key.pem" \
+				--load-ca-certificate "${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
+				--load-request "${_EXAMPLES}/tls/testing--client--${_type}--request.pem" \
+				--outfile "${_EXAMPLES}/tls/testing--client--${_type}--certificate.pem" \
+				--template "${_EXAMPLES}/tls/testing--client--any--certificate.conf" \
+				--no-text \
+			2> /dev/null \
+		#
+		
+		cat -- \
+				"${_EXAMPLES}/tls/testing--client--${_type}--certificate.pem" \
+				"${_EXAMPLES}/tls/testing--ca--${_type}--certificate.pem" \
+				"${_EXAMPLES}/tls/testing--client--${_type}--private-key.pem" \
+			>| "${_EXAMPLES}/tls/testing--client--${_type}--bundle.pem" \
+		#
+		
+		openssl pkcs12 \
+				-export \
+				-name bundle \
+				-password pass:bundle \
+				-des3 -descert -macalg sha1 \
+				-in "${_EXAMPLES}/tls/testing--client--${_type}--bundle.pem" \
+				-out "${_EXAMPLES}/tls/testing--client--${_type}--bundle.p12" \
+		#
+		
+	done
+!!
+

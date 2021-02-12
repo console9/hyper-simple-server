@@ -1,0 +1,18 @@
+
+[package]
+name = "hyper-simple-server-example"
+version = "0.0.0"
+authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
+edition = "2018"
+license = "MIT"
+
+[[bin]]
+name = "example"
+path = "./sources/main.rs"
+
+[features]
+default = []
+
+[dependencies]
+hyper-simple-server = { path = "../sources", default-features = false, features = ["hss-full"] }
+

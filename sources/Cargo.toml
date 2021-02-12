@@ -16,19 +16,6 @@ autobenches = false
 name = "hyper_simple_server"
 path = "./lib.rs"
 
-[[bin]]
-name = "example"
-path = "./example.rs"
-required-features = [
-	"hss-main",
-	"hss-cli",
-	"hss-server-http",
-	"hss-routes",
-	"hss-http",
-	"hss-extensions",
-	"hss-exports",
-]
-
 
 
 

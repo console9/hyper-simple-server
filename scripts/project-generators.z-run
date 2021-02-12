@@ -3,7 +3,7 @@
 
 
 
---<<== project / generateor
+--<<== project / generator
 	#! <template>
 	
 	{{ $_features := Z_zspawn_capture ":: features / list" | split_lines }}

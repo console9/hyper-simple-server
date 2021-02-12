@@ -41,7 +41,7 @@ fn main_with_routes () -> hss::ServerResult {
 			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)
 			.build () ?;
 	
-	return hss::main_with_routes (_routes);
+	return hss::main_with_routes (_routes, None);
 }
 
 
@@ -54,6 +54,6 @@ fn main_with_static () -> hss::ServerResult {
 	};
 	let _handler = hss::HandlerFnSync::from (_handler);
 	
-	return hss::main_with_handler (_handler);
+	return hss::main_with_handler (_handler, None);
 }
 

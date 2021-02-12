@@ -3,13 +3,13 @@
 
 
 
-<< curl / http
+<< testing / curl / http
 	#! <bash+>
 	Z_expect_no_arguments
 	exec -- curl -v -s -k -- http://127.0.0.1:8080/
 !!
 
-<< curl / https
+<< testing / curl / https
 	#! <bash+>
 	Z_expect_no_arguments
 	exec -- curl -v -s -k -- https://127.0.0.1:8443/

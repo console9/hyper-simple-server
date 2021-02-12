@@ -6,13 +6,13 @@
 << dependencies / update / conservative
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' update
+	Z_zexec ':: tools / cargo' update
 !!
 
 << dependencies / update / aggressive
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' update --aggressive
+	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
 
@@ -21,7 +21,7 @@
 << dependencies / show / tree
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: cargo / run' tree \
+	Z_zspawn ':: tools / cargo' tree \
 			--all-features \
 			--format '{p}' \
 			--prefix indent \
@@ -31,7 +31,7 @@
 << dependencies / show / list
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: cargo / run' tree \
+	Z_zspawn ':: tools / cargo' tree \
 			--all-features \
 			--format ' | {p}' \
 			--prefix depth \
@@ -43,7 +43,7 @@
 << dependencies / show / unique
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: cargo / run' tree \
+	Z_zspawn ':: tools / cargo' tree \
 			--all-features \
 			--no-dedupe \
 			--format '{p}' \
@@ -56,7 +56,7 @@
 << dependencies / show / licenses
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: cargo / run' tree \
+	Z_zspawn ':: tools / cargo' tree \
 			--all-features \
 			--no-dedupe \
 			--format '{l} | {p}' \

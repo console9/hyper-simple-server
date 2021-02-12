@@ -37,7 +37,7 @@
 	{{ range $_, $_action := $_watch_actions }}
 	<< watch / {{ $_action }}
 		#! <bash+>
-		Z_zexec ':: watch / run' ':: '{{ $_action | shell_quote }} "${@}"
+		Z_zexec ':: tools / watch' ':: '{{ $_action | shell_quote }} "${@}"
 	!!
 	{{ end }}
 	

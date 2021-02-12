@@ -3,7 +3,7 @@
 
 
 
-<< wrk / http
+<< testing / wrk / http
 	#! <bash+>
 	Z_expect_no_arguments
 	exec -- wrk \
@@ -17,7 +17,7 @@
 	#
 !!
 
-<< wrk / https
+<< testing / wrk / https
 	#! <bash+>
 	Z_expect_no_arguments
 	exec -- wrk \

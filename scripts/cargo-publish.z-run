@@ -16,10 +16,10 @@
 			_token="${RANDOM}"
 			read -p "[>>]  please confirm action by entering \`${_token}\`: " -r -- _input
 			Z_enforce 0xcb389fe6 'invalid confirmation token!' test "${_token}" == "${_input}"
-			Z_zexec ':: cargo / run' publish
+			Z_zexec ':: tools / cargo' publish
 		;;
 		( test )
-			Z_zexec ':: cargo / run' publish --dry-run
+			Z_zexec ':: tools / cargo' publish --dry-run
 		;;
 		( * )
 			Z_panic 0x95e0ea2f 'invalid arguments!'

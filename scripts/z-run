@@ -5,8 +5,8 @@
 
 ::// docs / ...
 ::// watch / ...
-::// tls / ...
 ::// features / ...
+::// testing / ...
 ::// *
 
 
@@ -23,10 +23,10 @@
 && _/project-features.z-run
 && _/project-generators.z-run
 
-&& _/cargo-core.z-run
 && _/cargo-dependencies.z-run
 && _/cargo-publish.z-run
 
+&& _/tools-cargo.z-run
 && _/tools-watch.z-run
 
 && _/testing-curl.z-run

@@ -6,7 +6,7 @@
 << release / run / example
 	#! <bash+>
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: cargo / run' run --bin example --release -- "${@}"
+	Z_zexec ':: tools / cargo' run --bin example --release -- "${@}"
 !!
 
 
@@ -15,25 +15,25 @@
 << debug / build / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' build --lib --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' build --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / run / example
 	#! <bash+>
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: cargo / run' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
+	Z_zexec ':: tools / cargo' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
 !!
 
 << debug / check / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' check --lib --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' check --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / lint / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: cargo / run' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 
@@ -43,21 +43,21 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_TARGET}/doc"
-	Z_zexec ':: cargo / run' doc --lib --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' doc --lib --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << docs / crate / exports / build
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_TARGET}/doc"
-	Z_zexec ':: cargo / run' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << docs / crate / dependencies / build
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_TARGET}/doc"
-	Z_zexec ':: cargo / run' doc --lib
+	Z_zexec ':: tools / cargo' doc --lib
 !!
 
 << docs / crate / open

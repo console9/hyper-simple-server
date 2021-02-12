@@ -3,7 +3,7 @@
 
 
 
---<< watch / run
+--<< tools / watch
 	#! <bash+>
 	exec -- \
 		nodaemon \
@@ -24,13 +24,13 @@
 			\
 		nodaemon \
 	"${ZRUN[@]}" \
-			':: watch / delegate' \
+			':: tools / watch / delegate' \
 			"${@}"
 	#
 !!
 
 
---<< watch / delegate
+--<< tools / watch / delegate
 	#! <bash+>
 	Z_log_cut
 	Z_zexec "${@}"

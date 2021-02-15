@@ -213,7 +213,7 @@ impl EndpointAddress {
 			return Err (error_with_message (0x3a20b501, "no socket addresses resolved"));
 		};
 		if _addresses.next () .is_some () {
-			return Err (error_with_message (0x093c154c9, "multiple socket addresses resolved"));
+			return Err (error_with_message (0x93c154c9, "multiple socket addresses resolved"));
 		}
 		Ok (Self::from_socket_address (_address))
 	}

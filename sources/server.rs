@@ -129,7 +129,7 @@ impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
 		
-		let _self = self.internals.read () .or_panic (0x6db68b39);
+		let _self = self.internals.read () .or_panic (0x1d2cfbb8);
 		
 		let _accepter = Accepter::new (&_self.configuration.endpoint) ?;
 		let _protocol = self.serve_protocol () ?;

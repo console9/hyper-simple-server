@@ -8,6 +8,7 @@
 ::// watch / ...
 ::// features / ...
 ::// testing / ...
+::// sources / ...
 ::// *
 
 
@@ -23,6 +24,7 @@
 
 && _/project-common.z-run
 && _/project-features.z-run
+&& _/project-sources.z-run
 && _/project-generators.z-run
 
 && _/cargo-dependencies.z-run

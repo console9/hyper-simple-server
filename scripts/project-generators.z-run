@@ -14,6 +14,7 @@
 	
 	{{ $_watch_actions := array }}
 	{{ $_watch_actions = array_append $_watch_actions "debug / build / lib" "debug / check / lib" "debug / lint / lib" }}
+	{{ $_watch_actions = array_append $_watch_actions "debug / build / example" "debug / check / example" "debug / lint / example" }}
 	{{ $_watch_actions = array_append $_watch_actions "debug / run / example" }}
 	{{ $_watch_actions = array_append $_watch_actions "docs / crate / internals / build" "docs / crate / exports / build" "docs / crate / dependencies / build" }}
 	

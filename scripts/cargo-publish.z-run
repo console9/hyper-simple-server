@@ -10,16 +10,34 @@
 		set -- test
 	fi
 	
+	Z_log_cut
+	Z_zspawn ':: debug / build / lib'
+	Z_zspawn ':: debug / build / example'
+	Z_log_cut
+	
+	if ! git diff --quiet ; then
+		printf -- '[ee]  repository is dirty (unstaged)!\n' >&2
+		exit -- 1
+	fi
+	if ! git diff --cached --quiet ; then
+		printf -- '[ee]  repository is dirty (uncommitted)!\n' >&2
+		exit -- 1
+	fi
+	
 	Z_enforce 0x690bbeb3 '' test "${#}" -eq 1
 	case "${1}" in
 		( confirm )
 			_token="${RANDOM}"
 			read -p "[>>]  please confirm action by entering \`${_token}\`: " -r -- _input
 			Z_enforce 0xcb389fe6 'invalid confirmation token!' test "${_token}" == "${_input}"
-			Z_zexec ':: tools / cargo' publish
+			Z_log_cut
+			Z_zspawn ':: tools / cargo' publish
+			Z_log_cut
 		;;
 		( test )
-			Z_zexec ':: tools / cargo' publish --dry-run
+			Z_log_cut
+			Z_zspawn ':: tools / cargo' publish --dry-run
+			Z_log_cut
 		;;
 		( * )
 			Z_panic 0x95e0ea2f 'invalid arguments!'

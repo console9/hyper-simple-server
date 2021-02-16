@@ -9,6 +9,12 @@
 	Z_zexec ':: tools / cargo' run --bin example --release -- "${@}"
 !!
 
+<< debug / run / example
+	#! <bash+>
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
+!!
+
 
 
 
@@ -16,12 +22,6 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' build --lib --no-default-features --features "${_RUST_FEATURES:-default}"
-!!
-
-<< debug / run / example
-	#! <bash+>
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: tools / cargo' run --bin example --no-default-features --features "${_RUST_FEATURES:-default}" -- "${@}"
 !!
 
 << debug / check / lib
@@ -34,6 +34,30 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+
+
+
+<< debug / build / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' build --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+<< debug / check / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' check --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+<< debug / lint / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' clippy --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 

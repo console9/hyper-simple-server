@@ -73,6 +73,18 @@ impl <V> ResultExtPanic<V, io::Error> for Result<V, ()> {
 }
 
 
+impl <V> ResultExtPanic<V, ServerError> for Option<V> {
+	
+	fn result (self) -> Result<V, io::Error> {
+		if let Some (_value) = self {
+			Ok (_value)
+		} else {
+			Err (error_with_code (0x4b238357))
+		}
+	}
+}
+
+
 
 
 pub trait ErrorExtPanic<E : Error> : Sized {
@@ -109,6 +121,18 @@ impl <V, E : Error> ResultExtWrap<V> for Result<V, E> {
 				Ok (_value),
 			Err (_error) =>
 				Err (_error.wrap (_code)),
+		}
+	}
+}
+
+
+impl <V> ResultExtWrap<V> for Option<V> {
+	
+	fn or_wrap (self, _code : u32) -> ServerResult<V> {
+		if let Some (_value) = self {
+			Ok (_value)
+		} else {
+			Err (error_with_code (_code))
 		}
 	}
 }

@@ -54,6 +54,15 @@ pub trait ResultExtPanic<V, E : Error> : Sized {
 				_error.panic (_code),
 		}
 	}
+	
+	fn infallible (self, _code : u32) -> V {
+		match self.result () {
+			Ok (_value) =>
+				_value,
+			Err (_error) =>
+				_error.panic (_code),
+		}
+	}
 }
 
 

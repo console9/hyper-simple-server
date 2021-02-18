@@ -5,13 +5,44 @@ use crate::prelude::*;
 
 
 
+pub(crate) mod exports {
+	
+	pub use super::ServerError;
+	pub use super::ServerResult;
+}
+
+
+#[ cfg (feature = "hss-internals") ]
+pub(crate) mod internals {
+	
+	pub use super::ServerError;
+	pub use super::ServerResult;
+	
+	pub use super::ResultExtPanic;
+	pub use super::ErrorExtPanic;
+	
+	pub use super::ResultExtWrap;
+	pub use super::ErrorExtWrap;
+	
+	pub use super::error_with_format;
+	pub use super::error_with_message;
+	pub use super::error_with_code;
+	
+	pub use super::panic_with_format;
+	pub use super::panic_with_message;
+	pub use super::panic_with_code;
+}
+
+
+
+
 pub type ServerError = io::Error;
 pub type ServerResult<V = ()> = Result<V, ServerError>;
 
 
 
 
-pub(crate) trait ResultExtPanic<V, E : Error> : Sized {
+pub trait ResultExtPanic<V, E : Error> : Sized {
 	
 	fn result (self) -> Result<V, E>;
 	
@@ -44,7 +75,7 @@ impl <V> ResultExtPanic<V, io::Error> for Result<V, ()> {
 
 
 
-pub(crate) trait ErrorExtPanic<E : Error> : Sized {
+pub trait ErrorExtPanic<E : Error> : Sized {
 	
 	fn error (self) -> E;
 	
@@ -64,7 +95,7 @@ impl <E : Error> ErrorExtPanic<E> for E {
 
 
 
-pub(crate) trait ResultExtWrap<V> : Sized {
+pub trait ResultExtWrap<V> : Sized {
 	
 	fn or_wrap (self, _code : u32) -> ServerResult<V>;
 }
@@ -83,7 +114,9 @@ impl <V, E : Error> ResultExtWrap<V> for Result<V, E> {
 }
 
 
-pub(crate) trait ErrorExtWrap : Sized {
+
+
+pub trait ErrorExtWrap : Sized {
 	
 	fn wrap (self, _code : u32) -> ServerError;
 }
@@ -99,12 +132,12 @@ impl <E : Error> ErrorExtWrap for E {
 
 
 #[ allow (dead_code) ]
-pub(crate) fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ServerError {
+pub fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ServerError {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 }
 
 #[ allow (dead_code) ]
-pub(crate) fn error_with_message (_code : u32, _message : &str) -> ServerError {
+pub fn error_with_message (_code : u32, _message : &str) -> ServerError {
 	if ! _message.is_empty () {
 		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 	} else {
@@ -113,7 +146,7 @@ pub(crate) fn error_with_message (_code : u32, _message : &str) -> ServerError {
 }
 
 #[ allow (dead_code) ]
-pub(crate) fn error_with_code (_code : u32) -> ServerError {
+pub fn error_with_code (_code : u32) -> ServerError {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
 }
 
@@ -121,12 +154,12 @@ pub(crate) fn error_with_code (_code : u32) -> ServerError {
 
 
 #[ allow (dead_code) ]
-pub(crate) fn panic_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ! {
+pub fn panic_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ! {
 	panic! (format! ("[{:08x}]  {}", _code, _message))
 }
 
 #[ allow (dead_code) ]
-pub(crate) fn panic_with_message (_code : u32, _message : &str) -> ! {
+pub fn panic_with_message (_code : u32, _message : &str) -> ! {
 	if ! _message.is_empty () {
 		panic! (format! ("[{:08x}]  {}", _code, _message))
 	} else {
@@ -135,7 +168,7 @@ pub(crate) fn panic_with_message (_code : u32, _message : &str) -> ! {
 }
 
 #[ allow (dead_code) ]
-pub(crate) fn panic_with_code (_code : u32) -> ! {
+pub fn panic_with_code (_code : u32) -> ! {
 	panic! (format! ("[{:08x}]  unexpected error encountered!", _code))
 }
 

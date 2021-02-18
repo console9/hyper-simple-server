@@ -169,6 +169,7 @@ tokio--rt = ["tokio", "tokio/rt"]
 tokio--rt-multi-thread = ["tokio", "tokio/rt-multi-thread"]
 tokio--net = ["tokio", "tokio/net"]
 
+hss-internals = []
 
 features-fuzzing = []
 

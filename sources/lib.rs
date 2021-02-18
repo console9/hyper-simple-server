@@ -25,7 +25,7 @@
 #![ warn (single_use_lifetimes) ]
 #![ warn (trivial_casts) ]
 #![ warn (trivial_numeric_casts) ]
-#![ warn (unreachable_pub) ]
+//#![ warn (unreachable_pub) ]
 #![ warn (unsafe_code) ]
 #![ warn (unused_crate_dependencies) ]
 #![ warn (unused_extern_crates) ]
@@ -66,7 +66,7 @@ pub use {
 	crate::cli::*,
 	crate::connection::*,
 	crate::configuration::*,
-	crate::errors::*,
+	crate::errors::exports::*,
 	crate::extensions::*,
 	crate::handler::*,
 	crate::main::*,
@@ -80,6 +80,15 @@ pub use {
 	crate::exports::*,
 	crate::dependencies::*,
 };
+
+
+#[ cfg (feature = "hss-internals") ]
+pub mod internals {
+	#![ allow (unused_import_braces) ]
+	pub use {
+		crate::errors::internals::*,
+	};
+}
 
 
 
@@ -112,8 +121,6 @@ static ALLOCATOR : ::jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 
 mod dependencies {
-	
-	#![ allow (unreachable_pub) ]
 	
 	#[ cfg (feature = "hyper") ]
 	pub use ::hyper;

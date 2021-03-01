@@ -22,7 +22,9 @@ pub(crate) mod internals {
 	pub use super::ErrorExtPanic;
 	
 	pub use super::ResultExtWrap;
+	pub use super::ResultExtWrapFrom;
 	pub use super::ErrorExtWrap;
+	pub use super::ErrorExtWrapFrom;
 	
 	pub use super::error_with_format;
 	pub use super::error_with_message;
@@ -42,12 +44,18 @@ pub type ServerResult<V = ()> = Result<V, ServerError>;
 
 
 
-pub trait ResultExtPanic<V, E : Error> : Sized {
+pub trait ResultExtPanic <V> : Sized {
 	
-	fn result (self) -> Result<V, E>;
+	fn or_panic (self, _code : u32) -> V;
+	
+	fn infallible (self, _code : u32) -> V;
+}
+
+
+impl <V, EX : ErrorExtPanic> ResultExtPanic<V> for Result<V, EX> {
 	
 	fn or_panic (self, _code : u32) -> V {
-		match self.result () {
+		match self {
 			Ok (_value) =>
 				_value,
 			Err (_error) =>
@@ -56,7 +64,7 @@ pub trait ResultExtPanic<V, E : Error> : Sized {
 	}
 	
 	fn infallible (self, _code : u32) -> V {
-		match self.result () {
+		match self {
 			Ok (_value) =>
 				_value,
 			Err (_error) =>
@@ -66,29 +74,23 @@ pub trait ResultExtPanic<V, E : Error> : Sized {
 }
 
 
-impl <V, E : Error> ResultExtPanic<V, E> for Result<V, E> {
+impl <V> ResultExtPanic<V> for Option<V> {
 	
-	fn result (self) -> Self {
-		self
+	fn or_panic (self, _code : u32) -> V {
+		match self {
+			Some (_value) =>
+				_value,
+			None =>
+				panic_with_code (_code),
+		}
 	}
-}
-
-
-impl <V> ResultExtPanic<V, io::Error> for Result<V, ()> {
 	
-	fn result (self) -> Result<V, io::Error> {
-		self.map_err (|_| io::Error::new (io::ErrorKind::Other, "unspecified error"))
-	}
-}
-
-
-impl <V> ResultExtPanic<V, ServerError> for Option<V> {
-	
-	fn result (self) -> Result<V, io::Error> {
-		if let Some (_value) = self {
-			Ok (_value)
-		} else {
-			Err (error_with_code (0x4b238357))
+	fn infallible (self, _code : u32) -> V {
+		match self {
+			Some (_value) =>
+				_value,
+			None =>
+				panic_with_code (_code),
 		}
 	}
 }
@@ -96,48 +98,44 @@ impl <V> ResultExtPanic<V, ServerError> for Option<V> {
 
 
 
-pub trait ErrorExtPanic<E : Error> : Sized {
+pub trait ErrorExtPanic : Sized {
 	
-	fn error (self) -> E;
+	fn panic (self, _code : u32) -> !;
+}
+
+
+impl <E : Error> ErrorExtPanic for E {
 	
 	fn panic (self, _code : u32) -> ! {
-		panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self.error ());
-	}
-}
-
-
-impl <E : Error> ErrorExtPanic<E> for E {
-	
-	fn error (self) -> Self {
-		self
+		panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self);
 	}
 }
 
 
 
 
-pub trait ResultExtWrap<V> : Sized {
+pub trait ResultExtWrap <V, E> : Sized {
 	
-	fn or_wrap (self, _code : u32) -> ServerResult<V>;
+	fn or_wrap (self, _code : u32) -> Result<V, E>;
 }
 
 
-impl <V, E : Error> ResultExtWrap<V> for Result<V, E> {
+impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
 	
-	fn or_wrap (self, _code : u32) -> ServerResult<V> {
+	fn or_wrap (self, _code : u32) -> Result<V, io::Error> {
 		match self {
 			Ok (_value) =>
 				Ok (_value),
 			Err (_error) =>
-				Err (_error.wrap (_code)),
+				Err (io::Error::wrap_from (_code, _error)),
 		}
 	}
 }
 
 
-impl <V> ResultExtWrap<V> for Option<V> {
+impl <V> ResultExtWrap<V, io::Error> for Option<V> {
 	
-	fn or_wrap (self, _code : u32) -> ServerResult<V> {
+	fn or_wrap (self, _code : u32) -> Result<V, io::Error> {
 		if let Some (_value) = self {
 			Ok (_value)
 		} else {
@@ -149,15 +147,53 @@ impl <V> ResultExtWrap<V> for Option<V> {
 
 
 
-pub trait ErrorExtWrap : Sized {
+pub trait ResultExtWrapFrom <V, E> : Sized {
 	
-	fn wrap (self, _code : u32) -> ServerError;
+	fn or_wrap_from (_code : u32, _result : Result<V, E>) -> Self;
 }
 
-impl <E : Error> ErrorExtWrap for E {
+
+impl <V, E : Error, EX : ErrorExtWrapFrom<E>> ResultExtWrapFrom<V, E> for Result<V, EX> {
 	
-	fn wrap (self, _code : u32) -> ServerError {
-		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, self))
+	fn or_wrap_from (_code : u32, _result : Result<V, E>) -> Result<V, EX> {
+		match _result {
+			Ok (_value) =>
+				Ok (_value),
+			Err (_error) =>
+				Err (EX::wrap_from (_code, _error)),
+		}
+	}
+}
+
+
+
+
+pub trait ErrorExtWrapFrom <E> : Sized {
+	
+	fn wrap_from (_code : u32, _error : E) -> Self;
+}
+
+
+impl <E : Error> ErrorExtWrapFrom<E> for io::Error {
+	
+	fn wrap_from (_code : u32, _error : E) -> Self {
+		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _error))
+	}
+}
+
+
+
+
+pub trait ErrorExtWrap <E> : Sized {
+	
+	fn wrap (self, _code : u32) -> E;
+}
+
+
+impl <EI, EO : ErrorExtWrapFrom<EI>> ErrorExtWrap<EO> for EI {
+	
+	fn wrap (self, _code : u32) -> EO {
+		EO::wrap_from (_code, self)
 	}
 }
 
@@ -165,12 +201,12 @@ impl <E : Error> ErrorExtWrap for E {
 
 
 #[ allow (dead_code) ]
-pub fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ServerError {
+pub fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> io::Error {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 }
 
 #[ allow (dead_code) ]
-pub fn error_with_message (_code : u32, _message : &str) -> ServerError {
+pub fn error_with_message (_code : u32, _message : &str) -> io::Error {
 	if ! _message.is_empty () {
 		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 	} else {
@@ -179,7 +215,7 @@ pub fn error_with_message (_code : u32, _message : &str) -> ServerError {
 }
 
 #[ allow (dead_code) ]
-pub fn error_with_code (_code : u32) -> ServerError {
+pub fn error_with_code (_code : u32) -> io::Error {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
 }
 

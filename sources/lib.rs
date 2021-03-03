@@ -6,6 +6,7 @@
 
 
 #![ allow (warnings) ]
+#![ cfg_attr (feature = "features-fuzzing", deny (warnings)) ]
 
 
 #![ warn (absolute_paths_not_starting_with_crate) ]

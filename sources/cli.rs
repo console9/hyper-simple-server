@@ -45,6 +45,11 @@ pub struct ConfigurationArguments {
 	pub endpoint_native_tls_certificate_pkcs12_path_help : String,
 	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_fallback : Option<NativeTlsCertificate>,
+	
+	#[ cfg (feature = "hss-server-mt") ]
+	pub server_threads : Option<usize>,
+	#[ cfg (feature = "hss-server-mt") ]
+	pub server_threads_help : String,
 }
 
 
@@ -96,6 +101,11 @@ impl ConfigurationArguments {
 				_arguments.endpoint_insecure = Some (false);
 				_arguments.endpoint_native_tls_certificate_fallback = Some (_certificate.clone ());
 			}
+		}
+		
+		#[ cfg (feature = "hss-server-mt") ]
+		{
+		_arguments.server_threads = _configuration.threads;
 		}
 		
 		_arguments
@@ -189,6 +199,16 @@ impl ConfigurationArguments {
 				.metavar ("<password>")
 				.add_option (&["--load-native-tls-pkcs12-password"], argparse::StoreOption, "");
 		}
+		
+		#[ cfg (feature = "hss-server-mt") ]
+		{
+		self.server_threads_help = self.server_threads.as_ref () .map_or_else (
+				|| format! ("enable server multi-threading"),
+				|_threads| format! ("enable server multi-threading (default `{}` threads)", _threads));
+		_parser.refer (&mut self.server_threads)
+				.add_option (&["--server-threads"], argparse::StoreOption, &self.server_threads_help)
+				.add_option (&["--no-server-threads"], argparse::StoreConst (None), "");
+		}
 	}
 	
 	
@@ -267,6 +287,11 @@ impl ConfigurationArguments {
 					// NOP
 				}
 			}
+		}
+		
+		#[ cfg (feature = "hss-server-mt") ]
+		{
+		_configuration.threads = self.server_threads;
 		}
 		
 		Ok (())

@@ -3,31 +3,46 @@
 
 
 
-<< testing / wrk / http
-	#! <bash+>
-	Z_expect_no_arguments
-	exec -- wrk \
-			--threads 2 \
-			--connections 512 \
-			--timeout 1s \
-			--duration 30s \
-			--latency \
-			-- \
-			http://127.0.0.1:8080/ \
-	#
+<<== testing / wrk / generate
+	#! <template>
+	
+	{{ $_connections := array 1 2 4 8 16 32 64 128 256 512 1024 }}
+	{{ $_threads := array 1 2 4 }}
+	
+	{{ range $_, $_connection := $_connections }}
+	{{ range $_, $_threads := $_threads }}
+	<< testing / wrk / http / c{{ $_connection }}-t{{ $_threads }}
+		#! <bash+>
+		Z_expect_no_arguments
+		Z_zexec ':: testing / wrk' http://127.0.0.1:8080/ {{ $_connection }} {{ $_threads }} "${@}"
+	!!
+	<< testing / wrk / https / c{{ $_connection }}-t{{ $_threads }}
+		#! <bash+>
+		Z_expect_no_arguments
+		Z_zexec ':: testing / wrk' https://127.0.0.1:8443/ {{ $_connection }} {{ $_threads }} "${@}"
+	!!
+	{{ end }}
+	{{ end }}
 !!
 
-<< testing / wrk / https
+
+
+
+--<< testing / wrk
 	#! <bash+>
-	Z_expect_no_arguments
+	Z_enforce 0xacef1c3f '' test "${#}" -eq 3
+	_url="${1}"
+	_connections="${2}"
+	_threads="${3}"
+	shift -- 3
 	exec -- wrk \
-			--threads 2 \
-			--connections 512 \
+			--connections "${_connections}" \
+			--threads "${_threads}" \
 			--timeout 1s \
-			--duration 30s \
+			--duration 60s \
 			--latency \
 			-- \
-			https://127.0.0.1:8443/ \
+			"${_url}" \
 	#
 !!
 

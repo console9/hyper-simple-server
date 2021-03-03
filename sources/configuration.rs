@@ -10,6 +10,8 @@ pub struct Configuration {
 	pub endpoint : Endpoint,
 	#[ cfg (feature = "hss-handler") ]
 	pub handler : Option<HandlerDynArc>,
+	#[ cfg (feature = "hss-server-mt" ) ]
+	pub threads : Option<usize>,
 }
 
 
@@ -295,6 +297,8 @@ pub struct ConfigurationBuilder {
 	handler : Option<HandlerDynArc>,
 	#[ cfg (feature = "hss-routes") ]
 	routes : Option<RoutesBuilder>,
+	#[ cfg (feature = "hss-server-mt") ]
+	threads : Option<usize>,
 }
 
 
@@ -308,6 +312,8 @@ impl ConfigurationBuilder {
 				handler : None,
 				#[ cfg (feature = "hss-routes") ]
 				routes : None,
+				#[ cfg (feature = "hss-server-mt") ]
+				threads : None,
 			}
 	}
 	
@@ -319,6 +325,8 @@ impl ConfigurationBuilder {
 				handler : _handler,
 				#[ cfg (feature = "hss-routes") ]
 				routes : _routes,
+				#[ cfg (feature = "hss-server-mt") ]
+				threads : _threads,
 			} = self;
 		
 		let _endpoint = if let Some (_endpoint) = _endpoint {
@@ -353,6 +361,8 @@ impl ConfigurationBuilder {
 				endpoint : _endpoint,
 				#[ cfg (feature = "hss-handler") ]
 				handler : _handler_0,
+				#[ cfg (feature = "hss-server-mt") ]
+				threads : _threads,
 			};
 		
 		Ok (_configuration)

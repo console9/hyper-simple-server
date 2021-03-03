@@ -212,22 +212,34 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
 		
+		let _self = self.internals.read () .or_panic (0x6db68b39);
+		
 		maybe_start_jemalloc_stats ();
 		maybe_start_strace ();
 		
-		#[ cfg (not (feature = "tokio--rt-multi-thread")) ]
-		let mut _builder = {
+		let mut _builder_0 = None;
+		
+		#[ cfg (feature = "hss-server-mt") ]
+		if let Some (_threads) = _self.configuration.threads {
+			if _threads > 0 {
+				#[ cfg (debug_assertions) ]
+				eprintln! ("[ii] [cf4d96e6]  starting tokio multi-threaded executor...");
+				let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
+				_builder.worker_threads (_threads);
+				_builder.max_blocking_threads (_threads * 4);
+				_builder.thread_keep_alive (time::Duration::from_secs (60));
+				_builder_0 = Some (_builder);
+			}
+		}
+		
+		if _builder_0.is_none () {
 			#[ cfg (debug_assertions) ]
 			eprintln! ("[ii] [25065ee8]  starting tokio current-thread executor...");
-			tokio::RuntimeBuilder::new_current_thread ()
+			let _builder = tokio::RuntimeBuilder::new_current_thread ();
+			_builder_0 = Some (_builder);
 		};
 		
-		#[ cfg (feature = "tokio--rt-multi-thread") ]
-		let mut _builder = {
-			#[ cfg (debug_assertions) ]
-			eprintln! ("[ii] [cf4d96e6]  starting tokio multi-threaded executor...");
-			tokio::RuntimeBuilder::new_multi_thread ()
-		};
+		let mut _builder = _builder_0.infallible (0xfb2d7cfb);
 		
 		_builder.enable_all ();
 		

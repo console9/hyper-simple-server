@@ -19,16 +19,7 @@
 &&== env-path _RUST_TARGET_BASE ./.target
 &&== env-path _EXAMPLES ./examples
 
-<<== env / generate
-	#! <bash+>
-	_host="$( hostname -s )"
-	_token="$( uname -a | md5sum -b | cut -f 1 -d ' ' )"
-	printf -- '&&== env _HOST_NAME %s\n' "${_host}"
-	printf -- '&&== env _HOST_TOKEN %s\n' "${_token}"
-	printf -- '&&== env _HOST_ID %s--%s\n' "${_host}" "${_token}"
-	printf -- '&&== env-path _RUST_TARGET %s/%s--%s\n' "${_RUST_TARGET_BASE}" "${_host}" "${_token}"
-!!
-
+&& _/environment-common.z-run
 
 
 

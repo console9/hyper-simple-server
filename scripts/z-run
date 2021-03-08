@@ -16,10 +16,9 @@
 
 &&== env _RUST_CRATE hyper_simple_server
 &&== env-path _RUST_SOURCES ./sources
-&&== env-path _RUST_TARGET_BASE ./.target
-&&== env-path _EXAMPLES ./examples
+&&== env-path _RUST_TARGET ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
 
-&& _/environment-common.z-run
+&&== env-path _EXAMPLES ./examples
 
 
 

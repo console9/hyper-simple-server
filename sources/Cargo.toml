@@ -2,7 +2,7 @@
 
 [package]
 name = "hyper-simple-server"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
 edition = "2018"
 license = "MIT"

@@ -13,7 +13,7 @@
 			-r \
 			-- \
 			"${_RUST_SOURCES}" \
-			"${_EXAMPLES}" \
+			"${_EXAMPLES:-/dev/null}" \
 	|| true ) \
 	| sort \
 	| uniq -d \
@@ -25,7 +25,7 @@
 				-r \
 				-- \
 				"${_RUST_SOURCES}" \
-				"${_EXAMPLES}" \
+				"${_EXAMPLES:-/dev/null}" \
 		#
 	done
 !!
@@ -44,7 +44,7 @@
 			-r \
 			-- \
 			"${_RUST_SOURCES}" \
-			"${_EXAMPLES}" \
+			"${_EXAMPLES:-/dev/null}" \
 	|| true \
 	#
 !!

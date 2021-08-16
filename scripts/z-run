@@ -26,6 +26,7 @@
 && _/project-features.z-run
 && _/project-sources.z-run
 && _/project-generators.z-run
+&& _/project-example.z-run
 
 && _/cargo-dependencies.z-run
 && _/cargo-publish.z-run

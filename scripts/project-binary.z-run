@@ -1,0 +1,42 @@
+#!/dev/null
+
+
+
+
+<< release / run / bin
+	#! <bash+>
+	Z_log_cut
+	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_log_cut
+	exec -- "${_RUST_TARGET}/release/${_RUST_BINARY}" "${@}"
+!!
+
+<< debug / run / bin
+	#! <bash+>
+	Z_log_cut
+	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_log_cut
+	exec -- "${_RUST_TARGET}/debug/${_RUST_BINARY}" "${@}"
+!!
+
+
+
+
+<< debug / build / bin
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+<< debug / check / bin
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' check --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+<< debug / lint / bin
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' clippy --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+

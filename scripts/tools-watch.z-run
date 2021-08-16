@@ -5,12 +5,15 @@
 
 --<< tools / watch
 	#! <bash+>
+	_watch_paths=( --watch "${_RUST_SOURCES}" )
+	if test -n "${_EXAMPLES:-}" ; then
+		_watch_paths+=( --watch "${_EXAMPLES}" )
+	fi
 	exec -- \
 		nodaemon \
 	watchexec \
 			\
-			--watch "${_RUST_SOURCES}" \
-			--watch "${_EXAMPLES}" \
+			"${_watch_paths[@]}" \
 			\
 			--restart \
 			--debounce 100 \

@@ -201,6 +201,17 @@ impl RoutesBuilder {
 	}
 	
 	#[ allow (single_use_lifetimes) ]
+	pub fn with_route_fn_response <'a, P, C, RB> (self, _paths : P, _handler : C) -> Self
+			where
+				P : Into<RoutePaths<'a>>,
+				C : Fn () -> Response<RB> + Send + Sync + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB::Error : Error + Send + Sync + 'static,
+	{
+		self.with_route_fn_sync (_paths, move |_request| Ok (_handler ()))
+	}
+	
+	#[ allow (single_use_lifetimes) ]
 	pub fn with_route_dyn <'a, P, H> (self, _paths : P, _handler : H) -> Self
 			where
 					H : HandlerDyn,

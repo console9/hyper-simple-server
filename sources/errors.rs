@@ -9,7 +9,30 @@ pub(crate) mod exports {
 	
 	pub use super::ServerError;
 	pub use super::ServerResult;
+	
+	#[ cfg (feature = "hss-extensions") ]
+	pub use super::{
+			
+			ResultExtPanic,
+			ErrorExtPanic,
+			
+			ResultExtWrap,
+			ResultExtWrapFrom,
+			ErrorExtWrap,
+			ErrorExtWrapFrom,
+			
+			error_with_format,
+			error_with_message,
+			error_with_code,
+			error_wrap,
+			
+			panic_with_format,
+			panic_with_message,
+			panic_with_code,
+		};
 }
+
+
 
 
 #[ cfg (feature = "hss-internals") ]
@@ -29,6 +52,7 @@ pub(crate) mod internals {
 	pub use super::error_with_format;
 	pub use super::error_with_message;
 	pub use super::error_with_code;
+	pub use super::error_wrap;
 	
 	pub use super::panic_with_format;
 	pub use super::panic_with_message;
@@ -217,6 +241,11 @@ pub fn error_with_message (_code : u32, _message : &str) -> io::Error {
 #[ allow (dead_code) ]
 pub fn error_with_code (_code : u32) -> io::Error {
 	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
+}
+
+#[ allow (dead_code) ]
+pub fn error_wrap <E : Error> (_code : u32, _error : E) -> io::Error {
+	io::Error::wrap_from (_code, _error)
 }
 
 

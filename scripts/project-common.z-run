@@ -38,11 +38,23 @@
 	Z_zexec ':: tools / cargo' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
-<< docs / crate / dependencies / build
+<< docs / crate / dependencies / exports / build
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_TARGET}/doc"
-	Z_zexec ':: tools / cargo' doc --lib
+	Z_zexec ':: tools / cargo' doc --lib --all --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
+<< docs / crate / dependencies / internals / build
+	#! <bash+>
+	Z_expect_no_arguments
+	readarray -t -- _packages < <( Z_zexec ':: dependencies / show / for-documentation' )
+	_arguments=()
+	for _package in "${_packages[@]}" ; do
+		_arguments+=( --package "${_package}" )
+	done
+	rm -R -f -- "${_RUST_TARGET}/doc"
+	Z_zexec ':: tools / cargo' doc --lib --document-private-items --all-features "${_arguments[@]}"
 !!
 
 << docs / crate / open

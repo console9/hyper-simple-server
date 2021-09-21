@@ -22,11 +22,20 @@
 
 
 
+<< release / build / bin
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
 << debug / build / bin
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
+
+
+
 
 << debug / check / bin
 	#! <bash+>

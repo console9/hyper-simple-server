@@ -40,7 +40,7 @@
 	#
 !!
 
-<< dependencies / show / unique
+<< dependencies / show / unique / with-versions
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zspawn ':: tools / cargo' tree \
@@ -49,7 +49,45 @@
 			--format '{p}' \
 			--prefix none \
 	| tail -n +2 \
+	| cut -f 1,2 -d ' ' \
 	| sort -u \
+	#
+!!
+
+<< dependencies / show / unique / without-versions
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: tools / cargo' tree \
+			--all-features \
+			--no-dedupe \
+			--format '{p}' \
+			--prefix none \
+	| tail -n +2 \
+	| cut -f 1 -d ' ' \
+	| sort -u \
+	#
+!!
+
+<< dependencies / show / for-documentation
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: tools / cargo' tree \
+			--all-features \
+			--edges normal \
+			--no-dedupe \
+			--format '{p}' \
+			--prefix none \
+	| tail -n +2 \
+	| cut -f 1,2 -d ' ' \
+	| sort -u \
+	| sort -u -s -k 1,1 -t ' ' \
+	| sed -r -e 's#^([^ ]+) v([^ ]+)$#\1:\2#' \
+	#
+	Z_zspawn ':: tools / cargo' metadata \
+			--format-version 1 \
+			--no-deps \
+	| jq -r '.workspace_members[]' \
+	| sed -r -e 's#^([^ ]+) ([^ ]+) \([^ ]+\)$#\1:\2#' \
 	#
 !!
 

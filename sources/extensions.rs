@@ -19,12 +19,15 @@ pub trait RequestExt <B>
 	fn is_patch (&self) -> bool;
 	fn is_options (&self) -> bool;
 	
-	
 	fn uri_path (&self) -> &str;
 	fn uri_query (&self) -> Option<&str>;
 	
 	fn header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue>;
 	fn header_all (&self, _name : impl AsHeaderName) -> http::header::GetAll<'_, HeaderValue>;
+	
+	fn header_str (&self, _name : impl AsHeaderName) -> Option<&str> {
+		self.header (_name) .and_then (|_value| _value.to_str () .ok ())
+	}
 }
 
 
@@ -95,6 +98,22 @@ pub trait ResponseExt <B>
 	
 	fn set_content_type (&mut self, _content_type : impl Into<HeaderValue>) -> &mut Self {
 		self.set_header (consts::CONTENT_TYPE, _content_type)
+	}
+	
+	fn set_header_str_static (&mut self, _name : impl IntoHeaderName, _value : &'static str) -> &mut Self {
+		self.set_header (_name, HeaderValue::from_static (_value))
+	}
+	
+	fn set_header_string (&mut self, _name : impl IntoHeaderName, _value : String) -> &mut Self {
+		self.set_header (_name, HeaderValue::try_from (_value) .or_panic (0x627a7cff))
+	}
+	
+	fn add_header_str_static (&mut self, _name : impl IntoHeaderName, _value : &'static str) -> &mut Self {
+		self.add_header (_name, HeaderValue::from_static (_value))
+	}
+	
+	fn add_header_string (&mut self, _name : impl IntoHeaderName, _value : String) -> &mut Self {
+		self.add_header (_name, HeaderValue::try_from (_value) .or_panic (0x1ac00c46))
 	}
 }
 

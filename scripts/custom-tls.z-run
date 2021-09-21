@@ -3,21 +3,21 @@
 
 
 
-<< testing / tls / generate / all
+<<  tls / generate / all
 	#! <bash+>
 	
 	Z_expect_no_arguments
 	
-	Z_zspawn ':: testing / tls / generate / self-signed'
-	Z_zspawn ':: testing / tls / generate / testing / ca'
-	Z_zspawn ':: testing / tls / generate / testing / server'
-	Z_zspawn ':: testing / tls / generate / testing / client'
+	Z_zspawn ':: tls / generate / self-signed'
+	Z_zspawn ':: tls / generate / testing / ca'
+	Z_zspawn ':: tls / generate / testing / server'
+	Z_zspawn ':: tls / generate / testing / client'
 !!
 
 
 
 
-<< testing / tls / generate / self-signed
+<< tls / generate / self-signed
 	#! <bash+>
 	
 	Z_expect_no_arguments
@@ -71,7 +71,7 @@
 
 
 
-<< testing / tls / generate / testing / ca
+<< tls / generate / testing / ca
 	#! <bash+>
 	
 	Z_expect_no_arguments
@@ -113,7 +113,7 @@
 !!
 
 
-<< testing / tls / generate / testing / server
+<< tls / generate / testing / server
 	#! <bash+>
 	
 	Z_expect_no_arguments
@@ -180,7 +180,7 @@
 !!
 
 
-<< testing / tls / generate / testing / client
+<< tls / generate / testing / client
 	#! <bash+>
 	
 	Z_expect_no_arguments

@@ -24,12 +24,22 @@
 
 
 
+<< release / build / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' build --bin example --release --no-default-features --features "${_RUST_FEATURES:-default}"
+!!
+
 << debug / build / example
 	#! <bash+>
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
 	Z_zexec ':: tools / cargo' build --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
+
+
+
 
 << debug / check / example
 	#! <bash+>

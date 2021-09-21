@@ -3,47 +3,29 @@
 
 
 
---<<== project / generator
+--<<== project / generator / watch
 	#! <template>
 	
-	{{ $_features := Z_zspawn_capture ":: features / list" | split_lines }}
-	
-	{{ $_feature_actions := array }}
-	{{ $_feature_actions = array_append $_feature_actions "debug / build / lib" "debug / check / lib" }}
-	{{ $_feature_actions = array_append $_feature_actions "docs / crate / internals / build" "docs / crate / exports / build" }}
-	
-	{{ $_watch_actions := array }}
-	{{ $_watch_actions = array_append $_watch_actions "debug / build / lib" "debug / check / lib" "debug / lint / lib" }}
-	{{ $_watch_actions = array_append $_watch_actions "debug / build / example" "debug / check / example" "debug / lint / example" }}
-	{{ $_watch_actions = array_append $_watch_actions "debug / run / example" }}
-	{{ $_watch_actions = array_append $_watch_actions "docs / crate / internals / build" "docs / crate / exports / build" "docs / crate / dependencies / build" }}
-	
-	{{ range $_, $_action := array "debug / build / lib" "debug / check / lib" }}
-	{{ range $_, $_category := array "x1" "x2" "x3" "x4" "all" }}
-	<< features / {{ $_action }} / shuffle / {{ $_category }}
-		#! <bash+>
-		Z_zexec ':: features / run / shuffle' ':: '{{ $_action | shell_quote }} {{ $_category | shell_quote }} "${@}"
-	!!
-	{{ end }}
-	{{ end }}
-	
-	{{ range $_, $_action := $_feature_actions }}
-	{{ $_watch_actions = array_append $_watch_actions (print "features / " $_action " / with") }}
-	<< features / {{ $_action }} / with
-		#! <bash+>
-		Z_zexec ':: features / run / with' ':: '{{ $_action | shell_quote }} "${@}"
-	!!
-	{{ end }}
+	{{ $_watch_actions := array
+			
+			"debug / build / lib"
+			"debug / check / lib"
+			"debug / lint / lib"
+			
+			"debug / run / example"
+			"debug / build / example"
+			"debug / check / example"
+			"debug / lint / example"
+			
+			"docs / crate / internals / build"
+			"docs / crate / exports / build"
+	}}
 	
 	{{ range $_, $_action := $_watch_actions }}
 	<< watch / {{ $_action }}
 		#! <bash+>
 		Z_zexec ':: tools / watch' ':: '{{ $_action | shell_quote }} "${@}"
 	!!
-	{{ end }}
-	
-	{{ range $_, $_feature := $_features }}
-	:: features / set / {{ $_feature }} :: export -- _RUST_FEATURES={{ $_feature | shell_quote }}
 	{{ end }}
 !!
 

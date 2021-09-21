@@ -44,7 +44,7 @@ impl Routes {
 			let _parameters = _parameters.into_iter () .map (|(_name, _value)| (String::from (_name), String::from (_value))) .collect ();
 			let _matched = RouteMatched {
 					route : _route,
-					parameters : _parameters
+					parameters : _parameters,
 				};
 			Ok (Some (_matched))
 		} else {
@@ -76,8 +76,14 @@ impl Routes {
 		if let Some (_route_matched) = _route_matched {
 			let _route = _route_matched.route.clone ();
 			let mut _request = _request;
-			_request.extensions_mut () .insert (_route_matched);
-			Ok (_route.handler.delegate (_request))
+			match _route.handler {
+				RouteHandler::HandlerDynArc (ref _handler) => {
+					_request.extensions_mut () .insert (_route_matched);
+					Ok (_handler.handle (_request))
+				}
+				RouteHandler::RouteHandlerDynArc (ref _handler) =>
+					Ok (_handler.handle (_request, _route_matched)),
+			}
 		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
 			Ok (_fallback.delegate (_request))
 		} else {
@@ -130,7 +136,12 @@ impl RoutesBuilder {
 				if _fallback.is_some () {
 					return Err (error_with_message (0x073a9b1a, "multiple fallback routes specified"));
 				}
-				_fallback = Some (_route.handler.clone ());
+				_fallback = match _route.handler {
+					RouteHandler::HandlerDynArc (ref _handler) =>
+						Some (HandlerDynArc::from_arc (_handler.clone ())),
+					RouteHandler::RouteHandlerDynArc (_) =>
+						return Err (error_with_message (0x6e5e324e, "invalid fallback route specified")),
+				};
 			} else {
 				_tree.insert (&_route.path, _route.clone ());
 				_list.push (_route);
@@ -211,7 +222,7 @@ impl RoutesBuilder {
 		while let Some (_path) = _paths.next () {
 			let _route = Route {
 					path : String::from (_path),
-					handler : _handler.clone (),
+					handler : RouteHandler::HandlerDynArc (_handler.clone_arc ()),
 					debug : None,
 				};
 			self = self.with_route_object (_route);
@@ -232,11 +243,35 @@ impl RoutesBuilder {
 #[ cfg (feature = "hss-routes") ]
 pub struct Route {
 	pub path : String,
-	pub handler : HandlerDynArc,
+	pub handler : RouteHandler,
 	pub debug : Option<Box<dyn fmt::Debug + Send + Sync>>,
 }
 
 
+
+
+#[ derive (Clone) ]
+#[ cfg (feature = "hss-routes") ]
+pub enum RouteHandler {
+	HandlerDynArc (Arc<dyn HandlerDyn>),
+	RouteHandlerDynArc (Arc<dyn RouteHandlerDyn>),
+}
+
+
+
+
+#[ cfg (feature = "hss-routes") ]
+pub trait RouteHandlerDyn
+	where
+		Self : Send + Sync + 'static,
+{
+	fn handle (&self, _request : Request<Body>, _route : RouteMatched) -> HandlerFutureDynBox;
+}
+
+
+
+
+#[ derive (Clone) ]
 #[ cfg (feature = "hss-routes") ]
 pub struct RouteMatched {
 	pub route : Arc<Route>,

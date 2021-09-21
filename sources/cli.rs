@@ -220,6 +220,7 @@ impl ConfigurationArguments {
 				|| format! ("enable server multi-threading"),
 				|_threads| format! ("enable server multi-threading (default `{}` threads)", _threads));
 		_parser.refer (&mut self.server_threads)
+				.metavar ("<server-threads>")
 				.add_option (&["--server-threads"], argparse::StoreOption, &self.server_threads_help)
 				.add_option (&["--no-server-threads"], argparse::StoreConst (None), "");
 		}
@@ -313,23 +314,82 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn parse (&mut self) -> ServerResult {
-		
-		let mut _parser = argparse::ArgumentParser::new ();
-		self.prepare (&mut _parser);
-		_parser.parse_args_or_exit ();
-		
-		Ok (())
+	pub fn parse (_configuration : Configuration) -> ServerResult<Configuration> {
+		Self::parse_with_extensions (_configuration, ())
 	}
 	
+	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions) -> ServerResult<Configuration>
+	{
+		let mut _self = Self::with_defaults (&_configuration);
+		
+		{
+			let mut _parser = argparse::ArgumentParser::new ();
+			_self.prepare (&mut _parser);
+			_extensions.prepare (&mut _parser);
+			_parser.parse_args_or_exit ();
+		}
+		
+		_self.update (&mut _configuration) ?;
+		
+		Ok (_configuration)
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+pub trait CliExtensions {
 	
-	pub fn parse_and_update (_configuration : &mut Configuration) -> ServerResult {
-		
-		let mut _arguments = Self::with_defaults (_configuration);
-		_arguments.parse () ?;
-		_arguments.update (_configuration) ?;
-		
-		Ok (())
+	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a;
+}
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+impl CliExtensions for () {
+	
+	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+pub enum CliArgument<'a> {
+	String (&'a mut String, &'static str, &'static str),
+	StringConst (&'a mut String, &'a mut str, &'static str, &'static str),
+	Boolean (&'a mut bool, &'static str, &'static str),
+	BooleanConst (&'a mut bool, bool, &'static str, &'static str),
+}
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+impl <'b> CliExtensions for CliArgument<'b> {
+	
+	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
+		match self {
+			CliArgument::String (_variable, _flag, _help) => {
+				_parser.refer (_variable) .metavar ("<string>") .add_option (&[_flag], argparse::Store, _help);
+			}
+			CliArgument::StringConst (_variable, _value, _flag, _help) => {
+				_parser.refer (_variable) .metavar ("<string>") .add_option (&[_flag], argparse::StoreConst (_value.into ()), _help);
+			}
+			CliArgument::Boolean (_variable, _flag, _help) => {
+				_parser.refer (_variable) .metavar ("<boolean>") .add_option (&[_flag], argparse::Store, _help);
+			}
+			CliArgument::BooleanConst (_variable, _value, _flag, _help) => {
+				_parser.refer (_variable) .metavar ("<boolean>") .add_option (&[_flag], argparse::StoreConst (_value), _help);
+			}
+		}
+	}
+}
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+impl <'b, const N : usize> CliExtensions for [CliArgument<'b>; N] {
+	
+	fn prepare <'a> (mut self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
+		for _argument in self {
+			_argument.prepare (_parser);
+		}
 	}
 }
 

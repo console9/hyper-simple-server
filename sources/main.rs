@@ -10,7 +10,15 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_handler (_handler : impl Handler, _configuration : Option<Configuration>) -> ServerResult {
 	
-	let mut _configuration = main_configuration_from_template (_configuration) ?;
+	let _configuration = prepare_configuration (_configuration) ?;
+	
+	run_with_handler (_handler, _configuration)
+}
+
+#[ cfg (feature = "hss-main") ]
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-server-http") ]
+pub fn run_with_handler (_handler : impl Handler, mut _configuration : Configuration) -> ServerResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_handler));
 	
@@ -23,7 +31,15 @@ pub fn main_with_handler (_handler : impl Handler, _configuration : Option<Confi
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_handler_dyn (_handler : impl HandlerDyn, _configuration : Option<Configuration>) -> ServerResult {
 	
-	let mut _configuration = main_configuration_from_template (_configuration) ?;
+	let _configuration = prepare_configuration (_configuration) ?;
+	
+	run_with_handler_dyn (_handler, _configuration)
+}
+
+#[ cfg (feature = "hss-main") ]
+#[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-server-http") ]
+pub fn run_with_handler_dyn (_handler : impl HandlerDyn, mut _configuration : Configuration) -> ServerResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_handler));
 	
@@ -36,7 +52,15 @@ pub fn main_with_handler_dyn (_handler : impl HandlerDyn, _configuration : Optio
 #[ cfg (feature = "hss-server-http") ]
 pub fn main_with_routes (_routes : impl Into<Routes>, _configuration : Option<Configuration>) -> ServerResult {
 	
-	let mut _configuration = main_configuration_from_template (_configuration) ?;
+	let _configuration = prepare_configuration (_configuration) ?;
+	
+	run_with_routes (_routes, _configuration)
+}
+
+#[ cfg (feature = "hss-main") ]
+#[ cfg (feature = "hss-routes") ]
+#[ cfg (feature = "hss-server-http") ]
+pub fn run_with_routes (_routes : impl Into<Routes>, mut _configuration : Configuration) -> ServerResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_routes.into ()));
 	
@@ -48,37 +72,54 @@ pub fn main_with_routes (_routes : impl Into<Routes>, _configuration : Option<Co
 
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-http") ]
-pub fn main_configuration_http () -> ServerResult<Configuration> {
+pub fn prepare_configuration_http () -> ServerResult<Configuration> {
 	
 	let _configuration = Configuration::localhost_http () .build () ?;
 	
-	main_configuration_from_template (Some (_configuration))
+	prepare_configuration (Some (_configuration))
 }
 
 
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-http") ]
 #[ cfg (feature = "hss-tls-andy") ]
-pub fn main_configuration_https () -> ServerResult<Configuration> {
+pub fn prepare_configuration_https () -> ServerResult<Configuration> {
 	
 	let _configuration = Configuration::localhost_https () .build () ?;
 	
-	main_configuration_from_template (Some (_configuration))
+	main_configuration (Some (_configuration))
 }
 
 
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-http") ]
-pub fn main_configuration_from_template (_configuration : Option<Configuration>) -> ServerResult<Configuration> {
+pub fn prepare_configuration (_configuration : Option<Configuration>) -> ServerResult<Configuration> {
 	
-	let mut _configuration = if let Some (_configuration) = _configuration {
+	let _configuration = if let Some (_configuration) = _configuration {
 		_configuration
 	} else {
 		Configuration::localhost_http () .build () ?
 	};
 	
 	#[ cfg (feature = "hss-cli") ]
-	ConfigurationArguments::parse_and_update (&mut _configuration) ?;
+	let _configuration = ConfigurationArguments::parse (_configuration) ?;
+	
+	Ok (_configuration)
+}
+
+
+#[ cfg (feature = "hss-main") ]
+#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-cli") ]
+pub fn prepare_configuration_with_extensions (_configuration : Option<Configuration>, _extensions : impl CliExtensions) -> ServerResult<Configuration> {
+	
+	let _configuration = if let Some (_configuration) = _configuration {
+		_configuration
+	} else {
+		Configuration::localhost_http () .build () ?
+	};
+	
+	let _configuration = ConfigurationArguments::parse_with_extensions (_configuration, _extensions) ?;
 	
 	Ok (_configuration)
 }

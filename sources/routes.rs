@@ -279,6 +279,73 @@ pub struct RouteMatched {
 }
 
 
+#[ cfg (feature = "hss-routes") ]
+impl RouteMatched {
+	
+	
+	pub fn parameter_nth (&self, _index : usize) -> &String {
+		& (self.parameters.get (_index) .or_panic (0xe86a76a8)) .1
+	}
+	
+	pub fn parameters_1 (&self) -> &String {
+		self.parameter_nth (0)
+	}
+	
+	pub fn parameters_2 (&self) -> (&String, &String) {
+		(
+			self.parameter_nth (0),
+			self.parameter_nth (1),
+		)
+	}
+	
+	pub fn parameters_3 (&self) -> (&String, &String, &String) {
+		(
+			self.parameter_nth (0),
+			self.parameter_nth (1),
+			self.parameter_nth (2),
+		)
+	}
+	
+	pub fn parameters_4 (&self) -> (&String, &String, &String, &String) {
+		(
+			self.parameter_nth (0),
+			self.parameter_nth (1),
+			self.parameter_nth (2),
+			self.parameter_nth (3),
+		)
+	}
+	
+	
+	pub fn resolve_parameter_nth (_request : &Request<Body>, _index : usize) -> &String {
+		Self::resolve_or_panic (_request) .parameter_nth (_index)
+	}
+	
+	pub fn resolve_parameters_1 (_request : &Request<Body>) -> &String {
+		Self::resolve_or_panic (_request) .parameters_1 ()
+	}
+	
+	pub fn resolve_parameters_2 (_request : &Request<Body>) -> (&String, &String) {
+		Self::resolve_or_panic (_request) .parameters_2 ()
+	}
+	
+	pub fn resolve_parameters_3 (_request : &Request<Body>) -> (&String, &String, &String) {
+		Self::resolve_or_panic (_request) .parameters_3 ()
+	}
+	
+	pub fn resolve_parameters_4 (_request : &Request<Body>) -> (&String, &String, &String, &String) {
+		Self::resolve_or_panic (_request) .parameters_4 ()
+	}
+	
+	pub fn resolve (_request : &Request<Body>) -> Option<&Self> {
+		_request.extensions () .get ()
+	}
+	
+	fn resolve_or_panic (_request : &Request<Body>) -> &Self {
+		Self::resolve (_request) .or_panic (0x4c9197b5)
+	}
+}
+
+
 
 
 #[ cfg (feature = "hss-routes") ]

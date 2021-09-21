@@ -154,36 +154,42 @@ pub trait ResponseExtBuild <B>
 	where
 		B : BodyTrait,
 		Self : Sized,
+		Self : ResponseExt<B>,
 {
-	fn new_with_status_and_body (_status : StatusCode, _content_type : Option<impl Into<HeaderValue>>, _body : impl Into<B>) -> Self;
+	fn new_with_status_and_body (_status : StatusCode, _body : impl Into<B>, _content_type : Option<impl Into<HeaderValue>>) -> Self;
 	
 	fn new_empty () -> Self where B : Default {
 		let _content_type : Option<ContentType> = None;
-		Self::new_with_status_and_body (consts::OK, _content_type, B::default ())
+		Self::new_with_status_and_body (consts::OK, B::default (), _content_type)
 	}
 	
-	fn new_200_with_body (_content_type : Option<impl Into<HeaderValue>>, _body : impl Into<B>) -> Self {
-		Self::new_with_status_and_body (consts::OK, _content_type, _body)
+	fn new_with_status (_status : StatusCode) -> Self where B : Default {
+		let _content_type : Option<ContentType> = None;
+		Self::new_with_status_and_body (_status, B::default (), _content_type)
+	}
+	
+	fn new_200_with_body (_body : impl Into<B>, _content_type : Option<impl Into<HeaderValue>>) -> Self {
+		Self::new_with_status_and_body (consts::OK, _body, _content_type)
 	}
 	
 	fn new_200_with_text (_body : impl Into<B>) -> Self {
-		Self::new_200_with_body (Some (ContentType::Text), _body)
+		Self::new_200_with_body (_body, Some (ContentType::Text))
 	}
 	
 	fn new_200_with_html (_body : impl Into<B>) -> Self {
-		Self::new_200_with_body (Some (ContentType::Html), _body)
+		Self::new_200_with_body (_body, Some (ContentType::Html))
 	}
 	
 	fn new_200 () -> Self where B : From<&'static str> {
-		Self::new_with_status_and_body (consts::OK, Some (ContentType::Text), "OK\n")
+		Self::new_with_status_and_body (consts::OK, "OK\n", Some (ContentType::Text))
 	}
 	
 	fn new_404 () -> Self where B : From<&'static str> {
-		Self::new_with_status_and_body (consts::NOT_FOUND, Some (ContentType::Text), "404\n")
+		Self::new_with_status_and_body (consts::NOT_FOUND, "404\n", Some (ContentType::Text))
 	}
 	
 	fn new_method_not_allowed () -> Self where B : From<&'static str> {
-		Self::new_with_status_and_body (consts::METHOD_NOT_ALLOWED, Some (ContentType::Text), "method-not-allowed\n")
+		Self::new_with_status_and_body (consts::METHOD_NOT_ALLOWED, "method-not-allowed\n", Some (ContentType::Text))
 	}
 	
 	fn ok <E> (self) -> Result<Self, E> {
@@ -208,7 +214,7 @@ pub trait ResponseExtBuild <B>
 #[ cfg (feature = "hss-extensions") ]
 impl ResponseExtBuild<Body> for Response<Body> {
 	
-	fn new_with_status_and_body (_status : StatusCode, _content_type : Option<impl Into<HeaderValue>>, _body : impl Into<Body>) -> Self {
+	fn new_with_status_and_body (_status : StatusCode, _body : impl Into<Body>, _content_type : Option<impl Into<HeaderValue>>) -> Self {
 		let mut _response = Response::new (_body.into ());
 		_response.set_status (_status);
 		if let Some (_content_type) = _content_type {

@@ -336,6 +336,52 @@ impl FileResource {
 		}
 		Ok (_data)
 	}
+	
+	pub fn new_text (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Text), false)
+	}
+	
+	pub fn new_html (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Html), false)
+	}
+	
+	pub fn new_css (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Css), false)
+	}
+	
+	pub fn new_js (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Js), false)
+	}
+	
+	pub fn new_json (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Json), false)
+	}
+	
+	pub fn new_xml (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Xml), false)
+	}
+	
+	pub fn new_png (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Png), false)
+	}
+	
+	pub fn new_jpeg (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Jpeg), false)
+	}
+	
+	pub fn new_svg (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Svg), false)
+	}
+	
+	pub fn new_icon (_path : impl AsRef<path::Path>) -> Self {
+		Self::new (_path, Some (ContentType::Icon), false)
+	}
+	
+	pub fn response (&self) -> ServerResult<Response<Body>> {
+		let _data = self.load () ?;
+		let _response = Response::new_200_with_body (_data, self.content_type);
+		Ok (_response)
+	}
 }
 
 
@@ -349,9 +395,8 @@ impl Handler for FileResource {
 	type ResponseBodyError = ServerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
-		match self.load () {
-			Ok (_data) => {
-				let mut _response = Response::new_200_with_body (self.content_type, _data);
+		match self.response () {
+			Ok (_response) => {
 				future::ready (Ok (_response.map (BodyWrapper::new)))
 			}
 			Err (_error) =>
@@ -384,9 +429,53 @@ impl StaticResource {
 			}
 	}
 	
+	pub fn new_text (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Text))
+	}
+	
+	pub fn new_html (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Html))
+	}
+	
+	pub fn new_css (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Css))
+	}
+	
+	pub fn new_js (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Js))
+	}
+	
+	pub fn new_json (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Json))
+	}
+	
+	pub fn new_xml (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Xml))
+	}
+	
+	pub fn new_png (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Png))
+	}
+	
+	pub fn new_jpeg (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Jpeg))
+	}
+	
+	pub fn new_svg (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Svg))
+	}
+	
+	pub fn new_icon (_data : impl Into<Bytes>) -> Self {
+		Self::new (_data, Some (ContentType::Icon))
+	}
+	
 	pub fn load_from_path (_path : impl AsRef<path::Path>, _content_type : Option<ContentType>) -> ServerResult<Self> {
 		let _data = fs::read (_path) ?;
 		Ok (Self::new (_data, _content_type))
+	}
+	
+	pub fn response (&self) -> Response<Body> {
+		Response::new_200_with_body (self.data.clone (), self.content_type)
 	}
 }
 
@@ -401,7 +490,7 @@ impl Handler for StaticResource {
 	type ResponseBodyError = ServerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
-		let mut _response = Response::new_200_with_body (self.content_type, self.data.clone ());
+		let _response = self.response ();
 		future::ready (Ok (_response.map (BodyWrapper::new)))
 	}
 }
@@ -423,11 +512,56 @@ pub struct EmbeddedResource {
 #[ cfg (feature = "hss-extensions") ]
 impl EmbeddedResource {
 	
-	pub const fn new (_content_type : Option<ContentType>, _data : &'static [u8]) -> Self {
+	pub fn new (_data : &'static (impl AsRef<[u8]> + ?Sized), _content_type : Option<ContentType>) -> Self {
+		let _data = _data.as_ref ();
 		EmbeddedResource {
 				data : _data,
 				content_type : _content_type,
 			}
+	}
+	
+	pub fn new_text (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Text))
+	}
+	
+	pub fn new_html (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Html))
+	}
+	
+	pub fn new_css (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Css))
+	}
+	
+	pub fn new_js (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Js))
+	}
+	
+	pub fn new_json (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Json))
+	}
+	
+	pub fn new_xml (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Xml))
+	}
+	
+	pub fn new_png (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Png))
+	}
+	
+	pub fn new_jpeg (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Jpeg))
+	}
+	
+	pub fn new_svg (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Svg))
+	}
+	
+	pub fn new_icon (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
+		Self::new (_data, Some (ContentType::Icon))
+	}
+	
+	pub fn response (&self) -> Response<Body> {
+		Response::new_200_with_body (self.data, self.content_type)
 	}
 }
 
@@ -442,7 +576,7 @@ impl Handler for EmbeddedResource {
 	type ResponseBodyError = ServerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
-		let mut _response = Response::new_200_with_body (self.content_type, self.data.clone ());
+		let _response = self.response ();
 		future::ready (Ok (_response.map (BodyWrapper::new)))
 	}
 }

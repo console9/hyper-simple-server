@@ -185,6 +185,18 @@ impl HandlerDynArc {
 	pub fn delegate (&self, _request : Request<Body>) -> HandlerFutureDynBox {
 		self.0.handle (_request)
 	}
+	
+	pub fn from_arc (_handler : Arc<dyn HandlerDyn>) -> Self {
+		HandlerDynArc (_handler)
+	}
+	
+	pub fn into_arc (self) -> Arc<dyn HandlerDyn> {
+		self.0
+	}
+	
+	pub fn clone_arc (&self) -> Arc<dyn HandlerDyn> {
+		self.0.clone ()
+	}
 }
 
 

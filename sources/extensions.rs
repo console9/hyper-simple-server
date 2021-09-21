@@ -184,6 +184,72 @@ pub trait ResponseExtBuild <B>
 		Self::new_with_status_and_body (consts::OK, "OK\n", Some (ContentType::Text))
 	}
 	
+	fn new_301 (_location : impl Into<HeaderValue>) -> Self where B : Default {
+		Self::new_redirect_with_code (consts::MOVED_PERMANENTLY, _location)
+	}
+	
+	fn new_302 (_location : impl Into<HeaderValue>) -> Self where B : Default {
+		Self::new_redirect_with_code (consts::FOUND, _location)
+	}
+	
+	fn new_303 (_location : impl Into<HeaderValue>) -> Self where B : Default {
+		Self::new_redirect_with_code (consts::SEE_OTHER, _location)
+	}
+	
+	fn new_307 (_location : impl Into<HeaderValue>) -> Self where B : Default {
+		Self::new_redirect_with_code (consts::TEMPORARY_REDIRECT, _location)
+	}
+	
+	fn new_308 (_location : impl Into<HeaderValue>) -> Self where B : Default {
+		Self::new_redirect_with_code (consts::PERMANENT_REDIRECT, _location)
+	}
+	
+	fn new_301_str_static (_location : &'static str) -> Self where B : Default {
+		Self::new_301 (HeaderValue::from_static (_location))
+	}
+	
+	fn new_302_str_static (_location : &'static str) -> Self where B : Default {
+		Self::new_302 (HeaderValue::from_static (_location))
+	}
+	
+	fn new_303_str_static (_location : &'static str) -> Self where B : Default {
+		Self::new_303 (HeaderValue::from_static (_location))
+	}
+	
+	fn new_307_str_static (_location : &'static str) -> Self where B : Default {
+		Self::new_307 (HeaderValue::from_static (_location))
+	}
+	
+	fn new_308_str_static (_location : &'static str) -> Self where B : Default {
+		Self::new_308 (HeaderValue::from_static (_location))
+	}
+	
+	fn new_301_string (_location : String) -> Self where B : Default {
+		Self::new_301 (HeaderValue::try_from (_location) .or_panic (0x15f9b93c))
+	}
+	
+	fn new_302_string (_location : String) -> Self where B : Default {
+		Self::new_302 (HeaderValue::try_from (_location) .or_panic (0x0a94e02d))
+	}
+	
+	fn new_303_string (_location : String) -> Self where B : Default {
+		Self::new_303 (HeaderValue::try_from (_location) .or_panic (0xa87f95a7))
+	}
+	
+	fn new_307_string (_location : String) -> Self where B : Default {
+		Self::new_307 (HeaderValue::try_from (_location) .or_panic (0xd0e3f0f9))
+	}
+	
+	fn new_308_string (_location : String) -> Self where B : Default {
+		Self::new_308 (HeaderValue::try_from (_location) .or_panic (0x69839071))
+	}
+	
+	fn new_redirect_with_code (_status : StatusCode, _location : impl Into<HeaderValue>) -> Self where B : Default {
+		let mut _response = Self::new_with_status (_status);
+		_response.set_header (consts::LOCATION, _location);
+		_response
+	}
+	
 	fn new_404 () -> Self where B : From<&'static str> {
 		Self::new_with_status_and_body (consts::NOT_FOUND, "404\n", Some (ContentType::Text))
 	}

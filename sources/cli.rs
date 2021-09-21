@@ -27,7 +27,9 @@ pub struct ConfigurationArguments {
 	#[ cfg (feature = "hyper--http2") ]
 	pub endpoint_protocol_http2_help : String,
 	
+	#[ cfg (feature = "hss-tls-any") ]
 	pub endpoint_insecure : Option<bool>,
+	#[ cfg (feature = "hss-tls-any") ]
 	pub endpoint_insecure_help : String,
 	
 	#[ cfg (feature = "hss-tls-rust") ]
@@ -88,6 +90,7 @@ impl ConfigurationArguments {
 				(),
 		}
 		
+		#[ cfg (feature = "hss-tls-any") ]
 		match _configuration.endpoint.security {
 			EndpointSecurity::Insecure =>
 				_arguments.endpoint_insecure = Some (true),
@@ -118,15 +121,23 @@ impl ConfigurationArguments {
 		self.endpoint_socket_address_help = self.endpoint_socket_address.as_ref () .map_or_else (
 				|| format! ("listen on TCP socket address"),
 				|_address| format! ("listen on TCP socket address (default `{}`)", _address));
-		_parser.refer (&mut self.endpoint_socket_address)
+		let mut _argument = _parser.refer (&mut self.endpoint_socket_address);
+		{
+			_argument
 				.metavar ("<socket-address>")
 				.add_option (&["--listen-address"], argparse::StoreOption, &self.endpoint_socket_address_help)
 				.add_option (&["--listen-any-80"], argparse::StoreConst (Some (String::from ("0.0.0.0:80"))), "listen on any IP with port 80 (might require root or capabilities)")
-				.add_option (&["--listen-any-443"], argparse::StoreConst (Some (String::from ("0.0.0.0:443"))), "listen on any IP with port 443 (might require root or capabilities)")
 				.add_option (&["--listen-any-8080"], argparse::StoreConst (Some (String::from ("0.0.0.0:8080"))), "listen on any IP with port 8080")
+				.add_option (&["--listen-localhost-8080"], argparse::StoreConst (Some (String::from ("127.0.0.1:8080"))), "listen on localhost with port 8080");
+		}
+		#[ cfg (feature = "hss-tls-any") ]
+		{
+			_argument
+				.add_option (&["--listen-any-443"], argparse::StoreConst (Some (String::from ("0.0.0.0:443"))), "listen on any IP with port 443 (might require root or capabilities)")
 				.add_option (&["--listen-any-8443"], argparse::StoreConst (Some (String::from ("0.0.0.0:8443"))), "listen on any IP with port 8443")
-				.add_option (&["--listen-localhost-8080"], argparse::StoreConst (Some (String::from ("127.0.0.1:8080"))), "listen on localhost with port 8080")
-				.add_option (&["--listen-localhost-8443"], argparse::StoreConst (Some (String::from ("127.0.0.1:8443"))), "listen on localhost with port 8443");
+				.add_option (&["--listen-localhost-8443"], argparse::StoreConst (Some (String::from ("127.0.0.1:8443"))), "listen on localhost with port 8443")
+			;
+		}
 		
 		#[ cfg (unix) ]
 		{
@@ -158,6 +169,8 @@ impl ConfigurationArguments {
 				.add_option (&["--disable-http2"], argparse::StoreConst (Some (false)), "");
 		}
 		
+		#[ cfg (feature = "hss-tls-any") ]
+		{
 		self.endpoint_insecure_help = if self.endpoint_insecure.unwrap_or (false) {
 				format! ("disable TLS support (default disabled)")
 			} else {
@@ -166,6 +179,7 @@ impl ConfigurationArguments {
 		_parser.refer (&mut self.endpoint_insecure)
 				.add_option (&["--disable-tls"], argparse::StoreConst (Some (true)), &self.endpoint_insecure_help)
 				.add_option (&["--enable-tls"], argparse::StoreConst (Some (false)), "");
+		}
 		
 		#[ cfg (feature = "hss-tls-rust") ]
 		{
@@ -242,6 +256,7 @@ impl ConfigurationArguments {
 		_configuration.endpoint.protocol = EndpointProtocol::with_http_support (_http1_enabled, _http2_enabled);
 		}
 		
+		#[ cfg (feature = "hss-tls-any") ]
 		if let Some (true) = self.endpoint_insecure {
 			_configuration.endpoint.security = EndpointSecurity::Insecure;
 		}
@@ -269,7 +284,7 @@ impl ConfigurationArguments {
 			}
 		}
 		
-		#[ allow (irrefutable_let_patterns) ]
+		#[ cfg (feature = "hss-tls-any") ]
 		if let Some (_endpoint_insecure) = self.endpoint_insecure {
 			if _endpoint_insecure {
 				if let EndpointSecurity::Insecure = _configuration.endpoint.security {

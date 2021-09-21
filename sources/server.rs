@@ -113,15 +113,18 @@ impl Server
 				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _service = move |_ : &Connection| {
-				let _handler = _handler.clone () .wrap ();
+				let _service = _handler.clone () .wrap ();
+				let _service = ServiceEprintlnWrapper (_service);
 				async {
-					ServerResult::Ok (_handler)
+					ServerResult::Ok (_service)
 				}
 			};
 		
 		self.serve_with_make_service_fn (_service) .await
 	}
 }
+
+
 
 
 #[ cfg (feature = "hss-server-http") ]
@@ -150,12 +153,15 @@ impl Server {
 				SBD : Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
-		let _make_service = move |_connection : &Connection| {
-				let _service = hyper::service_fn (_service.clone ());
+		let _make_service = move |_ : &Connection| {
+				let _service = _service.clone ();
+				let _service = hyper::service_fn (_service);
+				let _service = ServiceEprintlnWrapper (_service);
 				async {
 					ServerResult::Ok (_service)
 				}
 			};
+		
 		self.serve_with_make_service_fn (_make_service).await
 	}
 	
@@ -246,6 +252,63 @@ impl Server {
 		let _runtime = _builder.build () .or_wrap (0xc29071d8) ?;
 		
 		Ok (_runtime)
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-server-http") ]
+struct ServiceEprintlnWrapper <S> (S)
+	where
+		S : hyper::Service<Request<Body>>,
+		S::Error : Error,
+;
+
+#[ cfg (feature = "hss-server-http") ]
+struct ServiceEprintlnFuture <S> (S::Future)
+	where
+		S : hyper::Service<Request<Body>>,
+		S::Error : Error,
+;
+
+
+#[ cfg (feature = "hss-server-http") ]
+impl <S> hyper::Service<Request<Body>> for ServiceEprintlnWrapper<S>
+	where
+		S : hyper::Service<Request<Body>>,
+		S::Error : Error,
+{
+	type Future = ServiceEprintlnFuture<S>;
+	type Response = S::Response;
+	type Error = S::Error;
+	
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+		self.0.poll_ready (_context)
+	}
+	
+	fn call (&mut self, _request : Request<Body>) -> Self::Future {
+		let _future = self.0.call (_request);
+		ServiceEprintlnFuture (_future)
+	}
+}
+
+#[ cfg (feature = "hss-server-http") ]
+impl <S> Future for ServiceEprintlnFuture<S>
+	where
+		S : hyper::Service<Request<Body>>,
+		S::Error : Error,
+{
+	type Output = <S::Future as Future>::Output;
+	
+	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
+		let _delegate = unsafe { self.map_unchecked_mut (|_self| &mut _self.0) };
+		_delegate.poll (_context) .map (|_result| {
+				if let Err (ref _error) = _result {
+					eprintln! ("[ee] [540dc2bc]  handler failed:  {}", _error);
+				}
+				_result
+			})
 	}
 }
 

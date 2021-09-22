@@ -114,7 +114,7 @@ impl Server
 	{
 		let _service = move |_ : &Connection| {
 				let _service = _handler.clone () .wrap ();
-				let _service = ServiceEprintlnWrapper (_service);
+				let _service = ServiceWrapper (_service);
 				async {
 					ServerResult::Ok (_service)
 				}
@@ -144,19 +144,17 @@ impl Server {
 		Ok (_builder)
 	}
 	
-	pub async fn serve_with_service_fn <S, SE, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
+	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> ServerResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SE : Error + Send + Sync + 'static,
-				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
+				SF : Future<Output = Result<Response<SB>, io::Error>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = io::Error> + Send + 'static,
 				SBD : Buf + Send + 'static,
-				SBE : Error + Send + Sync + 'static,
 	{
 		let _make_service = move |_ : &Connection| {
 				let _service = _service.clone ();
 				let _service = hyper::service_fn (_service);
-				let _service = ServiceEprintlnWrapper (_service);
+				let _service = ServiceWrapper (_service);
 				async {
 					ServerResult::Ok (_service)
 				}
@@ -259,57 +257,79 @@ impl Server {
 
 
 #[ cfg (feature = "hss-server-http") ]
-struct ServiceEprintlnWrapper <S> (S)
+struct ServiceWrapper <S> (S)
 	where
-		S : hyper::Service<Request<Body>>,
-		S::Error : Error,
+		S : hyper::Service<Request<Body>, Error = io::Error>,
 ;
 
 #[ cfg (feature = "hss-server-http") ]
-struct ServiceEprintlnFuture <S> (S::Future)
+enum ServiceWrapperFuture <S>
 	where
-		S : hyper::Service<Request<Body>>,
-		S::Error : Error,
-;
-
-
-#[ cfg (feature = "hss-server-http") ]
-impl <S> hyper::Service<Request<Body>> for ServiceEprintlnWrapper<S>
-	where
-		S : hyper::Service<Request<Body>>,
-		S::Error : Error,
+		S : hyper::Service<Request<Body>, Error = io::Error>,
 {
-	type Future = ServiceEprintlnFuture<S>;
+	Future (S::Future),
+	Error (io::Error),
+	Done,
+}
+
+
+#[ cfg (feature = "hss-server-http") ]
+impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
+	where
+		S : hyper::Service<Request<Body>, Error = io::Error>,
+{
+	type Future = ServiceWrapperFuture<S>;
 	type Response = S::Response;
-	type Error = S::Error;
+	type Error = io::Error;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), io::Error>> {
 		self.0.poll_ready (_context)
 	}
 	
 	fn call (&mut self, _request : Request<Body>) -> Self::Future {
 		let _future = self.0.call (_request);
-		ServiceEprintlnFuture (_future)
+		ServiceWrapperFuture::Future (_future)
 	}
 }
 
 #[ cfg (feature = "hss-server-http") ]
-impl <S> Future for ServiceEprintlnFuture<S>
+impl <S> Future for ServiceWrapperFuture<S>
 	where
-		S : hyper::Service<Request<Body>>,
-		S::Error : Error,
+		S : hyper::Service<Request<Body>, Error = io::Error>,
 {
 	type Output = <S::Future as Future>::Output;
 	
 	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
 		#[ allow (unsafe_code) ]
-		let _delegate = unsafe { self.map_unchecked_mut (|_self| &mut _self.0) };
-		_delegate.poll (_context) .map (|_result| {
-				if let Err (ref _error) = _result {
-					eprintln! ("[ee] [540dc2bc]  handler failed:  {}", _error);
+		let _self_0 = unsafe { self.get_unchecked_mut () };
+		match _self_0 {
+			ServiceWrapperFuture::Future (_future) => {
+				#[ allow (unsafe_code) ]
+				let _delegate = unsafe { Pin::new_unchecked (_future) };
+				match _delegate.poll (_context) {
+					_outcome @ Poll::Pending =>
+						_outcome,
+					_outcome @ Poll::Ready (Ok (_)) => {
+						mem::replace (_self_0, ServiceWrapperFuture::Done);
+						_outcome
+					}
+					Poll::Ready (Err (_error)) => {
+						eprintln! ("[ee] [540dc2bc]  handler failed:  {}", _error);
+						Poll::Ready (Err (_error))
+					}
 				}
-				_result
-			})
+			}
+			ServiceWrapperFuture::Error (_error) => {
+				let _self_1 = mem::replace (_self_0, ServiceWrapperFuture::Done);
+				if let ServiceWrapperFuture::Error (_error) = _self_1 {
+					Poll::Ready (Err (_error))
+				} else {
+					panic_with_code (0xd83566d8);
+				}
+			}
+			ServiceWrapperFuture::Done =>
+				Poll::Ready (Err (error_with_code (0x0722e578))),
+		}
 	}
 }
 

@@ -302,6 +302,7 @@ impl <S> Future for ServiceEprintlnFuture<S>
 	type Output = <S::Future as Future>::Output;
 	
 	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
+		#[ allow (unsafe_code) ]
 		let _delegate = unsafe { self.map_unchecked_mut (|_self| &mut _self.0) };
 		_delegate.poll (_context) .map (|_result| {
 				if let Err (ref _error) = _result {

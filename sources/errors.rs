@@ -253,13 +253,13 @@ pub fn error_wrap <E : Error> (_code : u32, _error : E) -> io::Error {
 
 #[ allow (dead_code) ]
 pub fn panic_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ! {
-	panic! (format! ("[{:08x}]  {}", _code, _message))
+	panic! ("[{:08x}]  {}", _code, _message)
 }
 
 #[ allow (dead_code) ]
 pub fn panic_with_message (_code : u32, _message : &str) -> ! {
 	if ! _message.is_empty () {
-		panic! (format! ("[{:08x}]  {}", _code, _message))
+		panic! ("[{:08x}]  {}", _code, _message)
 	} else {
 		panic_with_code (_code)
 	}
@@ -267,6 +267,6 @@ pub fn panic_with_message (_code : u32, _message : &str) -> ! {
 
 #[ allow (dead_code) ]
 pub fn panic_with_code (_code : u32) -> ! {
-	panic! (format! ("[{:08x}]  unexpected error encountered!", _code))
+	panic! ("[{:08x}]  unexpected error encountered!", _code)
 }
 

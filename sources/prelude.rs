@@ -24,6 +24,7 @@ pub(crate) use ::std::prelude::v1::*;
 
 pub(crate) use ::std::convert::From;
 pub(crate) use ::std::convert::Into;
+#[ allow (unused_imports) ]
 pub(crate) use ::std::convert::TryInto;
 pub(crate) use ::std::convert::TryFrom;
 
@@ -31,6 +32,7 @@ pub(crate) use ::std::error::Error;
 
 pub(crate) use ::std::future::Future;
 #[ cfg (feature = "futures") ]
+#[ allow (unused_imports) ]
 pub(crate) use futures::FutureExt as _;
 #[ cfg (feature = "futures") ]
 pub(crate) use futures::TryFutureExt as _;

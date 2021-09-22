@@ -362,7 +362,7 @@ pub enum CliArgument<'a> {
 
 #[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-cli") ]
-impl <'b> CliExtensions for CliArgument<'b> {
+impl CliExtensions for CliArgument<'_> {
 	
 	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
 		match self {
@@ -384,9 +384,9 @@ impl <'b> CliExtensions for CliArgument<'b> {
 
 #[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-cli") ]
-impl <'b, const N : usize> CliExtensions for [CliArgument<'b>; N] {
+impl <const N : usize> CliExtensions for [CliArgument<'_>; N] {
 	
-	fn prepare <'a> (mut self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
+	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
 		for _argument in self {
 			_argument.prepare (_parser);
 		}

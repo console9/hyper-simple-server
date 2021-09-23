@@ -228,7 +228,7 @@ impl Server {
 		#[ cfg (feature = "hss-jemalloc") ]
 		if true {
 			#[ cfg (debug_assertions) ]
-			eprintln! ("[ii] [8291112d]  using `jemalloc` allocator...");
+			eprintln! ("[ii] [8291112d]  using `jemalloc` allocator;");
 			#[ cfg (feature = "hss-server-debug-jemalloc") ]
 			server_start_jemalloc_stats ();
 		}
@@ -244,7 +244,7 @@ impl Server {
 		if let Some (_threads) = _self.configuration.threads {
 			if _threads > 0 {
 				#[ cfg (debug_assertions) ]
-				eprintln! ("[ii] [cf4d96e6]  using multi-threaded executor (with {} threads)...", _threads);
+				eprintln! ("[ii] [cf4d96e6]  using multi-threaded executor (with {} threads);", _threads);
 				let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
 				_builder.worker_threads (_threads);
 				_builder.max_blocking_threads (_threads * 4);
@@ -255,10 +255,14 @@ impl Server {
 		
 		if _builder_0.is_none () {
 			#[ cfg (debug_assertions) ]
-			eprintln! ("[ii] [25065ee8]  using current-thread executor (with 1 thread)...");
+			eprintln! ("[ii] [25065ee8]  using current-thread executor (with 1 thread);");
 			let _builder = tokio::RuntimeBuilder::new_current_thread ();
 			_builder_0 = Some (_builder);
 		};
+		
+		#[ cfg (feature = "hss-server-sanitize") ]
+		#[ cfg (debug_assertions) ]
+		eprintln! ("[ii] [3c1badd4]  using URI sanitizer;");
 		
 		let mut _builder = _builder_0.infallible (0xfb2d7cfb);
 		
@@ -282,6 +286,7 @@ struct ServiceWrapper <S> (S)
 
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hyper--server") ]
+#[ allow (dead_code) ]
 enum ServiceWrapperFuture <S>
 	where
 		S : hyper::Service<Request<Body>, Error = io::Error>,
@@ -318,7 +323,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 			}
 			Ok (Some (_uri)) => {
 				if true {
-					eprintln! ("[ww] [d1e356bc]  URI sanitized to `{}` from `{}`!", _uri, _request.uri ());
+					eprintln! ("[ww] [d1e356bc]  URI sanitized to `{}` from `{}`;", _uri, _request.uri ());
 				}
 				* _request.uri_mut () = _uri;
 			}
@@ -349,7 +354,7 @@ impl <S> Future for ServiceWrapperFuture<S>
 					_outcome @ Poll::Pending =>
 						_outcome,
 					_outcome @ Poll::Ready (Ok (_)) => {
-						mem::replace (_self_0, ServiceWrapperFuture::Done);
+						let _ = mem::replace (_self_0, ServiceWrapperFuture::Done);
 						_outcome
 					}
 					Poll::Ready (Err (_error)) => {

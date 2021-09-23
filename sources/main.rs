@@ -87,7 +87,7 @@ pub fn prepare_configuration_https () -> ServerResult<Configuration> {
 	
 	let _configuration = Configuration::localhost_https () .build () ?;
 	
-	main_configuration (Some (_configuration))
+	prepare_configuration (Some (_configuration))
 }
 
 

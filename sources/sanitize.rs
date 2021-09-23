@@ -3,16 +3,6 @@
 use crate::prelude::*;
 
 
-#[ cfg (feature = "hss-http") ]
-#[ cfg (feature = "hss-sanitize") ]
-use http::uri::{
-		Uri,
-		Scheme,
-		Authority,
-		PathAndQuery,
-	};
-
-
 
 
 #[ cfg (feature = "hss-sanitize") ]
@@ -51,7 +41,7 @@ pub fn sanitize_path (_path : &str) -> ServerResult<Option<String>> {
 	
 	let _path_as_str = _path;
 	let _path_as_bytes = _path_as_str.as_bytes ();
-	mem::drop (_path);
+	drop (_path);
 	
 	match _path_as_bytes {
 		

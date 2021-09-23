@@ -84,15 +84,6 @@ pub use {
 };
 
 
-#[ cfg (feature = "hss-internals") ]
-pub mod internals {
-	#![ allow (unused_import_braces) ]
-	pub use {
-		crate::errors::internals::*,
-	};
-}
-
-
 
 
 pub(crate) mod accepter;
@@ -118,12 +109,14 @@ compile_error! ("enable any of HTTP/1 or HTTP/2");
 
 #[ cfg (feature = "hss-jemalloc") ]
 #[global_allocator]
-static ALLOCATOR : ::jemallocator::Jemalloc = jemallocator::Jemalloc;
+static ALLOCATOR : ::jemallocator::Jemalloc = ::jemallocator::Jemalloc;
 
 
 
 
 mod dependencies {
+	
+	#![ allow (unused_imports) ]
 	
 	#[ cfg (feature = "hyper") ]
 	pub use ::hyper;
@@ -158,24 +151,19 @@ mod dependencies {
 	pub use ::tokio_native_tls;
 	
 	
-	#[ allow (unused_imports) ]
 	#[ cfg (feature = "futures") ]
-	pub(crate) use ::futures;
+	pub use ::futures;
 	
-	#[ allow (unused_imports) ]
 	#[ cfg (feature = "path-tree") ]
-	pub(crate) use ::path_tree;
+	pub use ::path_tree;
 	
-	#[ allow (unused_imports) ]
 	#[ cfg (feature = "argparse") ]
-	pub(crate) use ::argparse;
+	pub use ::argparse;
 	
-	#[ allow (unused_imports) ]
 	#[ cfg (feature = "jemallocator") ]
-	pub(crate) use ::jemallocator;
+	pub use ::jemallocator;
+	
+	#[ cfg (feature = "jemalloc-sys") ]
+	pub use ::jemalloc_sys;
 }
-
-// NOTE:  Required so that `cargo docs` doesn't break...
-#[ allow (unused_imports) ]
-use crate::dependencies::*;
 

@@ -1,5 +1,6 @@
 
 
+#![ allow (dead_code) ]
 #![ allow (unused_import_braces) ]
 
 
@@ -22,6 +23,10 @@ pub use http::{
 		response::Builder as ResponseBuilder,
 		
 		uri::Uri,
+		uri::Scheme,
+		uri::Authority,
+		uri::PathAndQuery,
+		
 		version::Version,
 		method::Method,
 		status::StatusCode,
@@ -59,7 +64,6 @@ pub use ::hyper::{
 
 
 
-#[ allow (dead_code) ]
 #[ cfg (feature = "http") ]
 pub type Headers = HeaderMap<HeaderValue>;
 
@@ -67,7 +71,6 @@ pub type Headers = HeaderMap<HeaderValue>;
 
 
 #[ derive (Copy, Clone) ]
-#[ allow (dead_code) ]
 #[ cfg (feature = "hss-extensions") ]
 pub enum ContentType {
 	
@@ -136,7 +139,6 @@ impl Into<HeaderValue> for ContentType {
 
 
 
-#[ allow (dead_code) ]
 #[ allow (clippy::declare_interior_mutable_const) ]
 #[ cfg (feature = "hss-extensions") ]
 pub mod consts {

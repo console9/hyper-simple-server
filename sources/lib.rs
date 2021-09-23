@@ -72,6 +72,7 @@ pub use {
 	crate::handler::*,
 	crate::main::*,
 	crate::routes::*,
+	crate::sanitize::*,
 	crate::server::*,
 };
 
@@ -105,6 +106,7 @@ pub(crate) mod handler;
 pub(crate) mod main;
 pub(crate) mod prelude;
 pub(crate) mod routes;
+pub(crate) mod sanitize;
 pub(crate) mod server;
 
 

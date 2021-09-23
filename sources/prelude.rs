@@ -13,6 +13,7 @@ pub(crate) use crate::errors::*;
 pub(crate) use crate::exports::*;
 pub(crate) use crate::handler::*;
 pub(crate) use crate::server::*;
+pub(crate) use crate::sanitize::*;
 pub(crate) use crate::routes::*;
 
 

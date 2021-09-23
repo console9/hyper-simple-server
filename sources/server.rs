@@ -286,7 +286,20 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 		self.0.poll_ready (_context)
 	}
 	
-	fn call (&mut self, _request : Request<Body>) -> Self::Future {
+	fn call (&mut self, mut _request : Request<Body>) -> Self::Future {
+		
+		match sanitize_uri (_request.uri ()) {
+			Err (_error) => {
+				eprintln! ("[ee] [aace2099]  URI sanitize failed:  {}", _error);
+				return ServiceWrapperFuture::Error (_error);
+			}
+			Ok (Some (_uri)) => {
+				eprintln! ("[ww] [d1e356bc]  URI sanitized to `{}` from `{}`!", _uri, _request.uri ());
+				* _request.uri_mut () = _uri;
+			}
+			Ok (None) => (),
+		}
+		
 		let _future = self.0.call (_request);
 		ServiceWrapperFuture::Future (_future)
 	}

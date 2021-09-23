@@ -110,7 +110,10 @@ impl Server
 				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _runtime = self.serve_runtime () ?;
-		return _runtime.block_on (self.serve_with_handler (_handler));
+		let _future = self.serve_with_handler (_handler);
+		let _outcome = _runtime.block_on (_future);
+		
+		_outcome
 	}
 	
 	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
@@ -184,7 +187,11 @@ impl Server {
 	{
 		let _service = hyper::make_service_fn (_make_service);
 		let _builder = self.serve_builder () ?;
-		_builder.serve (_service) .await .or_wrap (0x73080376)
+		let _future = _builder.serve (_service);
+		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .or_panic (0xa011830e); });
+		let _outcome = _future.await;
+		let _outcome = _outcome.or_wrap (0x73080376);
+		_outcome
 	}
 	
 	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {

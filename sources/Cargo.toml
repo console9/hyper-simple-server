@@ -198,8 +198,8 @@ hyper--http2 = ["hyper", "hyper/http2", "hyper--http"]
 hyper--http = ["hyper", "http", "http-body", "bytes"]
 hyper--runtime = ["hyper", "hyper/runtime"]
 
-tokio--rt = ["tokio", "tokio/rt"]
-tokio--rt-multi-thread = ["tokio", "tokio/rt-multi-thread"]
+tokio--rt = ["tokio", "tokio/rt", "tokio/signal"]
+tokio--rt-multi-thread = ["tokio--rt", "tokio/rt-multi-thread"]
 tokio--net = ["tokio", "tokio/net"]
 
 

@@ -101,6 +101,10 @@ pub(crate) mod tokio {
 	pub(crate) use ::tokio::task::{
 			spawn,
 		};
+	#[ cfg (feature = "tokio--rt") ]
+	pub(crate) use ::tokio::signal::{
+			ctrl_c,
+		};
 }
 
 

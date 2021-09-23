@@ -52,6 +52,11 @@ pub struct ConfigurationArguments {
 	pub server_threads : Option<usize>,
 	#[ cfg (feature = "hss-server-mt") ]
 	pub server_threads_help : String,
+	
+	#[ cfg (feature = "hss-server-profiling") ]
+	pub server_profiling : Option<String>,
+	#[ cfg (feature = "hss-server-profiling") ]
+	pub server_profiling_help : String,
 }
 
 
@@ -61,7 +66,7 @@ pub struct ConfigurationArguments {
 #[ cfg (feature = "hss-cli") ]
 impl ConfigurationArguments {
 	
-	pub fn with_defaults (_configuration : &Configuration) -> Self {
+	pub fn with_defaults (_configuration : &Configuration) -> ServerResult<Self> {
 		
 		let mut _arguments = Self::default ();
 		
@@ -111,7 +116,13 @@ impl ConfigurationArguments {
 		_arguments.server_threads = _configuration.threads;
 		}
 		
-		_arguments
+		#[ cfg (feature = "hss-server-profiling") ]
+		if let Some (_path) = _configuration.profiling.as_ref () {
+			let _path = _path.to_str () .or_wrap (0xd708ca76) ?;
+			_arguments.server_profiling = Some (_path.to_owned ());
+		}
+		
+		Ok (_arguments)
 	}
 	
 	
@@ -224,6 +235,17 @@ impl ConfigurationArguments {
 				.add_option (&["--server-threads"], argparse::StoreOption, &self.server_threads_help)
 				.add_option (&["--no-server-threads"], argparse::StoreConst (None), "");
 		}
+		
+		#[ cfg (feature = "hss-server-profiling") ]
+		{
+		self.server_profiling_help = self.server_profiling.as_ref () .map_or_else (
+				|| format! ("enable server profiling"),
+				|_profiling| format! ("enable server profiling (default `{}` path)", _profiling));
+		_parser.refer (&mut self.server_profiling)
+				.metavar ("<server-profiling>")
+				.add_option (&["--server-profiling"], argparse::StoreOption, &self.server_profiling_help)
+				.add_option (&["--no-server-profiling"], argparse::StoreConst (None), "");
+		}
 	}
 	
 	
@@ -310,6 +332,11 @@ impl ConfigurationArguments {
 		_configuration.threads = self.server_threads;
 		}
 		
+		#[ cfg (feature = "hss-server-profiling") ]
+		{
+		_configuration.profiling = self.server_profiling.as_ref () .map (|_path| path::PathBuf::from (_path));
+		}
+		
 		Ok (())
 	}
 	
@@ -320,7 +347,7 @@ impl ConfigurationArguments {
 	
 	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions) -> ServerResult<Configuration>
 	{
-		let mut _self = Self::with_defaults (&_configuration);
+		let mut _self = Self::with_defaults (&_configuration) ?;
 		
 		{
 			let mut _parser = argparse::ArgumentParser::new ();

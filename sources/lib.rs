@@ -74,6 +74,7 @@ pub use {
 	crate::routes::*,
 	crate::sanitize::*,
 	crate::server::*,
+	crate::profiling::*,
 };
 
 
@@ -99,6 +100,7 @@ pub(crate) mod prelude;
 pub(crate) mod routes;
 pub(crate) mod sanitize;
 pub(crate) mod server;
+pub(crate) mod profiling;
 
 
 #[ cfg (all (feature = "hss-server-core", not (feature = "hyper--server-http"), not (feature = "features-fuzzing"))) ]
@@ -159,6 +161,9 @@ mod dependencies {
 	
 	#[ cfg (feature = "argparse") ]
 	pub use ::argparse;
+	
+	#[ cfg (feature = "cpuprofiler") ]
+	pub use ::cpuprofiler;
 	
 	#[ cfg (feature = "jemallocator") ]
 	pub use ::jemallocator;

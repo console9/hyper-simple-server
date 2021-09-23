@@ -109,9 +109,22 @@ impl Server
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
 				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
+		#[ cfg (feature = "hss-server-profiling") ]
+		let _profiling = {
+			let _self = self.internals.read () .or_panic (0x1d2cfbb8);
+			if let Some (_path) = &_self.configuration.profiling {
+				Some (ProfilingSession::start (_path) ?)
+			} else {
+				None
+			}
+		};
+		
 		let _runtime = self.serve_runtime () ?;
 		let _future = self.serve_with_handler (_handler);
 		let _outcome = _runtime.block_on (_future);
+		
+		#[ cfg (feature = "hss-server-profiling") ]
+		drop (_profiling);
 		
 		_outcome
 	}
@@ -185,11 +198,21 @@ impl Server {
 				SBD : Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{
+		
 		let _service = hyper::make_service_fn (_make_service);
 		let _builder = self.serve_builder () ?;
+		
 		let _future = _builder.serve (_service);
 		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .or_panic (0xa011830e); });
+		
+		#[ cfg (debug_assertions) ]
+		eprintln! ("[ii] [3aed0938]  server initialized;");
+		
 		let _outcome = _future.await;
+		
+		#[ cfg (debug_assertions) ]
+		eprintln! ("\n[ii] [3eff9778]  server terminated;");
+		
 		let _outcome = _outcome.or_wrap (0x73080376);
 		_outcome
 	}

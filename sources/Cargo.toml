@@ -52,6 +52,7 @@ hss-full-http2 = [
 hss-full-common = [
 	"hss-server-mt",
 	"hss-server-sanitize",
+	"hss-server-profiling",
 	"hss-handler",
 	"hss-routes",
 	"hss-config",
@@ -94,6 +95,11 @@ hss-server-mt = [
 # gate
 hss-server-sanitize = [
 	"hss-sanitize",
+]
+
+# gate
+hss-server-profiling = [
+	"cpuprofiler",
 ]
 
 # meta(crate)
@@ -227,6 +233,8 @@ tokio-native-tls = { version = "0.3.0", default-features = false, features = [],
 futures = { version = "0.3.17", default-features = false, features = [], optional = true }
 path-tree = { version = "0.2.1", default-features = false, features = [], optional = true }
 argparse = { version = "0.2.2", default-features = false, features = [], optional = true }
+
+cpuprofiler = { version = "0.0.4", default-features = false, features = [], optional = true }
 
 jemallocator = { version = "0.3.2", default-features = false, features = [], optional = true }
 jemalloc-sys = { version = "0.3.2", default-features = false, features = [], optional = true }

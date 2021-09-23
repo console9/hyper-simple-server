@@ -16,6 +16,7 @@ pub(crate) use crate::handler::*;
 pub(crate) use crate::server::*;
 pub(crate) use crate::sanitize::*;
 pub(crate) use crate::routes::*;
+pub(crate) use crate::profiling::*;
 
 
 

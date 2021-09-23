@@ -12,6 +12,8 @@ pub struct Configuration {
 	pub handler : Option<HandlerDynArc>,
 	#[ cfg (feature = "hss-server-mt" ) ]
 	pub threads : Option<usize>,
+	#[ cfg (feature = "hss-server-profiling" ) ]
+	pub profiling : Option<path::PathBuf>,
 }
 
 
@@ -299,6 +301,8 @@ pub struct ConfigurationBuilder {
 	routes : Option<RoutesBuilder>,
 	#[ cfg (feature = "hss-server-mt") ]
 	threads : Option<usize>,
+	#[ cfg (feature = "hss-server-profiling" ) ]
+	profiling : Option<path::PathBuf>,
 }
 
 
@@ -314,6 +318,8 @@ impl ConfigurationBuilder {
 				routes : None,
 				#[ cfg (feature = "hss-server-mt") ]
 				threads : None,
+				#[ cfg (feature = "hss-server-profiling" ) ]
+				profiling : None,
 			}
 	}
 	
@@ -327,6 +333,8 @@ impl ConfigurationBuilder {
 				routes : _routes,
 				#[ cfg (feature = "hss-server-mt") ]
 				threads : _threads,
+				#[ cfg (feature = "hss-server-profiling" ) ]
+				profiling : _profiling,
 			} = self;
 		
 		let _endpoint = if let Some (_endpoint) = _endpoint {
@@ -363,6 +371,8 @@ impl ConfigurationBuilder {
 				handler : _handler_0,
 				#[ cfg (feature = "hss-server-mt") ]
 				threads : _threads,
+				#[ cfg (feature = "hss-server-profiling" ) ]
+				profiling : _profiling,
 			};
 		
 		Ok (_configuration)

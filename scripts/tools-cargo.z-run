@@ -20,10 +20,25 @@
 					--target-dir "${_RUST_TARGET}"
 				)
 		;;
-		( metadata | update | tree )
+		( metadata | update | tree | outdated )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 				)
+		;;
+		( exec | exec-with-target | exec-without-target | exec-without-manifest )
+			Z_enforce 0x00266037 'expected command!' test "${#}" -ge 1
+			_command="${1}"
+			shift -- 1
+			if test "${_command}" != exec-without-manifest ; then
+				_arguments+=(
+						--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
+					)
+			fi
+			if test "${_command}" == exec-with-target -o "${_command}" == exec ; then
+				_arguments+=(
+						--target-dir "${_RUST_TARGET}"
+					)
+			fi
 		;;
 		( * )
 			Z_panic 0x510d7e97 'invalid command `%s`!' "${_command}"

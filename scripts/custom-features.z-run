@@ -49,23 +49,22 @@
 	hss-accepter
 	hss-cli
 	hss-config
+	hss-errors
 	hss-exports
 	hss-extensions
 	hss-full
 	hss-full-http1
 	hss-full-http2
 	hss-handler
-	hss-http
-	hss-internals
 	hss-jemalloc
 	hss-main
 	hss-routes
 	hss-sanitize
-	hss-server
 	hss-server-full
 	hss-server-http1
 	hss-server-http2
 	hss-server-mt
+	hss-server-sanitize
 	hss-tls-native
 	hss-tls-rust
 !!
@@ -90,6 +89,10 @@
 
 --<<~~.. features / list / combine
 	#! <template>
+	{{- range $_index_0, $_feature_0 := Z_zspawn_capture ":: features / list / cargo / hss" | split_lines -}}
+	{{- if ne $_feature_0 "hss-server-core" -}}
+	x0 {{ $_feature_0 }}
+	{{ end }}{{ end -}}
 	{{- $_features := Z_zspawn_capture ":: features / list" | split_lines -}}
 	{{- range $_index_1, $_feature_1 := $_features -}}
 	x1 {{ $_feature_1 }}
@@ -108,7 +111,25 @@
 	Z_expect_no_arguments
 	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
 	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .key' \
-	| sort \
+	| sort -u \
+	#
+!!
+
+<< features / list / cargo / used
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
+	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .value | .[]' \
+	| sort -u \
+	#
+!!
+
+<< features / list / cargo / dependencies
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
+	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .dependencies | .[] | .name' \
+	| sort -u \
 	#
 !!
 
@@ -128,5 +149,36 @@
 	Z_zspawn ':: features / list / cargo / hss' \
 	| sed -r -e 's!^.*$!\0 = ["hyper-simple-server/\0"]!' \
 	#
+!!
+
+
+<< features / list / sources / cfg
+	#! <bash+>
+	Z_expect_no_arguments
+	find ./sources/ -name '*.rs' -exec cat -- {} \; \
+	| grep -o -E -e '#\[\s*cfg\s+[^]]+\s*\]' \
+	| grep -o -E -e 'feature\s*=\s*"[^"]+"' \
+	| sed -r -e 's!^feature\s*=\s*"!!' -e 's!"\s*$!!' \
+	| sort -u
+	#
+!!
+
+
+<< features / list / cargo-all + cargo-dependencies
+	#! <bash+>
+	Z_expect_no_arguments
+	sort -u < <(
+		Z_zspawn ':: features / list / cargo / all'
+		Z_zspawn ':: features / list / cargo / dependencies'
+	)
+!!
+
+<< features / list / sources-cfg + cargo-used
+	#! <bash+>
+	Z_expect_no_arguments
+	sort -u < <(
+		Z_zspawn ':: features / list / sources / cfg'
+		Z_zspawn ':: features / list / cargo / used'
+	)
 !!
 

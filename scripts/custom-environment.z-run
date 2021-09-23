@@ -8,4 +8,5 @@
 :: features / set / quick / full :: export -- _RUST_FEATURES=hss-full
 :: features / set / quick / full + jemalloc :: export -- _RUST_FEATURES=hss-full,hss-jemalloc
 :: features / set / quick / full + jemalloc-debug :: export -- _RUST_FEATURES=hss-full,hss-jemalloc,hss-server-debug-jemalloc
+:: features / set / quick / none :: export -- _RUST_FEATURES=features-none
 

@@ -91,9 +91,6 @@ hss-server = [
 	"http-body",
 	"bytes",
 	"tokio--rt",
-#	"hss-jemalloc",
-#	"hss-server-debug-strace",
-#	"hss-server-debug-jemalloc",
 ]
 
 hss-accepter = [
@@ -166,7 +163,7 @@ hss-server-debug-jemalloc = [
 hyper--server = ["hyper", "hyper/server"]
 hyper--http1 = ["hyper", "hyper/http1", "hyper--http"]
 hyper--http2 = ["hyper", "hyper/http2", "hyper--http"]
-hyper--http = ["hyper", "hyper/http2"]
+hyper--http = ["hyper"]
 hyper--runtime = ["hyper", "hyper/runtime"]
 tokio--rt = ["tokio", "tokio/rt"]
 tokio--rt-multi-thread = ["tokio", "tokio/rt-multi-thread"]

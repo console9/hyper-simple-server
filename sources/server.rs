@@ -218,8 +218,18 @@ impl Server {
 		
 		let _self = self.internals.read () .or_panic (0x6db68b39);
 		
-		maybe_start_jemalloc_stats ();
-		maybe_start_strace ();
+		#[ cfg (feature = "hss-jemalloc") ]
+		if true {
+			#[ cfg (debug_assertions) ]
+			eprintln! ("[ii] [8291112d]  using `jemalloc` allocator...");
+			#[ cfg (feature = "hss-server-debug-jemalloc") ]
+			server_start_jemalloc_stats ();
+		}
+		
+		#[ cfg (feature = "hss-server-debug-strace") ]
+		if true {
+			server_start_strace ();
+		}
 		
 		let mut _builder_0 = None;
 		
@@ -227,7 +237,7 @@ impl Server {
 		if let Some (_threads) = _self.configuration.threads {
 			if _threads > 0 {
 				#[ cfg (debug_assertions) ]
-				eprintln! ("[ii] [cf4d96e6]  starting tokio multi-threaded executor...");
+				eprintln! ("[ii] [cf4d96e6]  using multi-threaded executor (with {} threads)...", _threads);
 				let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
 				_builder.worker_threads (_threads);
 				_builder.max_blocking_threads (_threads * 4);
@@ -238,7 +248,7 @@ impl Server {
 		
 		if _builder_0.is_none () {
 			#[ cfg (debug_assertions) ]
-			eprintln! ("[ii] [25065ee8]  starting tokio current-thread executor...");
+			eprintln! ("[ii] [25065ee8]  using current-thread executor (with 1 thread)...");
 			let _builder = tokio::RuntimeBuilder::new_current_thread ();
 			_builder_0 = Some (_builder);
 		};
@@ -332,7 +342,9 @@ impl <S> Future for ServiceWrapperFuture<S>
 						_outcome
 					}
 					Poll::Ready (Err (_error)) => {
-						eprintln! ("[ee] [540dc2bc]  handler failed:  {}", _error);
+						if true {
+							eprintln! ("[ee] [540dc2bc]  handler failed:  {}", _error);
+						}
 						Poll::Ready (Err (_error))
 					}
 				}
@@ -372,42 +384,48 @@ impl <F> hyper::Executor<F> for ServerExecutor
 
 
 #[ cfg (feature = "hss-server-http") ]
-fn maybe_start_strace () -> () {
-	#[ cfg (feature = "hss-server-debug-strace") ]
-	{
-		process::Command::new ("strace")
-				.args (&["-f", "-p", & process::id () .to_string ()])
-				.spawn ()
-				.or_panic (0xff87ffef);
-	}
+#[ cfg (feature = "hss-server-debug-strace") ]
+fn server_start_strace () -> () {
+	
+	#[ cfg (debug_assertions) ]
+	eprintln! ("[ii] [19f96abc]  starting `strace` tracing...");
+	
+	process::Command::new ("strace")
+			.args (&["-f", "-p", & process::id () .to_string ()])
+			.spawn ()
+			.or_panic (0xff87ffef);
 }
 
+
 #[ cfg (feature = "hss-server-http") ]
-fn maybe_start_jemalloc_stats () -> () {
-	#[ cfg (feature = "hss-server-debug-jemalloc") ]
-	{
-		extern "C" fn _write (_ : * mut os::raw::c_void, _message : * const os::raw::c_char) {
-			#[ allow (unsafe_code) ]
-			let _message = unsafe { ffi::CStr::from_ptr (_message) };
-			let _message = _message.to_str () .or_panic (0x2d88d281);
-			for _message in _message.split_terminator ("\n") {
-				if (_message == "___ Begin jemalloc statistics ___") || (_message == "--- End jemalloc statistics ---") {
-					continue;
-				}
-				if _message == "Background threads: 0, num_runs: 0, run_interval: 0 ns" {
-					continue;
-				}
-				eprintln! ("[dd] [35256205]  jemalloc statistics:  {}", _message);
+#[ cfg (feature = "hss-jemalloc") ]
+#[ cfg (feature = "hss-server-debug-jemalloc") ]
+fn server_start_jemalloc_stats () -> () {
+	
+	#[ cfg (debug_assertions) ]
+	eprintln! ("[ii] [8291112d]  starting `jemalloc` tracing...");
+	
+	extern "C" fn _write (_ : * mut os::raw::c_void, _message : * const os::raw::c_char) {
+		#[ allow (unsafe_code) ]
+		let _message = unsafe { ffi::CStr::from_ptr (_message) };
+		let _message = _message.to_str () .or_panic (0x2d88d281);
+		for _message in _message.split_terminator ("\n") {
+			if (_message == "___ Begin jemalloc statistics ___") || (_message == "--- End jemalloc statistics ---") {
+				continue;
 			}
+			if _message == "Background threads: 0, num_runs: 0, run_interval: 0 ns" {
+				continue;
+			}
+			eprintln! ("[dd] [35256205]  jemalloc statistics:  {}", _message);
 		}
-		thread::spawn (|| {
-			let _options = &b"gmdablxe\0"[..];
-				loop {
-					#[ allow (unsafe_code) ]
-					unsafe { ::jemalloc_sys::malloc_stats_print (Some (_write), ptr::null_mut (), _options.as_ptr () as * const os::raw::c_char) };
-					thread::sleep (time::Duration::from_secs (1));
-			}
-		});
 	}
+	thread::spawn (|| {
+		let _options = &b"gmdablxe\0"[..];
+			loop {
+				#[ allow (unsafe_code) ]
+				unsafe { ::jemalloc_sys::malloc_stats_print (Some (_write), ptr::null_mut (), _options.as_ptr () as * const os::raw::c_char) };
+				thread::sleep (time::Duration::from_secs (1));
+		}
+	});
 }
 

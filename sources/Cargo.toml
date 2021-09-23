@@ -49,6 +49,7 @@ hss-full-common = [
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
+	"hss-sanitize",
 	"hss-http",
 	"hss-exports",
 	"hss-extensions",
@@ -138,6 +139,8 @@ hss-http = [
 	"bytes",
 	"hyper",
 ]
+
+hss-sanitize = []
 
 hss-extensions = []
 

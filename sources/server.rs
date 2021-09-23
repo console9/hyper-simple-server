@@ -288,13 +288,18 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	
 	fn call (&mut self, mut _request : Request<Body>) -> Self::Future {
 		
+		#[ cfg (feature = "hss-sanitize") ]
 		match sanitize_uri (_request.uri ()) {
 			Err (_error) => {
-				eprintln! ("[ee] [aace2099]  URI sanitize failed:  {}", _error);
+				if true {
+					eprintln! ("[ww] [aace2099]  URI sanitize failed for `{}`:  {}", _request.uri (), _error);
+				}
 				return ServiceWrapperFuture::Error (_error);
 			}
 			Ok (Some (_uri)) => {
-				eprintln! ("[ww] [d1e356bc]  URI sanitized to `{}` from `{}`!", _uri, _request.uri ());
+				if true {
+					eprintln! ("[ww] [d1e356bc]  URI sanitized to `{}` from `{}`!", _uri, _request.uri ());
+				}
 				* _request.uri_mut () = _uri;
 			}
 			Ok (None) => (),

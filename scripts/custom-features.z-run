@@ -57,8 +57,10 @@
 	hss-handler
 	hss-http
 	hss-internals
+	hss-jemalloc
 	hss-main
 	hss-routes
+	hss-sanitize
 	hss-server
 	hss-server-full
 	hss-server-http1
@@ -101,11 +103,30 @@
 !!
 
 
-<< features / list / cargo
+<< features / list / cargo / all
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
 	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .key' \
+	| sort \
+	#
+!!
+
+
+<< features / list / cargo / hss
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: features / list / cargo / all' \
+	| grep -E -e '^hss-' \
+	#
+!!
+
+
+<< features / list / cargo / hss / toml
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: features / list / cargo / hss' \
+	| sed -r -e 's!^.*$!\0 = ["hyper-simple-server/\0"]!' \
 	#
 !!
 

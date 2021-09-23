@@ -5,13 +5,27 @@
 
 << testing / curl / http
 	#! <bash+>
-	Z_expect_no_arguments
-	exec -- curl -v -s -k -- http://127.0.0.1:8080/
+	Z_zexec ':: testing / curl / exec' http://127.0.0.1:8080 "${@}"
 !!
 
 << testing / curl / https
 	#! <bash+>
-	Z_expect_no_arguments
-	exec -- curl -v -s -k -- https://127.0.0.1:8443/
+	Z_zexec ':: testing / curl / exec' https://127.0.0.1:8443 "${@}"
+!!
+
+
+--<< testing / curl / exec
+	#! <bash+>
+	Z_enforce 0x10a9d4e5 '' test "${#}" -ge 1
+	_url_base="${1}"
+	shift
+	if test "${#}" -eq 0 ; then
+		set -- /
+	fi
+	for _url_path in "${@}" ; do
+		Z_log_cut
+		curl -v -s -k --request-target "${_url_path}" -- "${_url_base}"
+		Z_log_cut
+	done
 !!
 

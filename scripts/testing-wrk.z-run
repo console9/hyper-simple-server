@@ -11,16 +11,16 @@
 	
 	{{ range $_, $_connection := $_connections }}
 	{{ range $_, $_threads := $_threads }}
+	{{ if ge $_connection $_threads }}
 	<< testing / wrk / http / c{{ $_connection }}-t{{ $_threads }}
 		#! <bash+>
-		Z_expect_no_arguments
-		Z_zexec ':: testing / wrk' http://127.0.0.1:8080/ {{ $_connection }} {{ $_threads }} "${@}"
+		Z_zexec ':: testing / wrk' http://127.0.0.1:8080 {{ $_connection }} {{ $_threads }} "${@}"
 	!!
 	<< testing / wrk / https / c{{ $_connection }}-t{{ $_threads }}
 		#! <bash+>
-		Z_expect_no_arguments
-		Z_zexec ':: testing / wrk' https://127.0.0.1:8443/ {{ $_connection }} {{ $_threads }} "${@}"
+		Z_zexec ':: testing / wrk' https://127.0.0.1:8443 {{ $_connection }} {{ $_threads }} "${@}"
 	!!
+	{{ end }}
 	{{ end }}
 	{{ end }}
 !!
@@ -30,11 +30,16 @@
 
 --<< testing / wrk
 	#! <bash+>
-	Z_enforce 0xacef1c3f '' test "${#}" -eq 3
-	_url="${1}"
+	Z_enforce 0xacef1c3f '' test "${#}" -ge 3 -a "${#}" -le 4
+	_url_base="${1}"
 	_connections="${2}"
 	_threads="${3}"
 	shift -- 3
+	if test "${#}" -eq 0 ; then
+		set -- /
+	fi
+	_url_path="${1}"
+	shift -- 1
 	exec -- wrk \
 			--connections "${_connections}" \
 			--threads "${_threads}" \
@@ -42,7 +47,7 @@
 			--duration 60s \
 			--latency \
 			-- \
-			"${_url}" \
+			"${_url_base}${_url_path}" \
 	#
 !!
 

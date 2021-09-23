@@ -64,6 +64,7 @@
 	hss-server-http1
 	hss-server-http2
 	hss-server-mt
+	hss-server-profiling
 	hss-server-sanitize
 	hss-tls-native
 	hss-tls-rust

@@ -166,7 +166,7 @@ impl RoutesBuilder {
 				P : Into<RoutePaths<'a>>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RB::Error> + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
 		let _handler : H = _handler.into ();
@@ -179,7 +179,7 @@ impl RoutesBuilder {
 				P : Into<RoutePaths<'a>>,
 				I : Into<HandlerFnSync<C, RB>>,
 				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
-				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnSync<C, RB> = _handler.into ();
@@ -193,7 +193,7 @@ impl RoutesBuilder {
 				I : Into<HandlerFnAsync<C, F, RB>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
 		let _handler : HandlerFnAsync<C, F, RB> = _handler.into ();
@@ -205,7 +205,7 @@ impl RoutesBuilder {
 			where
 				P : Into<RoutePaths<'a>>,
 				C : Fn () -> Response<RB> + Send + Sync + 'static,
-				RB : BodyTrait<Data = Bytes> + Send + 'static,
+				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
 		self.with_route_fn_sync (_paths, move |_request| Ok (_handler ()))

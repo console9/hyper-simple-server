@@ -11,7 +11,7 @@ pub trait Handler
 		Self : Send + Sync + 'static,
 {
 	type Future : Future<Output = ServerResult<Response<Self::ResponseBody>>> + Send + 'static;
-	type ResponseBody : BodyTrait<Data = Bytes, Error = Self::ResponseBodyError> + Send + 'static;
+	type ResponseBody : BodyTrait<Data = Bytes, Error = Self::ResponseBodyError> + Send + Sync + 'static;
 	type ResponseBodyError : Error + Send + Sync + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
@@ -53,7 +53,7 @@ pub struct HandlerFnAsync <C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	function : C,
@@ -66,7 +66,7 @@ impl <C, F, RB> Handler for HandlerFnAsync<C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	type Future = F;
@@ -84,7 +84,7 @@ impl <C, F, RB> From<C> for HandlerFnAsync<C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
@@ -102,7 +102,7 @@ impl <C, F, RB> From<C> for HandlerFnAsync<C, F, RB>
 pub struct HandlerFnSync <C, RB>
 	where
 		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	function : C,
@@ -114,7 +114,7 @@ pub struct HandlerFnSync <C, RB>
 impl <C, RB> Handler for HandlerFnSync<C, RB>
 	where
 		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	type Future = future::Ready<ServerResult<Response<RB>>>;
@@ -131,7 +131,7 @@ impl <C, RB> Handler for HandlerFnSync<C, RB>
 impl <C, RB> From<C> for HandlerFnSync<C, RB>
 	where
 		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
-		RB : BodyTrait<Data = Bytes> + Send + 'static,
+		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
@@ -259,7 +259,7 @@ impl HandlerFutureDynBox {
 #[ cfg (feature = "hss-extensions") ]
 impl <B> From<Response<B>> for HandlerFutureDynBox
 	where
-		B : BodyTrait<Data = Bytes> + Send + 'static,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		B::Error : Error + Send + Sync + 'static,
 {
 	fn from (_response : Response<B>) -> Self {
@@ -528,7 +528,7 @@ impl <B> BodyDyn for B
 
 
 #[ cfg (feature = "hss-handler") ]
-pub struct BodyDynBox (Pin<Box<dyn BodyDyn>>);
+pub struct BodyDynBox (Pin<Box<dyn BodyDyn + Sync>>);
 
 
 #[ cfg (feature = "hss-handler") ]
@@ -558,7 +558,7 @@ impl BodyTrait for BodyDynBox {
 #[ cfg (feature = "hss-handler") ]
 impl BodyDynBox {
 	
-	pub fn new (_body : impl BodyDyn) -> Self {
+	pub fn new (_body : impl BodyDyn + Sync) -> Self {
 		Self (Box::pin (_body))
 	}
 	

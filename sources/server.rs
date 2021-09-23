@@ -155,7 +155,7 @@ impl Server {
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
 				SF : Future<Output = Result<Response<SB>, io::Error>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = io::Error> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = io::Error> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 	{
 		let _make_service = move |_ : &Connection| {
@@ -178,7 +178,7 @@ impl Server {
 				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
 				SE : Error + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = SBE> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 				SBE : Error + Send + Sync + 'static,
 	{

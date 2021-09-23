@@ -24,96 +24,138 @@ path = "./lib.rs"
 
 [features]
 
+
+# meta
 default = ["hss-full"]
 
+
+# meta
 hss-full = [
 	"hss-full-http1",
 	"hss-full-http2",
+	"hss-server-full",
 ]
 
+# meta
 hss-full-http1 = [
 	"hss-full-common",
 	"hss-server-http1",
 ]
 
+# meta
 hss-full-http2 = [
 	"hss-full-common",
 	"hss-server-http2",
 ]
 
+# meta(crate)
 hss-full-common = [
 	"hss-server-mt",
+	"hss-server-sanitize",
 	"hss-handler",
 	"hss-routes",
 	"hss-config",
 	"hss-accepter",
 	"hss-tls-rust",
 	"hss-tls-native",
-	"hss-sanitize",
-	"hss-http",
 	"hss-exports",
 	"hss-extensions",
+	"hss-errors",
+	"hss-sanitize",
 	"hss-main",
 	"hss-cli",
 ]
 
+
+# meta
 hss-server-full = [
 	"hss-server-mt",
 	"hss-server-http1",
 	"hss-server-http2",
 ]
 
+# meta
+hss-server-http1 = [
+	"hss-server-core",
+	"hyper--server-http1",
+]
+
+# meta
+hss-server-http2 = [
+	"hss-server-core",
+	"hyper--server-http2",
+]
+
+# gate
 hss-server-mt = [
-	"hss-server",
 	"tokio--rt-multi-thread",
 ]
 
-hss-server-http1 = [
-	"hss-server",
-	"hss-server-http",
-	"hyper--http1",
+# gate
+hss-server-sanitize = [
+	"hss-sanitize",
 ]
 
-hss-server-http2 = [
-	"hss-server",
-	"hss-server-http",
-	"hyper--http2",
-]
-
-hss-server-http = []
-
-hss-server = [
+# meta(crate)
+hss-server-core = [
 	"hss-config",
 	"hss-accepter",
 	"hyper--server",
 #	"hyper--runtime", # NOTE:  Optional for timeouts support.
-	"http",
-	"http-body",
-	"bytes",
 	"tokio--rt",
 ]
 
+# gate(crate)
 hss-accepter = [
 	"hss-config",
 	"tokio--net",
 	"futures",
 ]
 
+# gate(crate)
 hss-config = []
 
+
+# gate
 hss-handler = [
-	"hyper",
-	"http",
-	"http-body",
-	"bytes",
+	"hyper--http",
 	"futures",
 ]
 
+# gate
 hss-routes = [
 	"hss-handler",
 	"path-tree",
 ]
 
+# gate
+hss-sanitize = [
+	"hyper--http",
+]
+
+# gate
+hss-extensions = [
+	"hyper--http",
+]
+
+
+# gate
+hss-errors = []
+
+# gate
+hss-exports = []
+
+
+# gate
+hss-main = []
+
+# gate
+hss-cli = [
+	"argparse",
+]
+
+
+# gate
 hss-tls-rust = [
 	"hss-tls-any",
 	"rustls",
@@ -121,6 +163,7 @@ hss-tls-rust = [
 	"tokio-rustls",
 ]
 
+# gate
 hss-tls-native = [
 	"hss-tls-any",
 	"native-tls",
@@ -128,50 +171,40 @@ hss-tls-native = [
 	"tokio-native-tls",
 ]
 
+# gate(crate)
 hss-tls-any = []
 
-hss-http = [
-	"http",
-	"http-body",
-	"bytes",
-	"hyper",
-]
 
-hss-sanitize = []
-
-hss-extensions = []
-
-hss-exports = []
-
-hss-main = []
-
-hss-cli = [
-	"argparse",
-]
-
+# gate
 hss-jemalloc = [
 	"jemallocator",
 ]
 
+# gate
 hss-server-debug-strace = []
 
+# gate
 hss-server-debug-jemalloc = [
 	"jemalloc-sys/stats",
 ]
 
 
+hyper--server-http1 = ["hyper--server-http", "hyper--http1"]
+hyper--server-http2 = ["hyper--server-http", "hyper--http2"]
+hyper--server-http = ["hyper--server"]
 hyper--server = ["hyper", "hyper/server"]
 hyper--http1 = ["hyper", "hyper/http1", "hyper--http"]
 hyper--http2 = ["hyper", "hyper/http2", "hyper--http"]
-hyper--http = ["hyper"]
+hyper--http = ["hyper", "http", "http-body", "bytes"]
 hyper--runtime = ["hyper", "hyper/runtime"]
+
 tokio--rt = ["tokio", "tokio/rt"]
 tokio--rt-multi-thread = ["tokio", "tokio/rt-multi-thread"]
 tokio--net = ["tokio", "tokio/net"]
 
-hss-internals = []
 
 features-fuzzing = []
+features-none = []
 
 
 

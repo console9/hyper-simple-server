@@ -113,7 +113,7 @@ impl Server
 		let _profiling = {
 			let _self = self.internals.read () .or_panic (0x1d2cfbb8);
 			if let Some (_path) = &_self.configuration.profiling {
-				Some (ProfilingSession::start (_path) ?)
+				Some (ProfilingSession::new_and_start (_path) ?)
 			} else {
 				None
 			}
@@ -124,7 +124,9 @@ impl Server
 		let _outcome = _runtime.block_on (_future);
 		
 		#[ cfg (feature = "hss-server-profiling") ]
-		drop (_profiling);
+		if let Some (_profiling) = _profiling {
+			_profiling.stop_and_drop () ?;
+		}
 		
 		_outcome
 	}

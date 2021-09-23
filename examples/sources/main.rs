@@ -9,17 +9,32 @@ use hss::ResponseExtBuild as _;
 
 fn main () -> hss::ServerResult {
 	
-	if false {
-		return main_with_static ();
-	} else {
-		return main_with_routes ();
-	}
+	let _main = "echo";
+	
+	let _main = match std::env::var ("HSS_EXAMPLE_MAIN") {
+		Ok (_value) => _value,
+		Err (std::env::VarError::NotPresent) => String::from (_main),
+		Err (_error) => Err (hss::error_wrap (0xfe7f8e93, _error)) ?,
+	};
+	
+	let _main = match _main.as_str () {
+		
+		"echo" => main_with_echo,
+		"routes" => main_with_routes,
+		"handler_sync" => main_with_handler_sync,
+		
+		_ => Err (hss::error_with_format (0xa5dbefb7, format_args! ("invalid main `{}`", _main))) ?,
+	};
+	
+	return _main ();
 }
 
 
 
 
 fn main_with_routes () -> hss::ServerResult {
+	
+	eprintln! ("[ii] [f8f30521]  starting `routes` server...");
 	
 	let _handler_0 = |_request| {
 		hss::Response::new_200 () .ok ()
@@ -47,11 +62,32 @@ fn main_with_routes () -> hss::ServerResult {
 
 
 
-fn main_with_static () -> hss::ServerResult {
+fn main_with_handler_sync () -> hss::ServerResult {
+	
+	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
 	let _handler = |_request : hss::Request<hss::Body>| {
 		hss::Response::new_200 () .ok_0 ()
 	};
+	
+	let _handler = hss::HandlerFnSync::from (_handler);
+	
+	return hss::main_with_handler (_handler, None);
+}
+
+
+
+
+fn main_with_echo () -> hss::ServerResult {
+	
+	eprintln! ("[ii] [53dc40d3]  starting `echo` server...");
+	
+	let _handler = |_request : hss::Request<hss::Body>| {
+		let _uri = _request.uri ();
+		let _output = format! ("`{}` | scheme: {:?} | authority: {:?} | path: {:?} | query: {:?}", _uri, _uri.scheme (), _uri.authority (), _uri.path (), _uri.query ());
+		hss::Response::new_200_with_text (_output) .ok_0 ()
+	};
+	
 	let _handler = hss::HandlerFnSync::from (_handler);
 	
 	return hss::main_with_handler (_handler, None);

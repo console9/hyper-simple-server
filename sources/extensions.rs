@@ -5,7 +5,6 @@ use crate::prelude::*;
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 pub trait RequestExt <B>
 	where
@@ -31,7 +30,6 @@ pub trait RequestExt <B>
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 impl <B> RequestExt<B> for Request<B>
 	where
@@ -79,7 +77,6 @@ impl <B> RequestExt<B> for Request<B>
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 pub trait ResponseExt <B>
 	where
@@ -118,7 +115,6 @@ pub trait ResponseExt <B>
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 impl <B> ResponseExt<B> for Response<B>
 	where
@@ -148,7 +144,6 @@ impl <B> ResponseExt<B> for Response<B>
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 pub trait ResponseExtBuild <B>
 	where
@@ -276,7 +271,6 @@ pub trait ResponseExtBuild <B>
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 impl ResponseExtBuild<Body> for Response<Body> {
 	
@@ -293,7 +287,6 @@ impl ResponseExtBuild<Body> for Response<Body> {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct FileResource {
@@ -303,7 +296,6 @@ pub struct FileResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl FileResource {
@@ -385,7 +377,6 @@ impl FileResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for FileResource {
@@ -408,7 +399,6 @@ impl Handler for FileResource {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct StaticResource {
@@ -417,7 +407,6 @@ pub struct StaticResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl StaticResource {
@@ -480,7 +469,6 @@ impl StaticResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for StaticResource {
@@ -498,7 +486,6 @@ impl Handler for StaticResource {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 pub struct EmbeddedResource {
@@ -507,7 +494,6 @@ pub struct EmbeddedResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl EmbeddedResource {
@@ -566,7 +552,6 @@ impl EmbeddedResource {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Handler for EmbeddedResource {

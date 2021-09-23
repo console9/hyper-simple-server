@@ -18,13 +18,13 @@ pub struct ConfigurationArguments {
 	#[ cfg (unix) ]
 	pub endpoint_descriptor_help : String,
 	
-	#[ cfg (feature = "hyper--http1") ]
+	#[ cfg (feature = "hyper--server-http1") ]
 	pub endpoint_protocol_http1 : Option<bool>,
-	#[ cfg (feature = "hyper--http1") ]
+	#[ cfg (feature = "hyper--server-http1") ]
 	pub endpoint_protocol_http1_help : String,
-	#[ cfg (feature = "hyper--http2") ]
+	#[ cfg (feature = "hyper--server-http2") ]
 	pub endpoint_protocol_http2 : Option<bool>,
-	#[ cfg (feature = "hyper--http2") ]
+	#[ cfg (feature = "hyper--server-http2") ]
 	pub endpoint_protocol_http2_help : String,
 	
 	#[ cfg (feature = "hss-tls-any") ]
@@ -74,14 +74,14 @@ impl ConfigurationArguments {
 		}
 		
 		match _configuration.endpoint.protocol {
-			#[ cfg (feature = "hyper--http1") ]
+			#[ cfg (feature = "hyper--server-http1") ]
 			EndpointProtocol::Http1 =>
 				_arguments.endpoint_protocol_http1 = Some (true),
-			#[ cfg (feature = "hyper--http2") ]
+			#[ cfg (feature = "hyper--server-http2") ]
 			EndpointProtocol::Http2 =>
 				_arguments.endpoint_protocol_http2 = Some (true),
-			#[ cfg (feature = "hyper--http1") ]
-			#[ cfg (feature = "hyper--http2") ]
+			#[ cfg (feature = "hyper--server-http1") ]
+			#[ cfg (feature = "hyper--server-http2") ]
 			EndpointProtocol::Http12 => {
 				_arguments.endpoint_protocol_http1 = Some (true);
 				_arguments.endpoint_protocol_http2 = Some (true);
@@ -149,7 +149,7 @@ impl ConfigurationArguments {
 				.add_option (&["--listen-descriptor"], argparse::StoreOption, &self.endpoint_descriptor_help);
 		}
 		
-		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--server-http1") ]
 		{
 		self.endpoint_protocol_http1_help = self.endpoint_protocol_http1.as_ref () .map_or_else (
 				|| format! ("enable HTTP/1 support"),
@@ -159,7 +159,7 @@ impl ConfigurationArguments {
 				.add_option (&["--disable-http1"], argparse::StoreConst (Some (false)), "");
 		}
 		
-		#[ cfg (feature = "hyper--http2") ]
+		#[ cfg (feature = "hyper--server-http2") ]
 		{
 		self.endpoint_protocol_http2_help = self.endpoint_protocol_http2.as_ref () .map_or_else (
 				|| format! ("enable HTTP/2 support"),
@@ -242,15 +242,15 @@ impl ConfigurationArguments {
 			_configuration.endpoint.address = EndpointAddress::from_descriptor (_descriptor);
 		}
 		
-		#[ cfg (feature = "hyper--http") ]
+		#[ cfg (feature = "hyper--server-http") ]
 		{
 		let mut _http1_enabled = _configuration.endpoint.protocol.supports_http1 ();
-		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--server-http1") ]
 		if let Some (_enabled) = self.endpoint_protocol_http1 {
 			_http1_enabled = _enabled;
 		}
 		let mut _http2_enabled = _configuration.endpoint.protocol.supports_http2 ();
-		#[ cfg (feature = "hyper--http2") ]
+		#[ cfg (feature = "hyper--server-http2") ]
 		if let Some (_enabled) = self.endpoint_protocol_http2 {
 			_http2_enabled = _enabled;
 		}

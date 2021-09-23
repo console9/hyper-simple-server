@@ -69,8 +69,7 @@ pub(crate) mod hyper {
 			service::service_fn,
 			service::make_service_fn,
 		};
-	#[ cfg (feature = "hyper--server") ]
-	#[ cfg (feature = "hyper--http") ]
+	#[ cfg (feature = "hyper--server-http") ]
 	pub(crate) use ::hyper::{
 			server::conn::Http,
 			server::Builder,

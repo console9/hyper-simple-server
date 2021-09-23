@@ -68,7 +68,6 @@ pub type Headers = HeaderMap<HeaderValue>;
 
 #[ derive (Copy, Clone) ]
 #[ allow (dead_code) ]
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 pub enum ContentType {
 	
@@ -96,7 +95,6 @@ pub enum ContentType {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 impl ContentType {
 	
@@ -125,7 +123,6 @@ impl ContentType {
 }
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 impl Into<HeaderValue> for ContentType {
 	fn into (self) -> HeaderValue {
@@ -141,7 +138,6 @@ impl Into<HeaderValue> for ContentType {
 
 #[ allow (dead_code) ]
 #[ allow (clippy::declare_interior_mutable_const) ]
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-extensions") ]
 pub mod consts {
 	

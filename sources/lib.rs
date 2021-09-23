@@ -110,7 +110,7 @@ pub(crate) mod sanitize;
 pub(crate) mod server;
 
 
-#[ cfg (all (feature = "hss-server", not (feature = "hss-server-http"), not (feature = "features-fuzzing"))) ]
+#[ cfg (all (feature = "hss-server-core", not (feature = "hyper--server-http"), not (feature = "features-fuzzing"))) ]
 compile_error! ("enable any of HTTP/1 or HTTP/2");
 
 

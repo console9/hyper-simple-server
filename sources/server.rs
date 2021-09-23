@@ -6,23 +6,27 @@ use crate::prelude::*;
 
 
 #[ derive (Clone) ]
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 pub struct Server {
 	internals : ServerInternals,
 }
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 struct ServerInternals0 {
 	configuration : Configuration,
 }
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 type ServerInternals = Arc<RwLock<ServerInternals0>>;
 
 
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl Server {
 	
 	pub fn new (_configuration : Configuration) -> ServerResult<Self> {
@@ -37,8 +41,9 @@ impl Server {
 }
 
 
-#[ cfg (feature = "hss-server-http") ]
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl Server {
 	
 	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
@@ -76,8 +81,9 @@ impl Server {
 }
 
 
-#[ cfg (feature = "hss-server-http") ]
 #[ cfg (feature = "hss-handler") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl Server
 {
 	pub fn run_and_wait_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
@@ -127,7 +133,8 @@ impl Server
 
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
@@ -187,22 +194,22 @@ impl Server {
 		
 		let mut _http = hyper::Http::new ();
 		
-		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--server-http1") ]
 		if _protocol.supports_http1_only () {
 			_http.http1_only (true);
 		}
-		#[ cfg (feature = "hyper--http1") ]
+		#[ cfg (feature = "hyper--server-http1") ]
 		if _protocol.supports_http1 () {
 			_http.http1_keep_alive (true);
 			_http.http1_half_close (true);
 			_http.max_buf_size (16 * 1024);
 		}
 		
-		#[ cfg (feature = "hyper--http2") ]
+		#[ cfg (feature = "hyper--server-http2") ]
 		if _protocol.supports_http2_only () {
 			_http.http2_only (true);
 		}
-		#[ cfg (feature = "hyper--http2") ]
+		#[ cfg (feature = "hyper--server-http2") ]
 		if _protocol.supports_http2 () {
 			_http.http2_max_concurrent_streams (128);
 			#[ cfg (feature = "hyper--runtime") ]
@@ -266,13 +273,15 @@ impl Server {
 
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 struct ServiceWrapper <S> (S)
 	where
 		S : hyper::Service<Request<Body>, Error = io::Error>,
 ;
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 enum ServiceWrapperFuture <S>
 	where
 		S : hyper::Service<Request<Body>, Error = io::Error>,
@@ -283,7 +292,8 @@ enum ServiceWrapperFuture <S>
 }
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	where
 		S : hyper::Service<Request<Body>, Error = io::Error>,
@@ -298,7 +308,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	
 	fn call (&mut self, mut _request : Request<Body>) -> Self::Future {
 		
-		#[ cfg (feature = "hss-sanitize") ]
+		#[ cfg (feature = "hss-server-sanitize") ]
 		match sanitize_uri (_request.uri ()) {
 			Err (_error) => {
 				if true {
@@ -320,7 +330,8 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	}
 }
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl <S> Future for ServiceWrapperFuture<S>
 	where
 		S : hyper::Service<Request<Body>, Error = io::Error>,
@@ -367,10 +378,12 @@ impl <S> Future for ServiceWrapperFuture<S>
 
 
 #[ derive (Clone) ]
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 pub struct ServerExecutor ();
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
 impl <F> hyper::Executor<F> for ServerExecutor
 		where
 			F : Future<Output = ()> + Send + 'static,
@@ -383,7 +396,7 @@ impl <F> hyper::Executor<F> for ServerExecutor
 
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hss-server-debug-strace") ]
 fn server_start_strace () -> () {
 	
@@ -397,7 +410,7 @@ fn server_start_strace () -> () {
 }
 
 
-#[ cfg (feature = "hss-server-http") ]
+#[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hss-jemalloc") ]
 #[ cfg (feature = "hss-server-debug-jemalloc") ]
 fn server_start_jemalloc_stats () -> () {

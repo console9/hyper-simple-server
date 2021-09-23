@@ -15,7 +15,6 @@ use http::uri::{
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_scheme (_scheme : &Scheme) -> ServerResult<Option<Scheme>> {
 	
@@ -27,7 +26,6 @@ pub fn sanitize_scheme (_scheme : &Scheme) -> ServerResult<Option<Scheme>> {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_authority (_authority : &Authority) -> ServerResult<Option<Authority>> {
 	
@@ -48,7 +46,6 @@ pub fn sanitize_authority (_authority : &Authority) -> ServerResult<Option<Autho
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_path (_path : &str) -> ServerResult<Option<String>> {
 	
@@ -204,7 +201,6 @@ pub fn sanitize_path (_path : &str) -> ServerResult<Option<String>> {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_query (_query : &str) -> ServerResult<Option<String>> {
 	
@@ -222,7 +218,6 @@ pub fn sanitize_query (_query : &str) -> ServerResult<Option<String>> {
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> ServerResult<Option<PathAndQuery>> {
 	
@@ -256,7 +251,6 @@ pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> ServerResult
 
 
 
-#[ cfg (feature = "hss-http") ]
 #[ cfg (feature = "hss-sanitize") ]
 pub fn sanitize_uri (_uri : &Uri) -> ServerResult<Option<Uri>> {
 	

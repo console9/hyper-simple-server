@@ -10,7 +10,7 @@ pub(crate) mod exports {
 	pub use super::ServerError;
 	pub use super::ServerResult;
 	
-	#[ cfg (feature = "hss-extensions") ]
+	#[ cfg (feature = "hss-errors") ]
 	pub use super::{
 			
 			ResultExtPanic,

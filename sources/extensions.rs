@@ -27,6 +27,10 @@ pub trait RequestExt <B>
 	fn header_str (&self, _name : impl AsHeaderName) -> Option<&str> {
 		self.header (_name) .and_then (|_value| _value.to_str () .ok ())
 	}
+	
+	fn header_host (&self) -> Option<&str> {
+		self.header_str (consts::HOST)
+	}
 }
 
 

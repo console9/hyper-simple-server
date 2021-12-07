@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 
 
+#[ derive (Clone) ]
 #[ cfg (feature = "hss-config") ]
 pub struct Configuration {
 	pub endpoint : Endpoint,

@@ -167,6 +167,10 @@ pub trait ResponseExtBuild <B>
 		Self::new_with_status_and_body (_status, B::default (), _content_type)
 	}
 	
+	fn new_201 () -> Self where B : Default {
+		Self::new_with_status (consts::CREATED)
+	}
+	
 	fn new_200_with_body (_body : impl Into<B>, _content_type : Option<impl Into<HeaderValue>>) -> Self {
 		Self::new_with_status_and_body (consts::OK, _body, _content_type)
 	}

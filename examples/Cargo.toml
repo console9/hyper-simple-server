@@ -2,43 +2,49 @@
 [package]
 name = "hyper-simple-server-example"
 version = "0.0.0"
-authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
-edition = "2018"
 license = "MIT"
+edition = "2021"
 
 [[bin]]
 name = "example"
 path = "./sources/main.rs"
 
+[dependencies]
+hyper-simple-server = { path = "../sources", default-features = false, features = [] }
+
+
+
+
 [features]
+
+# meta
 default = ["hss-full"]
-hss-accepter = ["hyper-simple-server/hss-accepter"]
+
+# meta
+hss-full = ["hyper-simple-server/hss-full"]
+hss-full-http1 = ["hyper-simple-server/hss-full-http1"]
+hss-full-http2 = ["hyper-simple-server/hss-full-http2"]
+
+# meta
+hss-server-full = ["hyper-simple-server/hss-server-full"]
+hss-server-http1 = ["hyper-simple-server/hss-server-http1"]
+hss-server-http2 = ["hyper-simple-server/hss-server-http2"]
+
+# gate
 hss-cli = ["hyper-simple-server/hss-cli"]
-hss-config = ["hyper-simple-server/hss-config"]
 hss-errors = ["hyper-simple-server/hss-errors"]
 hss-exports = ["hyper-simple-server/hss-exports"]
 hss-extensions = ["hyper-simple-server/hss-extensions"]
-hss-full = ["hyper-simple-server/hss-full"]
-hss-full-common = ["hyper-simple-server/hss-full-common"]
-hss-full-http1 = ["hyper-simple-server/hss-full-http1"]
-hss-full-http2 = ["hyper-simple-server/hss-full-http2"]
 hss-handler = ["hyper-simple-server/hss-handler"]
 hss-jemalloc = ["hyper-simple-server/hss-jemalloc"]
 hss-main = ["hyper-simple-server/hss-main"]
 hss-routes = ["hyper-simple-server/hss-routes"]
 hss-sanitize = ["hyper-simple-server/hss-sanitize"]
-hss-server-core = ["hyper-simple-server/hss-server-core"]
 hss-server-debug-jemalloc = ["hyper-simple-server/hss-server-debug-jemalloc"]
 hss-server-debug-strace = ["hyper-simple-server/hss-server-debug-strace"]
-hss-server-full = ["hyper-simple-server/hss-server-full"]
-hss-server-http1 = ["hyper-simple-server/hss-server-http1"]
-hss-server-http2 = ["hyper-simple-server/hss-server-http2"]
 hss-server-mt = ["hyper-simple-server/hss-server-mt"]
 hss-server-sanitize = ["hyper-simple-server/hss-server-sanitize"]
-hss-tls-any = ["hyper-simple-server/hss-tls-any"]
+hss-server-profiling = ["hyper-simple-server/hss-server-profiling"]
 hss-tls-native = ["hyper-simple-server/hss-tls-native"]
 hss-tls-rust = ["hyper-simple-server/hss-tls-rust"]
-
-[dependencies]
-hyper-simple-server = { path = "../sources", default-features = false, features = [] }
 

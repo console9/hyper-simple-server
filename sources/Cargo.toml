@@ -110,7 +110,7 @@ hss-server-http2 = [
 
 # gate
 hss-server-mt = [
-	"tokio--rt-multi-thread",
+	"hss-runtime-mt",
 ]
 
 # gate
@@ -127,9 +127,9 @@ hss-server-profiling = [
 hss-server-core = [
 	"hss-config",
 	"hss-accepter",
+	"hss-runtime",
 	"hyper--server",
 #	"hyper--runtime", # NOTE:  Optional for timeouts support.
-	"tokio--rt",
 ]
 
 # gate(crate)
@@ -171,6 +171,17 @@ hss-errors = []
 
 # gate
 hss-exports = []
+
+# gate
+hss-runtime = [
+	"tokio--rt",
+]
+
+# gate
+hss-runtime-mt = [
+	"tokio--rt",
+	"tokio--rt-multi-thread",
+]
 
 
 # gate

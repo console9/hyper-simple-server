@@ -75,19 +75,28 @@ impl Routes {
 		};
 		if let Some (_route_matched) = _route_matched {
 			let _route = _route_matched.route.clone ();
-			let mut _request = _request;
-			match _route.handler {
-				RouteHandler::HandlerDynArc (ref _handler) => {
-					_request.extensions_mut () .insert (_route_matched);
-					Ok (_handler.handle (_request))
-				}
-				RouteHandler::RouteHandlerDynArc (ref _handler) =>
-					Ok (_handler.handle (_request, _route_matched)),
-			}
+			Ok (_route.handle (_request, _route_matched))
 		} else if let Some (_fallback) = self.internals.fallback.as_ref () {
 			Ok (_fallback.delegate (_request))
 		} else {
 			Err (_request)
+		}
+	}
+}
+
+
+#[ cfg (feature = "hss-routes") ]
+impl Route {
+	
+	pub fn handle (&self, _request : Request<Body>, _route_matched : RouteMatched) -> HandlerFutureDynBox {
+		let mut _request = _request;
+		match self.handler {
+			RouteHandler::HandlerDynArc (ref _handler) => {
+				_request.extensions_mut () .insert (_route_matched);
+				_handler.handle (_request)
+			}
+			RouteHandler::RouteHandlerDynArc (ref _handler) =>
+				_handler.handle (_request, _route_matched),
 		}
 	}
 }

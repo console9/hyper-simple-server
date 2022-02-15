@@ -294,6 +294,48 @@ impl EndpointProtocol {
 
 
 #[ cfg (feature = "hss-config") ]
+impl Endpoint {
+	
+	pub fn url (&self) -> String {
+		let _scheme = if self.security.supports_tls () { "https" } else { "http" };
+		format! ("{}://{}/", _scheme, self.address.url_authority ())
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+impl EndpointAddress {
+	
+	pub fn url_authority (&self) -> String {
+		match self {
+			EndpointAddress::Socket (_address) =>
+				_address.to_string (),
+			#[ cfg (unix) ]
+			EndpointAddress::Descriptor (_descriptor) =>
+				format! ("[descriptor:{}]", _descriptor),
+		}
+	}
+}
+
+
+#[ cfg (feature = "hss-config") ]
+impl EndpointSecurity {
+	
+	pub fn supports_tls (&self) -> bool {
+		match self {
+			EndpointSecurity::Insecure => false,
+			#[ cfg (feature = "hss-tls-rust") ]
+			EndpointSecurity::RustTls (_) => true,
+			#[ cfg (feature = "hss-tls-native") ]
+			EndpointSecurity::NativeTls (_) => true,
+		}
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-config") ]
 pub struct ConfigurationBuilder {
 	endpoint : Option<Endpoint>,
 	#[ cfg (feature = "hss-handler") ]

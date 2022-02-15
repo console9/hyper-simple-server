@@ -159,6 +159,8 @@ impl Server {
 		
 		let _self = self.internals.read () .or_panic (0x1d2cfbb8);
 		
+		eprintln! ("[ii] [83af6f05]  server listening on `{}`;", _self.configuration.endpoint.url ());
+		
 		let _accepter = Accepter::new (&_self.configuration.endpoint) ?;
 		let _protocol = self.serve_protocol () ?;
 		let _executor = ServerExecutor ();
@@ -213,7 +215,7 @@ impl Server {
 		let _outcome = _future.await;
 		
 		#[ cfg (debug_assertions) ]
-		eprintln! ("\n[ii] [3eff9778]  server terminated;");
+		eprintln! ("[ii] [3eff9778]  server terminated;");
 		
 		let _outcome = _outcome.or_wrap (0x73080376);
 		_outcome

@@ -86,8 +86,10 @@ pub trait ResponseExt <B>
 	where
 		B : BodyTrait,
 {
+	fn status (&self) -> StatusCode;
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self;
 	
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue>;
 	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	
@@ -116,6 +118,22 @@ pub trait ResponseExt <B>
 	fn add_header_string (&mut self, _name : impl IntoHeaderName, _value : String) -> &mut Self {
 		self.add_header (_name, HeaderValue::try_from (_value) .or_panic (0x1ac00c46))
 	}
+	
+	fn content_type (&self) -> Option<ContentType> {
+		if let Some (_content_type) = self.get_header (consts::CONTENT_TYPE) {
+			if let Ok (_content_type) = _content_type.to_str () {
+				ContentType::from_str (_content_type)
+			} else {
+				None
+			}
+		} else {
+			None
+		}
+	}
+	
+	fn content_type_or_unknown (&self) -> ContentType {
+		self.content_type () .unwrap_or (ContentType::Unknown)
+	}
 }
 
 
@@ -124,9 +142,17 @@ impl <B> ResponseExt<B> for Response<B>
 	where
 		B : BodyTrait,
 {
+	fn status (&self) -> StatusCode {
+		self.status ()
+	}
+	
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self {
 		*self.status_mut () = _status;
 		self
+	}
+	
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
+		self.headers () .get (_name)
 	}
 	
 	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {

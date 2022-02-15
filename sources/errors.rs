@@ -34,6 +34,7 @@ pub(crate) mod exports {
 			panic_with_format,
 			panic_with_message,
 			panic_with_code,
+			
 		};
 }
 
@@ -239,5 +240,36 @@ pub fn panic_with_message (_code : u32, _message : &str) -> ! {
 
 pub fn panic_with_code (_code : u32) -> ! {
 	panic! ("[{:08x}]  unexpected error encountered!", _code)
+}
+
+
+
+
+#[ cfg_attr (feature = "hss-errors", macro_export) ]
+macro_rules! fail_with_format {
+	( $_code : literal, $_format : literal, $( $_argument : tt )* ) => {
+		return ::std::result::Result::Err ($crate::error_with_format ($_code, ::std::format_args! ($_format, $( $_argument )* )));
+	}
+}
+
+#[ cfg_attr (feature = "hss-errors", macro_export) ]
+macro_rules! fail_with_message {
+	( $_code : literal, $_message : literal ) => {
+		return ::std::result::Result::Err ($crate::error_with_message ($_code, $_message));
+	};
+}
+
+#[ cfg_attr (feature = "hss-errors", macro_export) ]
+macro_rules! fail_with_code {
+	( $_code : literal ) => {
+		return ::std::result::Result::Err ($crate::error_with_code ($_code));
+	};
+}
+
+#[ cfg_attr (feature = "hss-errors", macro_export) ]
+macro_rules! fail_wrap {
+	( $_code : literal, $_error : expr ) => {
+		return ::std::result::Result::Err ($crate::error_wrap ($_code, $_error));
+	};
 }
 

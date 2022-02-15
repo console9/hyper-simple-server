@@ -7,18 +7,18 @@
 	#! <bash+>
 	Z_log_cut
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zspawn ':: tools / cargo' build --bin example --release --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
 	Z_log_cut
-	exec -- "${_RUST_TARGET}/release/example" "${@}"
+	exec -- "${_RUST_TARGET}/release/${_EXAMPLE_BIN}" "${@}"
 !!
 
 << debug / run / example
 	#! <bash+>
 	Z_log_cut
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zspawn ':: tools / cargo' build --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}"
 	Z_log_cut
-	exec -- "${_RUST_TARGET}/debug/example" "${@}"
+	exec -- "${_RUST_TARGET}/debug/${_EXAMPLE_BIN}" "${@}"
 !!
 
 
@@ -28,14 +28,14 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: tools / cargo' build --bin example --release --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / build / example
 	#! <bash+>
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: tools / cargo' build --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 
@@ -45,13 +45,13 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: tools / cargo' check --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' check --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 
 << debug / lint / example
 	#! <bash+>
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
-	Z_zexec ':: tools / cargo' clippy --bin example --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' clippy --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}"
 !!
 

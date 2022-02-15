@@ -23,6 +23,7 @@
 &&== env-path _RUST_TARGET ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
 
 &&== env-path _EXAMPLES ./examples
+&&== env _EXAMPLE_BIN example
 
 
 

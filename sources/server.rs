@@ -272,37 +272,30 @@ impl Server {
 			server_start_strace ();
 		}
 		
-		let mut _builder_0 = None;
+		let mut _runtime_0 = None;
 		
 		#[ cfg (feature = "hss-server-mt") ]
 		if let Some (_threads) = _self.configuration.threads {
 			if _threads > 0 {
 				#[ cfg (debug_assertions) ]
 				eprintln! ("[ii] [cf4d96e6]  using multi-threaded executor (with {} threads);", _threads);
-				let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
-				_builder.worker_threads (_threads);
-				_builder.max_blocking_threads (_threads * 4);
-				_builder.thread_keep_alive (time::Duration::from_secs (60));
-				_builder_0 = Some (_builder);
+				let _runtime = runtime_multiple_threads (Some (_threads)) ?;
+				_runtime_0 = Some (_runtime);
 			}
 		}
 		
-		if _builder_0.is_none () {
+		if _runtime_0.is_none () {
 			#[ cfg (debug_assertions) ]
 			eprintln! ("[ii] [25065ee8]  using current-thread executor (with 1 thread);");
-			let _builder = tokio::RuntimeBuilder::new_current_thread ();
-			_builder_0 = Some (_builder);
+			let _runtime = runtime_current_thread () ?;
+			_runtime_0 = Some (_runtime);
 		};
+		
+		let _runtime = _runtime_0.infallible (0xfb2d7cfb);
 		
 		#[ cfg (feature = "hss-server-sanitize") ]
 		#[ cfg (debug_assertions) ]
 		eprintln! ("[ii] [3c1badd4]  using URI sanitizer;");
-		
-		let mut _builder = _builder_0.infallible (0xfb2d7cfb);
-		
-		_builder.enable_all ();
-		
-		let _runtime = _builder.build () .or_wrap (0xc29071d8) ?;
 		
 		Ok (_runtime)
 	}
@@ -479,5 +472,26 @@ fn server_start_jemalloc_stats () -> () {
 				thread::sleep (time::Duration::from_secs (1));
 		}
 	});
+}
+
+
+
+
+#[ cfg (feature = "tokio--rt-multi-thread") ]
+pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<tokio::Runtime> {
+	let _threads = _threads.unwrap_or (1);
+	let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
+	_builder.worker_threads (_threads);
+	_builder.max_blocking_threads (_threads * 4);
+	_builder.thread_keep_alive (time::Duration::from_secs (60));
+	_builder.enable_all ();
+	_builder.build () .or_wrap (0x2692223a)
+}
+
+#[ cfg (feature = "tokio--rt") ]
+pub fn runtime_current_thread () -> ServerResult<tokio::Runtime> {
+	let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
+	_builder.enable_all ();
+	_builder.build () .or_wrap (0x280fcb72)
 }
 

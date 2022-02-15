@@ -1,21 +1,31 @@
 
 
 [package]
+
 name = "hyper-simple-server"
 version = "0.3.0"
-authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
-edition = "2018"
 license = "MIT"
+
+edition = "2021"
+rust-version = "1.58"
+resolver = "2"
+publish = false
+
+authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
 repository = "https://github.com/console9/hyper-simple-server"
 documentation = "https://docs.rs/hyper-simple-server"
 description = "Simple friendly wrapper around hyper HTTP server"
+
 autobins = false
 autoexamples = false
 autotests = false
 autobenches = false
 
 
+
+
 [lib]
+
 name = "hyper_simple_server"
 path = "./lib.rs"
 

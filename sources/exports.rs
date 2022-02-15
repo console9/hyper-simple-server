@@ -95,6 +95,8 @@ pub enum ContentType {
 	FontWoff,
 	FontWoff2,
 	
+	Unknown,
+	
 }
 
 
@@ -121,6 +123,51 @@ impl ContentType {
 			ContentType::FontOtf => "font/otf",
 			ContentType::FontWoff => "font/woff",
 			ContentType::FontWoff2 => "font/woff2",
+			
+			Unknown => "application/octet-stream",
+		}
+	}
+	
+	pub fn from_str (_string : &str) -> Option<Self> {
+		match _string {
+			
+			"text/plain; charset=utf-8" | "text/plain" =>
+				Some (ContentType::Text),
+			"text/html; charset=utf-8" | "" =>
+				Some (ContentType::Html),
+			"text/css; charset=utf-8" | "" =>
+				Some (ContentType::Css),
+			"application/javascript; charset=utf-8" | "" =>
+				Some (ContentType::Js),
+			
+			"application/json; charset=utf-8" | "" =>
+				Some (ContentType::Json),
+			"application/xml; charset=utf-8" | "" =>
+				Some (ContentType::Xml),
+			
+			"image/png" =>
+				Some (ContentType::Png),
+			"image/jpeg" =>
+				Some (ContentType::Jpeg),
+			"image/svg+xml" =>
+				Some (ContentType::Svg),
+			"image/vnd.microsoft.icon" =>
+				Some (ContentType::Icon),
+			
+			"font/ttf" =>
+				Some (ContentType::FontTtf),
+			"font/otf" =>
+				Some (ContentType::FontOtf),
+			"font/woff" =>
+				Some (ContentType::FontWoff),
+			"font/woff2" =>
+				Some (ContentType::FontWoff2),
+			
+			"application/octet-stream" =>
+				Some (ContentType::Unknown),
+			
+			_ =>
+				None,
 		}
 	}
 }

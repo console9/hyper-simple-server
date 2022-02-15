@@ -37,7 +37,7 @@ pub trait RequestExt <B>
 #[ cfg (feature = "hss-extensions") ]
 impl <B> RequestExt<B> for Request<B>
 	where
-		B : BodyTrait
+		B : BodyTrait,
 {
 	fn is_get (&self) -> bool {
 		self.method () == Method::GET
@@ -597,6 +597,62 @@ impl Handler for EmbeddedResource {
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _response = self.response ();
 		future::ready (Ok (_response.map (BodyWrapper::new)))
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-extensions") ]
+#[ cfg (feature = "tokio--rt") ]
+pub trait BodyExt {
+	
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&tokio::Runtime>) -> ServerResult;
+	
+	fn consume_to_vec (&mut self, _runtime : Option<&tokio::Runtime>) -> ServerResult<Vec<u8>> {
+		let mut _buffer = Vec::new ();
+		self.consume_into_vec (&mut _buffer, _runtime) ?;
+		Ok (_buffer)
+	}
+}
+
+
+#[ cfg (feature = "hss-extensions") ]
+#[ cfg (feature = "tokio--rt") ]
+impl <B> BodyExt for B
+	where
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : Error + Send + Sync + 'static,
+{
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&tokio::Runtime>) -> ServerResult {
+		
+		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
+		
+		let _runtime_0 = if _runtime.is_none () {
+			Some (tokio::RuntimeBuilder::new_current_thread () .build () .or_wrap (0x6d0d289e) ?)
+		} else {
+			None
+		};
+		
+		let _runtime = _runtime.or (_runtime_0.as_ref ()) .unwrap ();
+		
+		loop {
+			let _next = _runtime.block_on (self.data ());
+			let _next = if let Some (_next) = _next {
+				_next
+			} else {
+				break;
+			};
+			let mut _data = _next.or_wrap (0x401ac565) ?;
+			while _data.remaining () > 0 {
+				let _chunk = _data.chunk ();
+				_buffer.extend (_chunk);
+				let _chunk_size = _chunk.len ();
+				_data.advance (_chunk_size);
+			}
+		}
+		
+		Ok (())
 	}
 }
 

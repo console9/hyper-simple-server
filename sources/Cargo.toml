@@ -1,4 +1,9 @@
 
+################################################################################
+################################################################################
+
+
+
 
 [package]
 
@@ -28,6 +33,12 @@ autobenches = false
 
 name = "hyper_simple_server"
 path = "./lib.rs"
+
+
+
+
+################################################################################
+################################################################################
 
 
 
@@ -225,6 +236,12 @@ features-none = []
 
 
 
+################################################################################
+################################################################################
+
+
+
+
 [dependencies]
 
 hyper = { version = "0.14.13", default-features = false, features = [], optional = true }
@@ -248,4 +265,84 @@ cpuprofiler = { version = "0.0.4", default-features = false, features = [], opti
 
 jemallocator = { version = "0.3.2", default-features = false, features = [], optional = true }
 jemalloc-sys = { version = "0.3.2", default-features = false, features = [], optional = true }
+
+
+
+
+################################################################################
+################################################################################
+
+
+
+
+[profile.dev]
+incremental = true
+codegen-units = 1024
+opt-level = 0
+lto = "off"
+debug = 2
+debug-assertions = true
+overflow-checks = true
+panic = "unwind"
+
+[profile.test]
+incremental = true
+codegen-units = 1024
+opt-level = 0
+lto = "off"
+debug = 2
+debug-assertions = true
+overflow-checks = true
+
+[profile.release]
+incremental = false
+codegen-units = 1
+opt-level = 3
+lto = "fat"
+debug = 1
+debug-assertions = false
+overflow-checks = true
+panic = "abort"
+
+[profile.bench]
+incremental = false
+codegen-units = 1
+opt-level = 3
+lto = "fat"
+debug = 1
+debug-assertions = false
+overflow-checks = true
+
+
+[profile.dev.package."*"]
+incremental = false
+codegen-units = 1
+opt-level = 3
+debug = 2
+debug-assertions = true
+overflow-checks = true
+
+
+[profile.dev.build-override]
+incremental = false
+codegen-units = 1
+opt-level = 3
+debug = 2
+debug-assertions = true
+overflow-checks = true
+
+
+[profile.release.build-override]
+incremental = false
+codegen-units = 1
+opt-level = 3
+debug = 1
+debug-assertions = false
+overflow-checks = true
+
+
+
+
+################################################################################
+################################################################################
 

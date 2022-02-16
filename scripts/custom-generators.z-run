@@ -56,7 +56,7 @@
 	{{ end }}
 	
 	{{ range $_, $_feature := $_features }}
-	:: features / set / {{ $_feature }} :: export -- _RUST_FEATURES={{ $_feature | shell_quote }}
+	:: rust / features / set / {{ $_feature }} :: export -- _RUST_FEATURES={{ $_feature | shell_quote }}
 	{{ end }}
 !!
 

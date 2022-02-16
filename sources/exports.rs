@@ -130,7 +130,7 @@ impl ContentType {
 			ContentType::FontWoff => "font/woff",
 			ContentType::FontWoff2 => "font/woff2",
 			
-			Unknown => "application/octet-stream",
+			ContentType::Unknown => "application/octet-stream",
 		}
 	}
 	
@@ -139,16 +139,16 @@ impl ContentType {
 			
 			"text/plain; charset=utf-8" | "text/plain" =>
 				Some (ContentType::Text),
-			"text/html; charset=utf-8" | "" =>
+			"text/html; charset=utf-8" | "text/html" =>
 				Some (ContentType::Html),
-			"text/css; charset=utf-8" | "" =>
+			"text/css; charset=utf-8" | "text/css" =>
 				Some (ContentType::Css),
-			"application/javascript; charset=utf-8" | "" =>
+			"application/javascript; charset=utf-8" | "application/javascript" =>
 				Some (ContentType::Js),
 			
-			"application/json; charset=utf-8" | "" =>
+			"application/json; charset=utf-8" | "application/json" =>
 				Some (ContentType::Json),
-			"application/xml; charset=utf-8" | "" =>
+			"application/xml; charset=utf-8" | "application/xml" =>
 				Some (ContentType::Xml),
 			
 			"image/png" =>

@@ -9,30 +9,32 @@ use hss::ResponseExtBuild as _;
 
 fn main () -> hss::ServerResult {
 	
-	let _main = "echo";
+	let _arguments = ::std::env::args_os () .into_iter () .skip (1) .collect::<Vec<_>> ();
+	let _main = _arguments.first () .map (|_string| _string.to_string_lossy () .into_owned ());
 	
-	let _main = match std::env::var ("HSS_EXAMPLE_MAIN") {
-		Ok (_value) => _value,
-		Err (std::env::VarError::NotPresent) => String::from (_main),
-		Err (_error) => Err (hss::error_wrap (0xfe7f8e93, _error)) ?,
+	type Main = fn (&[::std::ffi::OsString]) -> hss::ServerResult;
+	
+	let (_main, _arguments) : (Main, _) = match _main.as_deref () {
+		
+		None =>
+			(main_with_echo, &_arguments[..]),
+		Some ("echo") =>
+			(main_with_echo, &_arguments[1..]),
+		Some ("routes") =>
+			(main_with_routes, &_arguments[1..]),
+		Some ("handler_sync") =>
+			(main_with_handler_sync, &_arguments[1..]),
+		Some (_main) =>
+			Err (hss::error_with_format (0xa5dbefb7, format_args! ("invalid main `{}`", _main))) ?,
 	};
 	
-	let _main = match _main.as_str () {
-		
-		"echo" => main_with_echo,
-		"routes" => main_with_routes,
-		"handler_sync" => main_with_handler_sync,
-		
-		_ => Err (hss::error_with_format (0xa5dbefb7, format_args! ("invalid main `{}`", _main))) ?,
-	};
-	
-	return _main ();
+	return _main (_arguments);
 }
 
 
 
 
-fn main_with_routes () -> hss::ServerResult {
+fn main_with_routes (_arguments : &[::std::ffi::OsString]) -> hss::ServerResult {
 	
 	eprintln! ("[ii] [f8f30521]  starting `routes` server...");
 	
@@ -56,13 +58,13 @@ fn main_with_routes () -> hss::ServerResult {
 			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)
 			.build () ?;
 	
-	return hss::main_with_routes (_routes, None);
+	return hss::main_with_routes (_routes, None, Some (_arguments));
 }
 
 
 
 
-fn main_with_handler_sync () -> hss::ServerResult {
+fn main_with_handler_sync (_arguments : &[::std::ffi::OsString]) -> hss::ServerResult {
 	
 	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
@@ -72,13 +74,13 @@ fn main_with_handler_sync () -> hss::ServerResult {
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
 	
-	return hss::main_with_handler (_handler, None);
+	return hss::main_with_handler (_handler, None, Some (_arguments));
 }
 
 
 
 
-fn main_with_echo () -> hss::ServerResult {
+fn main_with_echo (_arguments : &[::std::ffi::OsString]) -> hss::ServerResult {
 	
 	eprintln! ("[ii] [53dc40d3]  starting `echo` server...");
 	
@@ -90,6 +92,6 @@ fn main_with_echo () -> hss::ServerResult {
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
 	
-	return hss::main_with_handler (_handler, None);
+	return hss::main_with_handler (_handler, None, Some (_arguments));
 }
 

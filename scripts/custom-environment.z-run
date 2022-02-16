@@ -1,10 +1,6 @@
 #!/dev/null
 
 
-:: environment / example / use / echo :: export -- HSS_EXAMPLE_MAIN=echo
-:: environment / example / use / routes :: export -- HSS_EXAMPLE_MAIN=routes
-:: environment / example / use / handler_sync :: export -- HSS_EXAMPLE_MAIN=handler_sync
-
 :: features / set / quick / full :: export -- _RUST_FEATURES=hss-full
 :: features / set / quick / full + jemalloc :: export -- _RUST_FEATURES=hss-full,hss-jemalloc
 :: features / set / quick / full + jemalloc-debug :: export -- _RUST_FEATURES=hss-full,hss-jemalloc,hss-server-debug-jemalloc

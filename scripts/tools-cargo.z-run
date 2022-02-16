@@ -14,7 +14,18 @@
 	_arguments=()
 	
 	case "${_command}" in
-		( check | build | run | doc | clippy | publish )
+		( check | build | run | doc | clippy )
+			_arguments+=(
+					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
+					--target-dir "${_RUST_OUTPUTS}"
+				)
+			if test "${_RUST_TARGET}" != native ; then
+				_arguments+=(
+						--target "${_RUST_TARGET}"
+					)
+			fi
+		;;
+		( publish )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 					--target-dir "${_RUST_OUTPUTS}"

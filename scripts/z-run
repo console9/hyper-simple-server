@@ -13,6 +13,7 @@
 ::// *
 
 ::// features / ...
+::// rust / ...
 ::// tls / ...
 
 
@@ -21,9 +22,10 @@
 &&== env _RUST_CRATE hyper_simple_server
 &&== env-path _RUST_SOURCES ./sources
 &&== env-path _RUST_OUTPUTS ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
+&&== env-fallback _RUST_TARGET native1
 
 &&== env-path _EXAMPLES ./examples
-&&== env _EXAMPLE_BIN example
+&&== env-fallback _EXAMPLE_BIN example
 
 
 

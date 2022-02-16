@@ -607,9 +607,9 @@ impl Handler for EmbeddedResource {
 #[ cfg (feature = "tokio--rt") ]
 pub trait BodyExt {
 	
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&tokio::Runtime>) -> ServerResult;
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> ServerResult;
 	
-	fn consume_to_vec (&mut self, _runtime : Option<&tokio::Runtime>) -> ServerResult<Vec<u8>> {
+	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> ServerResult<Vec<u8>> {
 		let mut _buffer = Vec::new ();
 		self.consume_into_vec (&mut _buffer, _runtime) ?;
 		Ok (_buffer)
@@ -624,7 +624,7 @@ impl <B> BodyExt for B
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : Error + Send + Sync + 'static,
 {
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&tokio::Runtime>) -> ServerResult {
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> ServerResult {
 		
 		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
 		

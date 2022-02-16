@@ -255,7 +255,7 @@ impl Server {
 		Ok (_http)
 	}
 	
-	pub fn serve_runtime (&self) -> ServerResult<tokio::Runtime> {
+	pub fn serve_runtime (&self) -> ServerResult<Runtime> {
 		
 		let _self = self.internals.read () .or_panic (0x6db68b39);
 		
@@ -478,7 +478,7 @@ fn server_start_jemalloc_stats () -> () {
 
 
 #[ cfg (feature = "tokio--rt-multi-thread") ]
-pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<tokio::Runtime> {
+pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<Runtime> {
 	let _threads = _threads.unwrap_or (1);
 	let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
 	_builder.worker_threads (_threads);
@@ -489,7 +489,7 @@ pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<tokio
 }
 
 #[ cfg (feature = "tokio--rt") ]
-pub fn runtime_current_thread () -> ServerResult<tokio::Runtime> {
+pub fn runtime_current_thread () -> ServerResult<Runtime> {
 	let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
 	_builder.enable_all ();
 	_builder.build () .or_wrap (0x280fcb72)

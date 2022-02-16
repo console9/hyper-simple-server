@@ -9,7 +9,7 @@
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
 	Z_log_cut
-	exec -- "${_RUST_TARGET}/release/${_EXAMPLE_BIN}" "${@}"
+	exec -- "${_RUST_OUTPUTS}/release/${_EXAMPLE_BIN}" "${@}"
 !!
 
 << debug / run / example
@@ -18,7 +18,7 @@
 	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}"
 	Z_log_cut
-	exec -- "${_RUST_TARGET}/debug/${_EXAMPLE_BIN}" "${@}"
+	exec -- "${_RUST_OUTPUTS}/debug/${_EXAMPLE_BIN}" "${@}"
 !!
 
 

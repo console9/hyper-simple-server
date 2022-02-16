@@ -17,7 +17,7 @@
 		( check | build | run | doc | clippy | publish )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
-					--target-dir "${_RUST_TARGET}"
+					--target-dir "${_RUST_OUTPUTS}"
 				)
 		;;
 		( metadata | update | tree | outdated )
@@ -36,7 +36,7 @@
 			fi
 			if test "${_command}" == exec-with-target -o "${_command}" == exec ; then
 				_arguments+=(
-						--target-dir "${_RUST_TARGET}"
+						--target-dir "${_RUST_OUTPUTS}"
 					)
 			fi
 		;;
@@ -45,11 +45,11 @@
 		;;
 	esac
 	
-	if test ! -e "${_RUST_TARGET}" -a -h "${_RUST_TARGET}" ; then
-		mkdir -- "$( exec -- readlink -f -- "${_RUST_TARGET}" )"
+	if test ! -e "${_RUST_OUTPUTS}" -a -h "${_RUST_OUTPUTS}" ; then
+		mkdir -- "$( exec -- readlink -f -- "${_RUST_OUTPUTS}" )"
 	fi
-	if test ! -e "${_RUST_TARGET}" ; then
-		mkdir -- "${_RUST_TARGET}"
+	if test ! -e "${_RUST_OUTPUTS}" ; then
+		mkdir -- "${_RUST_OUTPUTS}"
 	fi
 	
 	exec -- \

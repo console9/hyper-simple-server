@@ -20,10 +20,11 @@
 
 &&== env _RUST_CRATE hyper_simple_server
 &&== env-path _RUST_SOURCES ./sources
-&&== env-path _RUST_TARGET ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
+&&== env-path _RUST_OUTPUTS ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
 
 &&== env-path _EXAMPLES ./examples
 &&== env _EXAMPLE_BIN example
+
 
 
 

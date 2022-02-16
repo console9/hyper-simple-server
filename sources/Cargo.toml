@@ -73,7 +73,7 @@ hss-full-http2 = [
 hss-full-common = [
 	"hss-server-mt",
 	"hss-server-sanitize",
-	"hss-server-profiling",
+#	"hss-server-profiling", # NOTE:  Breaks OSX builds.
 	"hss-handler",
 	"hss-routes",
 	"hss-config",

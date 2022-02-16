@@ -245,31 +245,35 @@ pub fn panic_with_code (_code : u32) -> ! {
 
 
 
-#[ cfg_attr (feature = "hss-errors", macro_export) ]
+#[ cfg (feature = "hss-errors") ]
+#[ macro_export ]
 macro_rules! fail_with_format {
 	( $_code : literal, $_format : literal, $( $_argument : tt )* ) => {
-		return ::std::result::Result::Err ($crate::error_with_format ($_code, ::std::format_args! ($_format, $( $_argument )* )));
+		return ::std::result::Result::Err ($crate::error_with_format ($_code, ::std::format_args! ($_format, $( $_argument )* )))
 	}
 }
 
-#[ cfg_attr (feature = "hss-errors", macro_export) ]
+#[ cfg (feature = "hss-errors") ]
+#[ macro_export ]
 macro_rules! fail_with_message {
 	( $_code : literal, $_message : literal ) => {
-		return ::std::result::Result::Err ($crate::error_with_message ($_code, $_message));
+		return ::std::result::Result::Err ($crate::error_with_message ($_code, $_message))
 	};
 }
 
-#[ cfg_attr (feature = "hss-errors", macro_export) ]
+#[ cfg (feature = "hss-errors") ]
+#[ macro_export ]
 macro_rules! fail_with_code {
 	( $_code : literal ) => {
-		return ::std::result::Result::Err ($crate::error_with_code ($_code));
+		return ::std::result::Result::Err ($crate::error_with_code ($_code))
 	};
 }
 
-#[ cfg_attr (feature = "hss-errors", macro_export) ]
+#[ cfg (feature = "hss-errors") ]
+#[ macro_export ]
 macro_rules! fail_wrap {
 	( $_code : literal, $_error : expr ) => {
-		return ::std::result::Result::Err ($crate::error_wrap ($_code, $_error));
+		return ::std::result::Result::Err ($crate::error_wrap ($_code, $_error))
 	};
 }
 

@@ -363,7 +363,7 @@ impl ConfigurationArguments {
 				Err (0) =>
 					::std::process::exit (0),
 				Err (_code) =>
-					fail_with_message! (0x4fec67d5, "invalid arguments!"),
+					return Err (error_with_message (0x4fec67d5, "invalid arguments!")),
 			}
 		}
 		

@@ -179,7 +179,7 @@ hss-runtime = [
 
 # gate
 hss-runtime-mt = [
-	"tokio--rt",
+	"hss-runtime",
 	"tokio--rt-multi-thread",
 ]
 

@@ -59,6 +59,8 @@
 	hss-jemalloc
 	hss-main
 	hss-routes
+	hss-runtime
+	hss-runtime-mt
 	hss-sanitize
 	hss-server-full
 	hss-server-http1

@@ -341,19 +341,39 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn parse (_configuration : Configuration) -> ServerResult<Configuration> {
-		Self::parse_with_extensions (_configuration, ())
+	pub fn parse (_configuration : Configuration, _arguments : Option<&[OsString]>) -> ServerResult<Configuration> {
+		Self::parse_with_extensions (_configuration, (), _arguments)
 	}
 	
-	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions) -> ServerResult<Configuration>
-	{
+	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<&[OsString]>) -> ServerResult<Configuration> {
+		
+		let mut _arguments : Vec<String> = {
+			let _arguments = if let Some (_arguments) = _arguments {
+				_arguments.to_vec ()
+			} else {
+				env::args_os () .into_iter () .skip (1) .collect ()
+			};
+			_arguments.into_iter ()
+				.map (OsString::into_string)
+				.map (|_result| _result.unwrap_or_else (|_string| _string.to_string_lossy () .into_owned ()))
+				.collect ()
+		};
+		_arguments.insert (0, "<cli>".into ());
+		
 		let mut _self = Self::with_defaults (&_configuration) ?;
 		
 		{
 			let mut _parser = argparse::ArgumentParser::new ();
 			_self.prepare (&mut _parser);
 			_extensions.prepare (&mut _parser);
-			_parser.parse_args_or_exit ();
+			match _parser.parse (_arguments, &mut io::stdout (), &mut io::stderr ()) {
+				Ok (()) =>
+					(),
+				Err (0) =>
+					::std::process::exit (0),
+				Err (_code) =>
+					::std::process::exit (_code),
+			}
 		}
 		
 		_self.update (&mut _configuration) ?;

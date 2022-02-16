@@ -634,7 +634,7 @@ impl <B> BodyExt for B
 			None
 		};
 		
-		let _runtime = _runtime.or (_runtime_0.as_ref ()) .unwrap ();
+		let _runtime = _runtime.or (_runtime_0.as_ref ()) .infallible (0x022bb6d6);
 		
 		loop {
 			let _next = _runtime.block_on (self.data ());

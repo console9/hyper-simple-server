@@ -50,6 +50,7 @@ pub(crate) use ::std::sync::RwLock;
 pub(crate) use ::std::task::Poll;
 pub(crate) use ::std::task::Context;
 
+pub(crate) use ::std::ffi::OsStr;
 pub(crate) use ::std::ffi::OsString;
 
 

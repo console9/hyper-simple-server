@@ -341,23 +341,14 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn parse (_configuration : Configuration, _arguments : Option<&[OsString]>) -> ServerResult<Configuration> {
+	pub fn parse (_configuration : Configuration, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
 		Self::parse_with_extensions (_configuration, (), _arguments)
 	}
 	
-	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<&[OsString]>) -> ServerResult<Configuration> {
+	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
 		
-		let mut _arguments : Vec<String> = {
-			let _arguments = if let Some (_arguments) = _arguments {
-				_arguments.to_vec ()
-			} else {
-				env::args_os () .into_iter () .skip (1) .collect ()
-			};
-			_arguments.into_iter ()
-				.map (OsString::into_string)
-				.map (|_result| _result.unwrap_or_else (|_string| _string.to_string_lossy () .into_owned ()))
-				.collect ()
-		};
+		let _arguments = CliArguments::unwrap_or_args (_arguments);
+		let mut _arguments = _arguments.into_vec_str ();
 		_arguments.insert (0, "<cli>".into ());
 		
 		let mut _self = Self::with_defaults (&_configuration) ?;
@@ -437,6 +428,77 @@ impl <const N : usize> CliExtensions for [CliArgument<'_>; N] {
 		for _argument in self {
 			_argument.prepare (_parser);
 		}
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+pub struct CliArguments (Vec<OsString>);
+
+
+#[ cfg (feature = "hss-config") ]
+#[ cfg (feature = "hss-cli") ]
+impl CliArguments {
+	
+	pub fn unwrap_or_args (_arguments : Option<CliArguments>) -> CliArguments {
+		_arguments.unwrap_or_else (CliArguments::from_args)
+	}
+	
+	pub fn from_args () -> CliArguments {
+		CliArguments (env::args_os () .into_iter () .skip (1) .collect ())
+	}
+	
+	pub fn from_vec_os (_arguments : Vec<OsString>) -> CliArguments {
+		CliArguments (_arguments)
+	}
+	
+	pub fn from_vec_str (_arguments : Vec<String>) -> CliArguments {
+		CliArguments::from_vec_os (_arguments.into_iter () .map (OsString::from) .collect ())
+	}
+	
+	pub fn into_vec_os (self) -> Vec<OsString> {
+		self.0
+	}
+	
+	pub fn into_vec_str (self) -> Vec<String> {
+		self.into_vec_os ()
+				.into_iter ()
+				.map (OsString::into_string)
+				.map (|_result| _result.unwrap_or_else (|_string| _string.to_string_lossy () .into_owned ()))
+				.collect ()
+	}
+	
+	pub fn is_empty (&self) -> bool {
+		self.0.is_empty ()
+	}
+	
+	pub fn first_os (&self) -> Option<&OsStr> {
+		self.0.first () .map (|_string| _string.as_ref ())
+	}
+	
+	pub fn first_str (&self) -> Option<&str> {
+		self.0.first () .and_then (|_string| _string.to_str ())
+	}
+	
+	pub fn remove_first_os (&mut self) -> Option<OsString> {
+		if self.0.is_empty () {
+			return None;
+		}
+		Some (self.0.remove (0))
+	}
+	
+	pub fn remove_first_str (&mut self) -> Option<String> {
+		self.remove_first_os ()
+				.map (OsString::into_string)
+				.map (|_result| _result.unwrap_or_else (|_string| _string.to_string_lossy () .into_owned ()))
+	}
+	
+	pub fn without_first (mut self) -> Self {
+		self.remove_first_os ();
+		self
 	}
 }
 

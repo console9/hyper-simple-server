@@ -437,6 +437,11 @@ impl <const N : usize> CliExtensions for [CliArgument<'_>; N] {
 #[ cfg (feature = "hss-cli") ]
 pub struct CliArguments (Vec<OsString>);
 
+#[ cfg (not (feature = "hss-cli")) ]
+pub struct CliArguments {
+	_private : (),
+}
+
 
 #[ cfg (feature = "hss-cli") ]
 impl CliArguments {

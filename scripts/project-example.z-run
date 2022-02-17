@@ -55,3 +55,20 @@
 	Z_zexec ':: tools / cargo' clippy --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 !!
 
+
+
+
+<< dependencies / update / conservative / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' update
+!!
+
+<< dependencies / update / aggressive / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' update --aggressive
+!!
+

@@ -31,12 +31,12 @@
 			read -p "[>>]  please confirm action by entering \`${_token}\`: " -r -- _input
 			Z_enforce 0xcb389fe6 'invalid confirmation token!' test "${_token}" == "${_input}"
 			Z_log_cut
-			Z_zspawn ':: tools / cargo' publish
+			Z_zspawn ':: tools / cargo' publish --locked
 			Z_log_cut
 		;;
 		( test )
 			Z_log_cut
-			Z_zspawn ':: tools / cargo' publish --dry-run
+			Z_zspawn ':: tools / cargo' publish --dry-run --locked
 			Z_log_cut
 		;;
 		( * )

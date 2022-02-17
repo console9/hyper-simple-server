@@ -25,6 +25,7 @@
 			--all-features \
 			--format '{p}' \
 			--prefix indent \
+			--locked \
 	#
 !!
 
@@ -35,6 +36,7 @@
 			--all-features \
 			--format ' | {p}' \
 			--prefix depth \
+			--locked \
 	| tail -n +2 \
 	| sort \
 	#
@@ -48,6 +50,7 @@
 			--no-dedupe \
 			--format '{p}' \
 			--prefix none \
+			--locked \
 	| tail -n +2 \
 	| cut -f 1,2 -d ' ' \
 	| sort -u \
@@ -62,6 +65,7 @@
 			--no-dedupe \
 			--format '{p}' \
 			--prefix none \
+			--locked \
 	| tail -n +2 \
 	| cut -f 1 -d ' ' \
 	| sort -u \
@@ -77,6 +81,7 @@
 			--no-dedupe \
 			--format '{p}' \
 			--prefix none \
+			--locked \
 	| tail -n +2 \
 	| cut -f 1,2 -d ' ' \
 	| sort -u \
@@ -86,6 +91,7 @@
 	Z_zspawn ':: tools / cargo' metadata \
 			--format-version 1 \
 			--no-deps \
+			--locked \
 	| jq -r '.workspace_members[]' \
 	| sed -r -e 's#^([^ ]+) ([^ ]+) \([^ ]+\)$#\1:\2#' \
 	#
@@ -99,6 +105,7 @@
 			--no-dedupe \
 			--format '{l} | {p}' \
 			--prefix none \
+			--locked \
 	| tail -n +2 \
 	| sort -u \
 	#

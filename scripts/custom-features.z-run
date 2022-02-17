@@ -112,7 +112,7 @@
 << features / list / cargo / all
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
+	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
 	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .key' \
 	| sort -u \
 	#
@@ -121,7 +121,7 @@
 << features / list / cargo / used
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
+	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
 	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .value | .[]' \
 	| sort -u \
 	#
@@ -130,7 +130,7 @@
 << features / list / cargo / dependencies
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 \
+	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
 	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .dependencies | .[] | .name' \
 	| sort -u \
 	#

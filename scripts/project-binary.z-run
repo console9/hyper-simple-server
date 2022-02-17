@@ -6,7 +6,7 @@
 << release / run / bin
 	#! <bash+>
 	Z_log_cut
-	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 	Z_log_cut
 	exec -- "${_RUST_OUTPUTS}/release/${_RUST_BINARY}" "${@}"
 !!
@@ -14,7 +14,7 @@
 << debug / run / bin
 	#! <bash+>
 	Z_log_cut
-	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 	Z_log_cut
 	exec -- "${_RUST_OUTPUTS}/debug/${_RUST_BINARY}" "${@}"
 !!
@@ -25,13 +25,13 @@
 << release / build / bin
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 !!
 
 << debug / build / bin
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 !!
 
 
@@ -40,12 +40,12 @@
 << debug / check / bin
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' check --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' check --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 !!
 
 << debug / lint / bin
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' clippy --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}"
+	Z_zexec ':: tools / cargo' clippy --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES:-default}" --locked
 !!
 

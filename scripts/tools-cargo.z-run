@@ -31,7 +31,7 @@
 					--target-dir "${_RUST_OUTPUTS}"
 				)
 		;;
-		( metadata | update | tree | outdated )
+		( metadata | update | fetch | tree | outdated )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 				)

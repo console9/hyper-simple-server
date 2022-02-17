@@ -15,6 +15,12 @@
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
+<< dependencies / fetch
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' fetch --locked
+!!
+
 
 
 

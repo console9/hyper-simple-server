@@ -72,3 +72,10 @@
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
+<< dependencies / fetch / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' fetch --locked
+!!
+

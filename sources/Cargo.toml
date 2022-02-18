@@ -82,6 +82,7 @@ hss-full-common = [
 	"hss-tls-native",
 	"hss-exports",
 	"hss-extensions",
+	"hss-resources",
 	"hss-errors",
 	"hss-sanitize",
 	"hss-main",
@@ -163,6 +164,12 @@ hss-sanitize = [
 # gate
 hss-extensions = [
 	"hyper--http",
+]
+
+# gate
+hss-resources = [
+	"hss-handler",
+	"hss-extensions",
 ]
 
 

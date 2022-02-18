@@ -58,6 +58,7 @@
 	hss-handler
 	hss-jemalloc
 	hss-main
+	hss-resources
 	hss-routes
 	hss-runtime
 	hss-runtime-mt

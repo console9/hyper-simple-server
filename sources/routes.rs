@@ -243,7 +243,7 @@ impl RoutesBuilder {
 			let _route = Route {
 					path : String::from (_path),
 					handler : RouteHandler::HandlerDynArc (_handler.clone_arc ()),
-					debug : None,
+					extensions : http::Extensions::new (),
 				};
 			self = self.with_route_object (_route);
 		}
@@ -264,7 +264,7 @@ impl RoutesBuilder {
 pub struct Route {
 	pub path : String,
 	pub handler : RouteHandler,
-	pub debug : Option<Box<dyn fmt::Debug + Send + Sync>>,
+	pub extensions : http::Extensions,
 }
 
 
@@ -442,6 +442,34 @@ impl <'a> From<&'a [&'a str; 4]> for RoutePaths<'a> {
 impl <'a> From<&'a [&'a str; 5]> for RoutePaths<'a> {
 	fn from (_paths : &'a [&'a str; 5]) -> Self {
 		RoutePaths::Slice (&_paths[..])
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-routes") ]
+pub struct RouteDebug {
+	pub debug : Box<dyn fmt::Debug + Send + Sync>,
+}
+
+
+#[ cfg (feature = "hss-routes") ]
+impl RouteDebug {
+	
+	pub fn new (_debug : impl fmt::Debug + Send + Sync + 'static) -> Self {
+		Self {
+				debug : Box::new (_debug),
+			}
+	}
+}
+
+
+#[ cfg (feature = "hss-routes") ]
+impl fmt::Debug for RouteDebug {
+	
+	fn fmt (&self, _formatter : &mut fmt::Formatter) -> Result<(), fmt::Error> {
+		self.debug.deref () .fmt (_formatter)
 	}
 }
 

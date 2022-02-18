@@ -37,6 +37,8 @@ pub use http::{
 		
 		header::AsHeaderName,
 		header::IntoHeaderName,
+		
+		Extensions,
 };
 
 #[ cfg (feature = "http-body") ]

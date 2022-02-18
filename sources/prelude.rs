@@ -27,6 +27,9 @@ pub(crate) use ::std::*;
 pub(crate) use ::std::prelude::v1::*;
 
 
+pub(crate) use ::std::fmt;
+
+
 pub(crate) use ::std::convert::From;
 pub(crate) use ::std::convert::Into;
 pub(crate) use ::std::convert::TryInto;

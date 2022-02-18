@@ -111,7 +111,7 @@ impl Server
 	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
-			let _self = self.internals.read () .or_panic (0x1d2cfbb8);
+			let _self = self.internals.read () .or_panic (0x0a78cbe3);
 			if let Some (_path) = &_self.configuration.profiling {
 				Some (ProfilingSession::new_and_start (_path) ?)
 			} else {
@@ -157,7 +157,7 @@ impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
 		
-		let _self = self.internals.read () .or_panic (0x1d2cfbb8);
+		let _self = self.internals.read () .or_panic (0x62cbf380);
 		
 		eprintln! ("[ii] [83af6f05]  server listening on `{}`;", _self.configuration.endpoint.url ());
 		
@@ -223,7 +223,7 @@ impl Server {
 	
 	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {
 		
-		let _self = self.internals.read () .or_panic (0x6db68b39);
+		let _self = self.internals.read () .or_panic (0xdd5eec49);
 		let _protocol = &_self.configuration.endpoint.protocol;
 		
 		let mut _http = hyper::Http::new ();
@@ -257,12 +257,12 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> ServerResult<Runtime> {
 		
-		let _self = self.internals.read () .or_panic (0x6db68b39);
+		let _self = self.internals.read () .or_panic (0xfc9b9ffb);
 		
 		#[ cfg (feature = "hss-jemalloc") ]
 		if true {
 			#[ cfg (debug_assertions) ]
-			eprintln! ("[ii] [8291112d]  using `jemalloc` allocator;");
+			eprintln! ("[ii] [cecdcf1b]  using `jemalloc` allocator;");
 			#[ cfg (feature = "hss-server-debug-jemalloc") ]
 			server_start_jemalloc_stats ();
 		}
@@ -448,7 +448,7 @@ fn server_start_strace () -> () {
 fn server_start_jemalloc_stats () -> () {
 	
 	#[ cfg (debug_assertions) ]
-	eprintln! ("[ii] [8291112d]  starting `jemalloc` tracing...");
+	eprintln! ("[ii] [19f5dcf1]  starting `jemalloc` tracing...");
 	
 	extern "C" fn _write (_ : * mut os::raw::c_void, _message : * const os::raw::c_char) {
 		#[ allow (unsafe_code) ]

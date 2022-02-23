@@ -33,8 +33,10 @@ impl Routes {
 	
 	pub fn into_builder (self) -> RoutesBuilder {
 		let _routes = self.internals.list.clone ();
+		let _fallback = self.internals.fallback.clone ();
 		RoutesBuilder {
 				routes : _routes,
+				fallback : _fallback,
 			}
 	}
 	
@@ -120,6 +122,7 @@ impl Handler for Routes {
 #[ cfg (feature = "hss-routes") ]
 pub struct RoutesBuilder {
 	pub routes : Vec<Arc<Route>>,
+	pub fallback : Option<HandlerDynArc>,
 }
 
 
@@ -129,16 +132,17 @@ impl RoutesBuilder {
 	pub fn new () -> Self {
 		Self {
 				routes : Vec::new (),
+				fallback : None,
 			}
 	}
 	
 	pub fn build (self) -> ServerResult<Routes> {
 		
 		let _routes = self.routes;
+		let mut _fallback = self.fallback;
 		
 		let mut _tree = path_tree::PathTree::new ();
 		let mut _list = Vec::with_capacity (_routes.len ());
-		let mut _fallback = None;
 		
 		for _route in _routes.into_iter () {
 			if _route.path.is_empty () {

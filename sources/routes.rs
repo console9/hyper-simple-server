@@ -45,6 +45,7 @@ impl Routes {
 			let _route = _route.clone ();
 			let _parameters = _parameters.into_iter () .map (|(_name, _value)| (String::from (_name), String::from (_value))) .collect ();
 			let _matched = RouteMatched {
+					routes : self.clone (),
 					route : _route,
 					parameters : _parameters,
 				};
@@ -298,6 +299,7 @@ pub trait RouteHandlerDyn
 #[ derive (Clone) ]
 #[ cfg (feature = "hss-routes") ]
 pub struct RouteMatched {
+	pub routes : Routes,
 	pub route : Arc<Route>,
 	pub parameters : Vec<(String, String)>,
 }

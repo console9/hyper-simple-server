@@ -55,8 +55,8 @@ impl Routes {
 		}
 	}
 	
-	pub fn routes (&self) -> impl Iterator<Item = Arc<Route>> + '_ {
-		self.internals.list.iter () .map (Arc::clone)
+	pub fn routes (&self) -> impl Iterator<Item = &Arc<Route>> {
+		self.internals.list.iter ()
 	}
 	
 	pub fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {

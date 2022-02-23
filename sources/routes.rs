@@ -445,31 +445,3 @@ impl <'a> From<&'a [&'a str; 5]> for RoutePaths<'a> {
 	}
 }
 
-
-
-
-#[ cfg (feature = "hss-routes") ]
-pub struct RouteDebug {
-	pub debug : Box<dyn fmt::Debug + Send + Sync>,
-}
-
-
-#[ cfg (feature = "hss-routes") ]
-impl RouteDebug {
-	
-	pub fn new (_debug : impl fmt::Debug + Send + Sync + 'static) -> Self {
-		Self {
-				debug : Box::new (_debug),
-			}
-	}
-}
-
-
-#[ cfg (feature = "hss-routes") ]
-impl fmt::Debug for RouteDebug {
-	
-	fn fmt (&self, _formatter : &mut fmt::Formatter) -> Result<(), fmt::Error> {
-		self.debug.deref () .fmt (_formatter)
-	}
-}
-

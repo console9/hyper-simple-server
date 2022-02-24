@@ -87,5 +87,6 @@
 	{{ range $_, $_feature := $_features }}
 	:: rust / features / set / {{ $_feature }} :: export -- _RUST_FEATURES={{ $_feature | shell_quote }}
 	{{ end }}
+	:: rust / features / set / features-none :: export -- _RUST_FEATURES=features-none
 !!
 

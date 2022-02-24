@@ -3,48 +3,6 @@
 
 
 
---<< features / run / with
-	#! <bash+>
-	Z_enforce 0x5485957a '' test "${#}" -ge 1
-	_scriptlet="${1}"
-	shift -- 1
-	Z_enforce 0x4bd54944 '' test "${#}" -ge 1
-	_features="${*}"
-	_features="${_features// /,}"
-	shift -- "${#}"
-	test "${#}" -eq 0
-	export -- _RUST_FEATURES="${_features}"
-	Z_zexec "${_scriptlet}"
-!!
-
-
---<< features / run / shuffle
-	#! <bash+>
-	Z_enforce 0xefe75a66 '' test "${#}" -ge 2
-	_scriptlet="${1}"
-	_expected="${2}"
-	shift -- 2
-	test "${#}" -eq 0
-	readarray -t -- _features < <( Z_zexec ':: features / list / shuffle' "${_expected}" )
-	Z_log_cut
-	_index=0
-	_count="${#_features[@]}"
-	for _feature in "${_features[@]}" ; do
-		_index="$(( _index + 1 ))"
-		_percent="$(( _index * 100 / _count ))"
-		Z_log_notice 0x7df50f92 '[%d%%] [%d/%d]  running with `%s`...' "${_percent}" "${_index}" "${_count}" "${_feature}"
-		export -- _RUST_FEATURES="${_feature},features-fuzzing"
-		export -- CARGO_INCREMENTAL=false
-		if ! Z_zspawn_return "${_scriptlet}" ; then
-			Z_panic 0x6d980282 'failed building with `%s`!' "${_feature}"
-		fi
-		Z_log_cut
-	done
-!!
-
-
-
-
 <<.. features / list
 	hss-accepter
 	hss-cli
@@ -74,68 +32,6 @@
 !!
 
 
---<< features / list / shuffle
-	#! <bash+>
-	Z_enforce 0xd4e41961 '' test "${#}" -eq 1
-	_expected="${1}"
-	shift -- 1
-	Z_zspawn ':: features / list / combine' \
-	| sort -R \
-	| sort -k 1,1 -t ' ' -s \
-	| while IFS=' ' read -r -- _category _features ; do
-		if ! test "${_expected}" == "${_category}" -o "${_expected}" == all ; then
-			continue
-		fi
-		printf -- '%s\n' "${_features// /,}"
-	done \
-!!
-
-
---<<~~.. features / list / combine
-	#! <template>
-	{{- range $_index_0, $_feature_0 := Z_zspawn_capture ":: features / list / cargo / hss" | split_lines -}}
-	{{- if ne $_feature_0 "hss-server-core" -}}
-	x0 {{ $_feature_0 }}
-	{{ end }}{{ end -}}
-	{{- $_features := Z_zspawn_capture ":: features / list" | split_lines -}}
-	{{- range $_index_1, $_feature_1 := $_features -}}
-	x1 {{ $_feature_1 }}
-	{{ range $_index_2, $_feature_2 := $_features }}{{ if gt $_index_2 $_index_1 -}}
-	x2 {{ $_feature_1 }} {{ $_feature_2 }}
-	{{ range $_index_3, $_feature_3 := $_features }}{{ if gt $_index_3 $_index_2 -}}
-	x3 {{ $_feature_1 }} {{ $_feature_2 }} {{ $_feature_3 }}
-	{{ range $_index_4, $_feature_4 := $_features }}{{ if gt $_index_4 $_index_3 -}}
-	x4 {{ $_feature_1 }} {{ $_feature_2 }} {{ $_feature_3 }} {{ $_feature_4 }}
-	{{ end }}{{ end }}{{ end }}{{ end }}{{ end }}{{ end }}{{ end -}}
-!!
-
-
-<< features / list / cargo / all
-	#! <bash+>
-	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
-	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .key' \
-	| sort -u \
-	#
-!!
-
-<< features / list / cargo / used
-	#! <bash+>
-	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
-	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .features | to_entries | .[] | .value | .[]' \
-	| sort -u \
-	#
-!!
-
-<< features / list / cargo / dependencies
-	#! <bash+>
-	Z_expect_no_arguments
-	Z_zspawn ':: tools / cargo' metadata --format-version 1 --locked \
-	| jq -r '.packages | .[] | select (.name == "hyper-simple-server") | .dependencies | .[] | .name' \
-	| sort -u \
-	#
-!!
 
 
 << features / list / cargo / hss
@@ -153,36 +49,5 @@
 	Z_zspawn ':: features / list / cargo / hss' \
 	| sed -r -e 's!^.*$!\0 = ["hyper-simple-server/\0"]!' \
 	#
-!!
-
-
-<< features / list / sources / cfg
-	#! <bash+>
-	Z_expect_no_arguments
-	find ./sources/ -name '*.rs' -exec cat -- {} \; \
-	| grep -o -E -e '#\[\s*cfg\s+[^]]+\s*\]' \
-	| grep -o -E -e 'feature\s*=\s*"[^"]+"' \
-	| sed -r -e 's!^feature\s*=\s*"!!' -e 's!"\s*$!!' \
-	| sort -u
-	#
-!!
-
-
-<< features / list / cargo-all + cargo-dependencies
-	#! <bash+>
-	Z_expect_no_arguments
-	sort -u < <(
-		Z_zspawn ':: features / list / cargo / all'
-		Z_zspawn ':: features / list / cargo / dependencies'
-	)
-!!
-
-<< features / list / sources-cfg + cargo-used
-	#! <bash+>
-	Z_expect_no_arguments
-	sort -u < <(
-		Z_zspawn ':: features / list / sources / cfg'
-		Z_zspawn ':: features / list / cargo / used'
-	)
 !!
 

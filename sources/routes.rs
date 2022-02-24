@@ -269,7 +269,7 @@ impl RoutesBuilder {
 pub struct Route {
 	pub path : String,
 	pub handler : RouteHandler,
-	pub extensions : http::Extensions,
+	pub extensions : Extensions,
 }
 
 

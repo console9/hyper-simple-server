@@ -503,5 +503,75 @@ impl CliArguments {
 		self.remove_first_os ();
 		self
 	}
+	
+	pub fn into_tuple_n_os (self, _length : usize) -> Result<Vec<OsString>, Self> {
+		if self.0.len () == _length {
+			Ok (self.into_vec_os ())
+		} else {
+			Err (self)
+		}
+	}
+	
+	pub fn into_tuple_n_str (self, _length : usize) -> Result<Vec<String>, Self> {
+		if self.0.len () == _length {
+			Ok (self.into_vec_str ())
+		} else {
+			Err (self)
+		}
+	}
+	
+	pub fn into_tuple_1_os (self) -> Result<(OsString,), Self> {
+		let mut _elements = self.into_tuple_n_os (1) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0x0db4f89f),
+			);
+		Ok (_tuple)
+	}
+	
+	pub fn into_tuple_1_str (self) -> Result<(String,), Self> {
+		let mut _elements = self.into_tuple_n_str (1) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0x3e69a37d),
+			);
+		Ok (_tuple)
+	}
+	
+	pub fn into_tuple_2_os (self) -> Result<(OsString, OsString), Self> {
+		let mut _elements = self.into_tuple_n_os (2) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0x7303f446),
+				_elements.next () .infallible (0x1d266eeb),
+			);
+		Ok (_tuple)
+	}
+	
+	pub fn into_tuple_2_str (self) -> Result<(String, String), Self> {
+		let mut _elements = self.into_tuple_n_str (2) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0x8ba4b0b2),
+				_elements.next () .infallible (0x3507fde7),
+			);
+		Ok (_tuple)
+	}
+	
+	pub fn into_tuple_3_os (self) -> Result<(OsString, OsString, OsString), Self> {
+		let mut _elements = self.into_tuple_n_os (3) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0xdc3beb9b),
+				_elements.next () .infallible (0x90b81bd1),
+				_elements.next () .infallible (0xfb6535ec),
+			);
+		Ok (_tuple)
+	}
+	
+	pub fn into_tuple_3_str (self) -> Result<(String, String, String), Self> {
+		let mut _elements = self.into_tuple_n_str (3) ? .into_iter ();
+		let _tuple = (
+				_elements.next () .infallible (0x76903952),
+				_elements.next () .infallible (0xfbb72b5b),
+				_elements.next () .infallible (0x404f94ba),
+			);
+		Ok (_tuple)
+	}
 }
 

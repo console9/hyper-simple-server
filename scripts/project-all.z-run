@@ -1,0 +1,48 @@
+#!/dev/null
+
+
+
+
+<< debug / build / all
+	#! <bash+>
+	Z_zspawn ':: debug / build / lib' "${@}"
+	Z_zspawn ':: debug / build / example' "${@}"
+!!
+
+
+<< debug / check / all
+	#! <bash+>
+	Z_zspawn ':: debug / check / lib' "${@}"
+	Z_zspawn ':: debug / check / example' "${@}"
+!!
+
+
+<< debug / lint / all
+	#! <bash+>
+	Z_zspawn ':: debug / lint / lib' "${@}"
+	Z_zspawn ':: debug / lint / example' "${@}"
+!!
+
+
+
+
+<< dependencies / update / conservative / all
+	#! <bash+>
+	Z_zspawn ':: dependencies / update / conservative / lib'
+	Z_zspawn ':: dependencies / update / conservative / example'
+!!
+
+
+<< dependencies / update / aggressive / all
+	#! <bash+>
+	Z_zspawn ':: dependencies / update / aggressive / lib'
+	Z_zspawn ':: dependencies / update / aggressive / example'
+!!
+
+
+<< dependencies / fetch / all
+	#! <bash+>
+	Z_zspawn ':: dependencies / fetch / lib'
+	Z_zspawn ':: dependencies / fetch / example'
+!!
+

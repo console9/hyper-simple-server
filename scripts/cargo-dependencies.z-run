@@ -3,19 +3,19 @@
 
 
 
-<< dependencies / update / conservative
+<< dependencies / update / conservative / lib
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' update
 !!
 
-<< dependencies / update / aggressive
+<< dependencies / update / aggressive / lib
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
-<< dependencies / fetch
+<< dependencies / fetch / lib
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' fetch --locked

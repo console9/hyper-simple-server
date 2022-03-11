@@ -22,9 +22,11 @@
 &&== env-path _RUST_SOURCES ./sources
 &&== env-path _RUST_OUTPUTS ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}
 &&== env-fallback _RUST_TARGET native
+&&== env-fallback _RUST_FEATURES default
 
 &&== env-path _EXAMPLES ./examples
 &&== env-fallback _EXAMPLE_BIN example
+&&== env-fallback _EXAMPLE_FEATURES default
 
 
 

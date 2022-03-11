@@ -6,19 +6,19 @@
 << debug / build / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' build --lib --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' build --lib --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 << debug / check / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' check --lib --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' check --lib --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 << debug / lint / lib
 	#! <bash+>
 	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' clippy --lib --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' clippy --lib --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 
@@ -28,21 +28,21 @@
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_OUTPUTS}/doc"
-	Z_zexec ':: tools / cargo' doc --lib --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' doc --lib --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 << docs / crate / exports / build
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_OUTPUTS}/doc"
-	Z_zexec ':: tools / cargo' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' doc --lib --no-deps --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 << docs / crate / dependencies / exports / build
 	#! <bash+>
 	Z_expect_no_arguments
 	rm -R -f -- "${_RUST_OUTPUTS}/doc"
-	Z_zexec ':: tools / cargo' doc --lib --all --no-default-features --features "${_RUST_FEATURES:-default}" --locked
+	Z_zexec ':: tools / cargo' doc --lib --all --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
 << docs / crate / dependencies / internals / build

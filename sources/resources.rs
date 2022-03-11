@@ -219,6 +219,13 @@ impl EmbeddedResource {
 			}
 	}
 	
+	pub const fn new_const (_data : &'static [u8], _content_type : Option<ContentType>) -> Self {
+		EmbeddedResource {
+				data : _data,
+				content_type : _content_type,
+			}
+	}
+	
 	pub fn new_text (_data : &'static (impl AsRef<[u8]> + ?Sized)) -> Self {
 		Self::new (_data, Some (ContentType::Text))
 	}

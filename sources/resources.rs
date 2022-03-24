@@ -116,17 +116,17 @@ impl Handler for FileResource {
 
 
 #[ cfg (feature = "hss-resources") ]
-pub struct StaticResource {
+pub struct BytesResource {
 	pub data : Bytes,
 	pub content_type : Option<ContentType>,
 }
 
 
 #[ cfg (feature = "hss-resources") ]
-impl StaticResource {
+impl BytesResource {
 	
 	pub fn new (_data : impl Into<Bytes>, _content_type : Option<ContentType>) -> Self {
-		StaticResource {
+		BytesResource {
 				data : _data.into (),
 				content_type : _content_type,
 			}
@@ -185,7 +185,7 @@ impl StaticResource {
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-resources") ]
-impl Handler for StaticResource {
+impl Handler for BytesResource {
 	
 	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;

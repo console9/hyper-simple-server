@@ -79,7 +79,7 @@ hss-full-common = [
 	"hss-config",
 	"hss-accepter",
 	"hss-tls-rust",
-	"hss-tls-native",
+#	"hss-tls-native", # NOTE:  Breaks static builds.
 	"hss-exports",
 	"hss-extensions",
 	"hss-resources",

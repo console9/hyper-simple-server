@@ -10,7 +10,12 @@
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
-	exec -- "${_RUST_OUTPUTS}/release/${_EXAMPLE_BIN}" "${@}"
+	if test "${_RUST_TARGET}" == native ; then
+		_executable="${_RUST_OUTPUTS}/release/${_EXAMPLE_BIN}"
+	else
+		_executable="${_RUST_OUTPUTS}/${_RUST_TARGET}/release/${_EXAMPLE_BIN}"
+	fi
+	exec -- "${_executable}" "${@}"
 !!
 
 << debug / run / example
@@ -20,7 +25,12 @@
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
-	exec -- "${_RUST_OUTPUTS}/debug/${_EXAMPLE_BIN}" "${@}"
+	if test "${_RUST_TARGET}" == native ; then
+		_executable="${_RUST_OUTPUTS}/debug/${_EXAMPLE_BIN}"
+	else
+		_executable="${_RUST_OUTPUTS}/${_RUST_TARGET}/debug/${_EXAMPLE_BIN}"
+	fi
+	exec -- "${_executable}" "${@}"
 !!
 
 

@@ -8,7 +8,12 @@
 	Z_log_cut
 	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --release --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
-	exec -- "${_RUST_OUTPUTS}/release/${_RUST_BINARY}" "${@}"
+	if test "${_RUST_TARGET}" == native ; then
+		_executable="${_RUST_OUTPUTS}/release/${_RUST_BINARY}"
+	else
+		_executable="${_RUST_OUTPUTS}/${_RUST_TARGET}/release/${_RUST_BINARY}"
+	fi
+	exec -- "${_executable}" "${@}"
 !!
 
 << debug / run / bin
@@ -16,7 +21,12 @@
 	Z_log_cut
 	Z_zspawn ':: tools / cargo' build --bin "${_RUST_BINARY}" --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
-	exec -- "${_RUST_OUTPUTS}/debug/${_RUST_BINARY}" "${@}"
+	if test "${_RUST_TARGET}" == native ; then
+		_executable="${_RUST_OUTPUTS}/debug/${_RUST_BINARY}"
+	else
+		_executable="${_RUST_OUTPUTS}/${_RUST_TARGET}/debug/${_RUST_BINARY}"
+	fi
+	exec -- "${_executable}" "${@}"
 !!
 
 

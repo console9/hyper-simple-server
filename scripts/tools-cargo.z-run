@@ -56,6 +56,39 @@
 		;;
 	esac
 	
+	_rustflags=()
+	if test -n "${_RUST_FLAGS:-}" ; then
+		_rustflags+=( "${_RUST_FLAGS}" )
+	fi
+	case "${_RUST_LINKAGE}" in
+		( dynamic )
+			_rustflags+=(
+					-C target-feature=-crt-static
+					-C relocation-model=pic
+				)
+		;;
+		( static )
+			_rustflags+=(
+					-C target-feature=+crt-static
+					-C relocation-model=static
+				)
+		;;
+		( * )
+			printf -- '[ee]  invalid Rust linkage `%s`;  aborting!\n' "${_RUST_LINKAGE}" >&2
+		;;
+	esac
+	_rustflags+=(
+			-C linker=clang
+		#!	-C link-arg=-fuse-ld=mold
+			-C link-arg=-fuse-ld=lld
+			-C link-arg=-Wl,--compress-debug-sections=zlib
+		)
+	_rustflags+=(
+			-C force-frame-pointers=yes
+		)
+	
+	export -- CARGO_BUILD_RUSTFLAGS="${_rustflags[*]}"
+	
 	if test ! -e "${_RUST_OUTPUTS}" -a -h "${_RUST_OUTPUTS}" ; then
 		mkdir -- "$( exec -- readlink -f -- "${_RUST_OUTPUTS}" )"
 	fi

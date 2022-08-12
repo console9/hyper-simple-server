@@ -64,7 +64,7 @@ impl Routes {
 			Ok (_future) =>
 				_future,
 			Err (_request) =>
-				HandlerFutureDynBox::ready_error (error_with_format (0x15c0a773, format_args! ("no route matched for `{}`", _request.uri () .path ()))),
+				HandlerFutureDynBox::ready_error (failed! (0x15c0a773, "no route matched for `{}`", _request.uri () .path ())),
 		}
 	}
 	
@@ -148,13 +148,13 @@ impl RoutesBuilder {
 		for _route in _routes.into_iter () {
 			if _route.path.is_empty () {
 				if _fallback.is_some () {
-					return Err (error_with_message (0x073a9b1a, "multiple fallback routes specified"));
+					fail! (0x073a9b1a, "multiple fallback routes specified");
 				}
 				_fallback = match _route.handler {
 					RouteHandler::HandlerDynArc (ref _handler) =>
 						Some (HandlerDynArc::from_arc (_handler.clone ())),
 					RouteHandler::RouteHandlerDynArc (_) =>
-						return Err (error_with_message (0x6e5e324e, "invalid fallback route specified")),
+						fail! (0x6e5e324e, "invalid fallback route specified"),
 				};
 			} else {
 				_tree.insert (&_route.path, _route.clone ());

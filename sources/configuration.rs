@@ -215,10 +215,10 @@ impl EndpointAddress {
 		let _address = if let Some (_address) = _addresses.next () {
 			_address
 		} else {
-			return Err (error_with_message (0x3a20b501, "no socket addresses resolved"));
+			fail! (0x3a20b501, "no socket addresses resolved");
 		};
 		if _addresses.next () .is_some () {
-			return Err (error_with_message (0x93c154c9, "multiple socket addresses resolved"));
+			fail! (0x93c154c9, "multiple socket addresses resolved");
 		}
 		Ok (Self::from_socket_address (_address))
 	}
@@ -389,7 +389,7 @@ impl ConfigurationBuilder {
 		#[ cfg (feature = "hss-handler") ]
 		#[ cfg (feature = "hss-routes") ]
 		if _handler.is_some () && _routes.is_some () {
-			return Err (error_with_message (0xc7d24cd3, "both handler and routes specified"))
+			fail! (0xc7d24cd3, "both handler and routes specified");
 		}
 		
 		#[ cfg (feature = "hss-handler") ]
@@ -675,18 +675,18 @@ impl RustTlsCertificate {
 		let _certificates = {
 			let _certificates : Vec<_> = _certificates.map (<[u8]>::to_vec) .map (rustls::Certificate) .collect ();
 			if _certificates.is_empty () {
-				return Err (error_with_message (0xc6991697, "no certificates found"));
+				fail! (0xc6991697, "no certificates found");
 			}
 			_certificates
 		};
 		let _private_key = {
 			if let Some (_private_key) = _private_keys.next () {
 				if _private_keys.next () .is_some () {
-					return Err (error_with_message (0xa5a124ef, "multiple private keys found"));
+					fail! (0xa5a124ef, "multiple private keys found");
 				}
 				rustls::PrivateKey (_private_key.to_vec ())
 			} else {
-				return Err (error_with_message (0x84af61dd, "no private key found"));
+				fail! (0x84af61dd, "no private key found");
 			}
 		};
 		Self::load_from_parts_0 (_certificates, _private_key)
@@ -694,7 +694,7 @@ impl RustTlsCertificate {
 	
 	fn load_from_parts_0 (_certificates : Vec<rustls::Certificate>, _private_key : rustls::PrivateKey) -> StdIoResult<Self> {
 		let _certified = {
-			let _private_key = rustls::sign::any_supported_type (&_private_key) .map_err (|_| error_with_message (0x5c4797d0, "invalid private key")) ?;
+			let _private_key = rustls::sign::any_supported_type (&_private_key) .map_err (|_| failed! (0x5c4797d0, "invalid private key")) ?;
 			rustls::sign::CertifiedKey::new (_certificates, Arc::new (_private_key))
 		};
 		let _certificate = RustTlsCertificate {

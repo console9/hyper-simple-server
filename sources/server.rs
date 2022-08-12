@@ -75,7 +75,7 @@ impl Server {
 		if let Some (_handler) = _configuration.handler.clone () {
 			Ok (_handler)
 		} else {
-			Err (error_with_message (0x55a5104c, "no handler specified"))
+			fail! (0x55a5104c, "no handler specified");
 		}
 	}
 }
@@ -397,11 +397,11 @@ impl <S> Future for ServiceWrapperFuture<S>
 				if let ServiceWrapperFuture::Error (_error) = _self_1 {
 					Poll::Ready (Err (_error))
 				} else {
-					panic_with_code (0xd83566d8);
+					panic! (enforcement, 0xd83566d8);
 				}
 			}
 			ServiceWrapperFuture::Done =>
-				Poll::Ready (Err (error_with_code (0x0722e578))),
+				Poll::Ready (failed! (0x0722e578)),
 		}
 	}
 }

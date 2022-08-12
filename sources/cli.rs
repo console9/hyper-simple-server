@@ -253,7 +253,7 @@ impl ConfigurationArguments {
 		
 		#[ cfg (unix) ]
 		if self.endpoint_socket_address.is_some () && self.endpoint_descriptor.is_some () {
-			return Err (error_with_message (0xbb9b6c08, "conflicting TCP listen options specified"));
+			fail! (0xbb9b6c08, "conflicting TCP listen options specified");
 		}
 		
 		if let Some (_address) = self.endpoint_socket_address.as_ref () {
@@ -287,7 +287,7 @@ impl ConfigurationArguments {
 		#[ cfg (feature = "hss-tls-rust") ]
 		#[ cfg (feature = "hss-tls-native") ]
 		if self.endpoint_rust_tls_certificate_pem_path.is_some () && self.endpoint_native_tls_certificate_pkcs12_path.is_some () {
-			return Err (error_with_message (0x7ce8d799, "conflicting load TLS certificate options specified"));
+			fail! (0x7ce8d799, "conflicting load TLS certificate options specified");
 		}
 		#[ cfg (feature = "hss-tls-rust") ]
 		if let Some (_path) = self.endpoint_rust_tls_certificate_pem_path.as_ref () {
@@ -313,14 +313,14 @@ impl ConfigurationArguments {
 				if let EndpointSecurity::Insecure = _configuration.endpoint.security {
 					// NOP
 				} else {
-					return Err (error_with_message (0x1111c2cc, "conflicting insecure and load TLS certificate options"));
+					fail! (0x1111c2cc, "conflicting insecure and load TLS certificate options");
 				}
 			} else {
 				if let EndpointSecurity::Insecure = _configuration.endpoint.security {
 					#[ cfg (feature = "hss-tls-any") ]
-					return Err (error_with_message (0x6621c453, "conflicting secure and missing load TLS certificate options"));
+					fail! (0x6621c453, "conflicting secure and missing load TLS certificate options");
 					#[ cfg (not (feature = "hss-tls-any")) ]
-					return Err (error_with_message (0x0e0edc6a, "conflicting secure and unavailable TLS engine options"));
+					fail! (0x0e0edc6a, "conflicting secure and unavailable TLS engine options");
 				} else {
 					// NOP
 				}
@@ -363,7 +363,7 @@ impl ConfigurationArguments {
 				Err (0) =>
 					::std::process::exit (0),
 				Err (_code) =>
-					return Err (error_with_message (0x4fec67d5, "invalid arguments!")),
+					fail! (0x4fec67d5, "invalid arguments!"),
 			}
 		}
 		

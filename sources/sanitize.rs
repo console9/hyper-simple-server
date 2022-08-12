@@ -52,7 +52,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 			Ok (None),
 		
 		_ if _path_as_bytes[0] != b'/' =>
-			return Err (error_with_code (0x0705e550)),
+			fail! (0x0705e550),
 		
 		_ => {
 			
@@ -103,7 +103,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 								0x21 | 0x24 ..= 0x3B | 0x3D | 0x40 ..= 0x5F | 0x61 ..= 0x7A | 0x7C | 0x7E =>
 									(Some (_current), State::Normal),
 								_ =>
-									return Err (error_with_code (0x9c6c8644)),
+									fail! (0x9c6c8644),
 							},
 						State::Percent0 | State::Percent1 (_) => {
 							let _digit_2 = match _current {
@@ -111,7 +111,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 								b'A' ..= b'F' => _current - b'A' + 10,
 								b'a' ..= b'f' => _current - b'a' + 10,
 								_ =>
-									return Err (error_with_code (0x563f825c)),
+									fail! (0x563f825c),
 							};
 							match _last_state {
 								State::Percent0 =>
@@ -121,7 +121,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 									(Some (_byte), State::Normal)
 								}
 								_ =>
-									panic_with_code (0xacb15742),
+									panic! (unreachable, 0xacb15742),
 							}
 						}
 					};
@@ -157,7 +157,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 				match _last_state {
 					State::Normal => (),
 					State::Percent0 | State::Percent1 (_) =>
-						return Err (error_with_code (0x574c1224)),
+						fail! (0x574c1224),
 				}
 				
 				let mut _buffer = String::from_utf8 (_buffer) .else_wrap (0x88642ea3) ?;

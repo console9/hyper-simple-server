@@ -60,7 +60,7 @@ impl ProfilingSession {
 	pub fn stop (&mut self) -> StdIoResult {
 		
 		if self.active == 0 {
-			return Err (error_with_code (0x628def32));
+			fail! (0x628def32);
 		}
 		
 		self.active -= 1;
@@ -113,7 +113,7 @@ fn profiling_start (_path : &path::Path) -> StdIoResult {
 	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0xd30eee91) ?;
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::NotActive {
-		return Err (error_with_code (0x1bd8ceb5));
+		fail! (0x1bd8ceb5);
 	}
 	
 	_profiler.start (_path) .else_wrap (0x57e487d1) ?;
@@ -131,7 +131,7 @@ fn profiling_stop () -> StdIoResult {
 	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0x678aa104) ?;
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::Active {
-		return Err (error_with_code (0x5dff5e52));
+		fail! (0x5dff5e52);
 	}
 	
 	_profiler.stop () .else_wrap (0x39363dfd) ?;

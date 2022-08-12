@@ -174,7 +174,7 @@ impl Server {
 	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> StdIoResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SF : Future<Output = Result<Response<SB>, StdIoError>> + Send + 'static,
+				SF : Future<Output = StdIoResult<Response<SB>>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = StdIoError> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 	{
@@ -334,7 +334,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	type Response = S::Response;
 	type Error = StdIoError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), StdIoError>> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<StdIoResult> {
 		self.0.poll_ready (_context)
 	}
 	

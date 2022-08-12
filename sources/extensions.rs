@@ -291,7 +291,7 @@ pub trait ResponseExtBuild <B>
 		Ok (self)
 	}
 	
-	fn ok_0 (self) -> Result<Self, StdIoError> {
+	fn ok_0 (self) -> StdIoResult<Self> {
 		Ok (self)
 	}
 	
@@ -299,7 +299,7 @@ pub trait ResponseExtBuild <B>
 		future::ready (Ok (self))
 	}
 	
-	fn ready_0 (self) -> future::Ready<Result<Self, StdIoError>> {
+	fn ready_0 (self) -> future::Ready<StdIoResult<Self>> {
 		future::ready (Ok (self))
 	}
 }

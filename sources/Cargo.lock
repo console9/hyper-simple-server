@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "hyper-simple-server"
-version = "0.3.0"
+version = "0.5.1"
 dependencies = [
  "argparse",
  "bytes",

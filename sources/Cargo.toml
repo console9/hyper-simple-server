@@ -8,13 +8,13 @@
 [package]
 
 name = "hyper-simple-server"
-version = "0.5.1"
+version = "0.6.0"
 license = "MIT"
 
 edition = "2021"
 rust-version = "1.58"
 resolver = "2"
-publish = true
+publish = false
 
 authors = ["Ciprian Dorin Craciun <ciprian@volution.ro>"]
 repository = "https://github.com/console9/hyper-simple-server"

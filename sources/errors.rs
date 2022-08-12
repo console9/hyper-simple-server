@@ -40,8 +40,8 @@ pub(crate) mod exports {
 
 
 
-pub type ServerError = io::Error;
-pub type ServerResult<V = ()> = Result<V, ServerError>;
+pub type ServerError = StdIoError;
+pub type ServerResult<V = ()> = StdIoResult<V>;
 
 
 
@@ -109,7 +109,7 @@ pub trait ErrorExtPanic : Sized {
 impl <E : Error> ErrorExtPanic for E {
 	
 	fn panic (self, _code : u32) -> ! {
-		panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self);
+		::std::panic! ("[{:08x}]  unexpected error encountered!  //  {}", _code, self);
 	}
 }
 
@@ -226,19 +226,19 @@ pub fn error_wrap <E : Error> (_code : u32, _error : E) -> io::Error {
 
 
 pub fn panic_with_format (_code : u32, _message : fmt::Arguments<'_>) -> ! {
-	panic! ("[{:08x}]  {}", _code, _message)
+	::std::panic! ("[{:08x}]  {}", _code, _message)
 }
 
 pub fn panic_with_message (_code : u32, _message : &str) -> ! {
 	if ! _message.is_empty () {
-		panic! ("[{:08x}]  {}", _code, _message)
+		::std::panic! ("[{:08x}]  {}", _code, _message)
 	} else {
 		panic_with_code (_code)
 	}
 }
 
 pub fn panic_with_code (_code : u32) -> ! {
-	panic! ("[{:08x}]  unexpected error encountered!", _code)
+	::std::panic! ("[{:08x}]  unexpected error encountered!", _code)
 }
 
 

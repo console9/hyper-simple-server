@@ -174,8 +174,8 @@ impl Server {
 	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> StdIoResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SF : Future<Output = Result<Response<SB>, io::Error>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = io::Error> + Send + Sync + 'static,
+				SF : Future<Output = Result<Response<SB>, StdIoError>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = StdIoError> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 	{
 		let _make_service = move |_ : &Connection| {
@@ -308,7 +308,7 @@ impl Server {
 #[ cfg (feature = "hyper--server") ]
 struct ServiceWrapper <S> (S)
 	where
-		S : hyper::Service<Request<Body>, Error = io::Error>,
+		S : hyper::Service<Request<Body>, Error = StdIoError>,
 ;
 
 #[ cfg (feature = "hss-server-core") ]
@@ -316,10 +316,10 @@ struct ServiceWrapper <S> (S)
 #[ allow (dead_code) ]
 enum ServiceWrapperFuture <S>
 	where
-		S : hyper::Service<Request<Body>, Error = io::Error>,
+		S : hyper::Service<Request<Body>, Error = StdIoError>,
 {
 	Future (S::Future),
-	Error (io::Error),
+	Error (StdIoError),
 	Done,
 }
 
@@ -328,13 +328,13 @@ enum ServiceWrapperFuture <S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	where
-		S : hyper::Service<Request<Body>, Error = io::Error>,
+		S : hyper::Service<Request<Body>, Error = StdIoError>,
 {
 	type Future = ServiceWrapperFuture<S>;
 	type Response = S::Response;
-	type Error = io::Error;
+	type Error = StdIoError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), io::Error>> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<Result<(), StdIoError>> {
 		self.0.poll_ready (_context)
 	}
 	
@@ -366,7 +366,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> Future for ServiceWrapperFuture<S>
 	where
-		S : hyper::Service<Request<Body>, Error = io::Error>,
+		S : hyper::Service<Request<Body>, Error = StdIoError>,
 {
 	type Output = <S::Future as Future>::Output;
 	

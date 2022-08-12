@@ -125,9 +125,9 @@ pub trait ResultExtWrap <V, E> : Sized {
 }
 
 
-impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
+impl <V, E : Error> ResultExtWrap<V, StdIoError> for Result<V, E> {
 	
-	fn else_wrap (self, _code : u32) -> Result<V, io::Error> {
+	fn else_wrap (self, _code : u32) -> Result<V, StdIoError> {
 		match self {
 			Ok (_value) =>
 				Ok (_value),
@@ -138,9 +138,9 @@ impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
 }
 
 
-impl <V> ResultExtWrap<V, io::Error> for Option<V> {
+impl <V> ResultExtWrap<V, StdIoError> for Option<V> {
 	
-	fn else_wrap (self, _code : u32) -> Result<V, io::Error> {
+	fn else_wrap (self, _code : u32) -> Result<V, StdIoError> {
 		if let Some (_value) = self {
 			Ok (_value)
 		} else {
@@ -158,9 +158,9 @@ pub trait ErrorExtWrap <E> : Sized {
 }
 
 
-impl <EI : Error> ErrorExtWrap<io::Error> for EI {
+impl <EI : Error> ErrorExtWrap<StdIoError> for EI {
 	
-	fn else_wrap (self, _code : u32) -> io::Error {
+	fn else_wrap (self, _code : u32) -> StdIoError {
 		error_wrap (_code, self)
 	}
 }
@@ -168,24 +168,24 @@ impl <EI : Error> ErrorExtWrap<io::Error> for EI {
 
 
 
-pub fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> io::Error {
-	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
+pub fn error_with_format (_code : u32, _message : fmt::Arguments<'_>) -> StdIoError {
+	StdIoError::new (StdIoErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 }
 
-pub fn error_with_message (_code : u32, _message : &str) -> io::Error {
+pub fn error_with_message (_code : u32, _message : &str) -> StdIoError {
 	if ! _message.is_empty () {
-		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
+		StdIoError::new (StdIoErrorKind::Other, format! ("[{:08x}]  {}", _code, _message))
 	} else {
 		error_with_code (_code)
 	}
 }
 
-pub fn error_with_code (_code : u32) -> io::Error {
-	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
+pub fn error_with_code (_code : u32) -> StdIoError {
+	StdIoError::new (StdIoErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!", _code))
 }
 
-pub fn error_wrap <E : Error> (_code : u32, _error : E) -> io::Error {
-	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!  //  {}", _code, _error))
+pub fn error_wrap <E : Error> (_code : u32, _error : E) -> StdIoError {
+	StdIoError::new (StdIoErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!  //  {}", _code, _error))
 }
 
 

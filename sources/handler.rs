@@ -440,13 +440,13 @@ impl <B> BodyTrait for BodyWrapper<B>
 	
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		let _future = self.delegate_pin_mut () .poll_data (_context);
-		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0x4e33a117))));
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.else_wrap (0x4e33a117))));
 		_future
 	}
 	
 	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
 		let _future = self.delegate_pin_mut () .poll_trailers (_context);
-		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x3a25b983)));
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.else_wrap (0x3a25b983)));
 		_future
 	}
 	
@@ -505,13 +505,13 @@ impl <B> BodyDyn for B
 {
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		let _future = BodyTrait::poll_data (self, _context);
-		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0xd89897d4))));
+		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.else_wrap (0xd89897d4))));
 		_future
 	}
 	
 	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
 		let _future = BodyTrait::poll_trailers (self, _context);
-		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x8adea6a0)));
+		let _future = _future.map (|_result| _result.map_err (|_error| _error.else_wrap (0x8adea6a0)));
 		_future
 	}
 	

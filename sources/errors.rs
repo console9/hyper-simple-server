@@ -26,9 +26,7 @@ pub(crate) mod exports {
 			ErrorExtPanic,
 			
 			ResultExtWrap,
-			ResultExtWrapFrom,
 			ErrorExtWrap,
-			ErrorExtWrapFrom,
 			
 			error_with_format,
 			error_with_message,
@@ -134,7 +132,7 @@ impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
 			Ok (_value) =>
 				Ok (_value),
 			Err (_error) =>
-				Err (io::Error::wrap_from (_code, _error)),
+				Err (error_wrap (_code, _error)),
 		}
 	}
 }
@@ -154,53 +152,16 @@ impl <V> ResultExtWrap<V, io::Error> for Option<V> {
 
 
 
-pub trait ResultExtWrapFrom <V, E> : Sized {
-	
-	fn or_wrap_from (_code : u32, _result : Result<V, E>) -> Self;
-}
-
-
-impl <V, E : Error, EX : ErrorExtWrapFrom<E>> ResultExtWrapFrom<V, E> for Result<V, EX> {
-	
-	fn or_wrap_from (_code : u32, _result : Result<V, E>) -> Result<V, EX> {
-		match _result {
-			Ok (_value) =>
-				Ok (_value),
-			Err (_error) =>
-				Err (EX::wrap_from (_code, _error)),
-		}
-	}
-}
-
-
-
-
-pub trait ErrorExtWrapFrom <E> : Sized {
-	
-	fn wrap_from (_code : u32, _error : E) -> Self;
-}
-
-
-impl <E : Error> ErrorExtWrapFrom<E> for io::Error {
-	
-	fn wrap_from (_code : u32, _error : E) -> Self {
-		io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  {}", _code, _error))
-	}
-}
-
-
-
-
 pub trait ErrorExtWrap <E> : Sized {
 	
-	fn wrap (self, _code : u32) -> E;
+	fn else_wrap (self, _code : u32) -> E;
 }
 
 
-impl <EI, EO : ErrorExtWrapFrom<EI>> ErrorExtWrap<EO> for EI {
+impl <EI : Error> ErrorExtWrap<io::Error> for EI {
 	
-	fn wrap (self, _code : u32) -> EO {
-		EO::wrap_from (_code, self)
+	fn else_wrap (self, _code : u32) -> io::Error {
+		error_wrap (_code, self)
 	}
 }
 
@@ -224,7 +185,7 @@ pub fn error_with_code (_code : u32) -> io::Error {
 }
 
 pub fn error_wrap <E : Error> (_code : u32, _error : E) -> io::Error {
-	io::Error::wrap_from (_code, _error)
+	io::Error::new (io::ErrorKind::Other, format! ("[{:08x}]  unexpected error encountered!  //  {}", _code, _error))
 }
 
 

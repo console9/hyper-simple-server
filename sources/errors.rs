@@ -12,7 +12,6 @@ use crate::prelude::*;
 
 pub(crate) mod exports {
 	
-	#[ cfg (feature = "hss-errors") ]
 	pub use super::{
 			
 			ServerError,
@@ -245,7 +244,6 @@ pub fn panic_with_code (_code : u32) -> ! {
 
 
 
-#[ cfg (feature = "hss-errors") ]
 #[ macro_export ]
 macro_rules! fail_with_format {
 	( $_code : literal, $_format : literal, $( $_argument : tt )* ) => {
@@ -253,7 +251,6 @@ macro_rules! fail_with_format {
 	}
 }
 
-#[ cfg (feature = "hss-errors") ]
 #[ macro_export ]
 macro_rules! fail_with_message {
 	( $_code : literal, $_message : literal ) => {
@@ -261,7 +258,6 @@ macro_rules! fail_with_message {
 	};
 }
 
-#[ cfg (feature = "hss-errors") ]
 #[ macro_export ]
 macro_rules! fail_with_code {
 	( $_code : literal ) => {
@@ -269,7 +265,6 @@ macro_rules! fail_with_code {
 	};
 }
 
-#[ cfg (feature = "hss-errors") ]
 #[ macro_export ]
 macro_rules! fail_wrap {
 	( $_code : literal, $_error : expr ) => {

@@ -83,7 +83,6 @@ hss-full-common = [
 	"hss-exports",
 	"hss-extensions",
 	"hss-resources",
-	"hss-errors",
 	"hss-sanitize",
 	"hss-main",
 	"hss-cli",
@@ -172,9 +171,6 @@ hss-resources = [
 	"hss-extensions",
 ]
 
-
-# gate
-hss-errors = []
 
 # gate
 hss-exports = []
@@ -284,6 +280,8 @@ cpuprofiler = { version = "0.0.4", default-features = false, features = [], opti
 jemallocator = { version = "0.3.2", default-features = false, features = [], optional = true }
 jemalloc-sys = { version = "0.3.2", default-features = false, features = [], optional = true }
 
+vrl-errors = { version = "*", default-features = false, features = [] }
+
 
 
 
@@ -357,6 +355,19 @@ opt-level = 3
 debug = 1
 debug-assertions = false
 overflow-checks = true
+
+
+
+
+################################################################################
+################################################################################
+
+
+
+
+[patch.crates-io]
+
+vrl-errors = { path = "../../volution-rust-libraries/sources/errors" }
 
 
 

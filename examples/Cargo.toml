@@ -10,7 +10,7 @@ name = "example"
 path = "./sources/main.rs"
 
 [dependencies]
-hyper-simple-server = { path = "../sources", default-features = false, features = [] }
+hyper-simple-server = { version = "*", default-features = false, features = [] }
 
 
 
@@ -32,7 +32,6 @@ hss-server-http2 = ["hyper-simple-server/hss-server-http2"]
 
 # gate
 hss-cli = ["hyper-simple-server/hss-cli"]
-hss-errors = ["hyper-simple-server/hss-errors"]
 hss-exports = ["hyper-simple-server/hss-exports"]
 hss-extensions = ["hyper-simple-server/hss-extensions"]
 hss-handler = ["hyper-simple-server/hss-handler"]
@@ -50,4 +49,12 @@ hss-server-sanitize = ["hyper-simple-server/hss-server-sanitize"]
 hss-server-profiling = ["hyper-simple-server/hss-server-profiling"]
 hss-tls-native = ["hyper-simple-server/hss-tls-native"]
 hss-tls-rust = ["hyper-simple-server/hss-tls-rust"]
+
+
+
+
+[patch.crates-io]
+
+hyper-simple-server = { path = "../sources" }
+vrl-errors = { path = "../../volution-rust-libraries/sources/errors" }
 

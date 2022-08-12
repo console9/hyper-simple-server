@@ -7,7 +7,6 @@
 	hss-accepter
 	hss-cli
 	hss-config
-	hss-errors
 	hss-exports
 	hss-extensions
 	hss-full

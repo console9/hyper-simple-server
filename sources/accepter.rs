@@ -20,7 +20,7 @@ pub enum Accepter {
 #[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
-	pub fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Connection>>> {
+	pub fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Connection>>> {
 		
 		let _self = Pin::into_inner (self);
 		
@@ -66,7 +66,7 @@ impl Accepter {
 #[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
-	pub fn new (_endpoint : &Endpoint) -> ServerResult<Self> {
+	pub fn new (_endpoint : &Endpoint) -> StdIoResult<Self> {
 		
 		let _listener = new_listener (&_endpoint.address) ?;
 		let _listener = Arc::new (_listener);
@@ -112,7 +112,7 @@ impl Accepter {
 impl hyper::Accept for Accepter {
 	
 	type Conn = Connection;
-	type Error = ServerError;
+	type Error = StdIoError;
 	
 	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
 		self.poll (_context)
@@ -123,7 +123,7 @@ impl hyper::Accept for Accepter {
 
 
 #[ cfg (feature = "hss-accepter") ]
-fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener> {
+fn new_listener (_address : &EndpointAddress) -> StdIoResult<tokio::TcpListener> {
 	
 	#[ allow (unsafe_code) ]
 	let _listener = match _address {
@@ -148,7 +148,7 @@ fn new_listener (_address : &EndpointAddress) -> ServerResult<tokio::TcpListener
 
 #[ cfg (feature = "hss-accepter") ]
 #[ cfg (feature = "hss-tls-rust") ]
-fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &EndpointProtocol) -> ServerResult<tokio_rustls::TlsAcceptor> {
+fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &EndpointProtocol) -> StdIoResult<tokio_rustls::TlsAcceptor> {
 	
 	let _resolver = {
 		struct Resolver (RustTlsCertificate);
@@ -182,7 +182,7 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 
 #[ cfg (feature = "hss-accepter") ]
 #[ cfg (feature = "hss-tls-native") ]
-fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> ServerResult<tokio_natls::TlsAcceptor> {
+fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> StdIoResult<tokio_natls::TlsAcceptor> {
 	
 	let _configuration = {
 		let mut _builder = natls::TlsAcceptor::builder (_certificate.identity.clone ());

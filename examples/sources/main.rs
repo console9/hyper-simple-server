@@ -7,11 +7,11 @@ use hss::ResponseExtBuild as _;
 
 
 
-fn main () -> hss::ServerResult {
+fn main () -> hss::StdIoResult {
 	
 	let mut _arguments = hss::CliArguments::from_args ();
 	
-	type Main = fn (hss::CliArguments) -> hss::ServerResult;
+	type Main = fn (hss::CliArguments) -> hss::StdIoResult;
 	
 	let (_main, _arguments_remove_first) : (Main, _) = match _arguments.first_str () {
 		
@@ -37,7 +37,7 @@ fn main () -> hss::ServerResult {
 
 
 
-fn main_with_routes (_arguments : hss::CliArguments) -> hss::ServerResult {
+fn main_with_routes (_arguments : hss::CliArguments) -> hss::StdIoResult {
 	
 	eprintln! ("[ii] [f8f30521]  starting `routes` server...");
 	
@@ -67,7 +67,7 @@ fn main_with_routes (_arguments : hss::CliArguments) -> hss::ServerResult {
 
 
 
-fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::ServerResult {
+fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::StdIoResult {
 	
 	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
@@ -83,7 +83,7 @@ fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::ServerResult 
 
 
 
-fn main_with_echo (_arguments : hss::CliArguments) -> hss::ServerResult {
+fn main_with_echo (_arguments : hss::CliArguments) -> hss::StdIoResult {
 	
 	eprintln! ("[ii] [53dc40d3]  starting `echo` server...");
 	

@@ -12,6 +12,11 @@ use crate::prelude::*;
 
 pub(crate) mod exports {
 	
+	pub use ::vrl_errors::{
+			StdIoError,
+			StdIoResult,
+		};
+	
 	pub use super::{
 			
 			ServerError,

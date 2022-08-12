@@ -28,7 +28,7 @@ impl FileResource {
 			}
 	}
 	
-	pub fn load (&self) -> ServerResult<Bytes> {
+	pub fn load (&self) -> StdIoResult<Bytes> {
 		if let Some (_cache) = self.cache.as_ref () {
 			let _cache = _cache.read () .or_wrap (0x6801d05a) ?;
 			if let Some (_data) = _cache.as_ref () {
@@ -85,7 +85,7 @@ impl FileResource {
 		Self::new (_path, Some (ContentType::Icon), false)
 	}
 	
-	pub fn response (&self) -> ServerResult<Response<Body>> {
+	pub fn response (&self) -> StdIoResult<Response<Body>> {
 		let _data = self.load () ?;
 		let _response = Response::new_200_with_body (_data, self.content_type);
 		Ok (_response)
@@ -97,9 +97,9 @@ impl FileResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for FileResource {
 	
-	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		match self.response () {
@@ -172,7 +172,7 @@ impl BytesResource {
 		Self::new (_data, Some (ContentType::Icon))
 	}
 	
-	pub fn load_from_path (_path : impl AsRef<path::Path>, _content_type : Option<ContentType>) -> ServerResult<Self> {
+	pub fn load_from_path (_path : impl AsRef<path::Path>, _content_type : Option<ContentType>) -> StdIoResult<Self> {
 		let _data = fs::read (_path) ?;
 		Ok (Self::new (_data, _content_type))
 	}
@@ -187,9 +187,9 @@ impl BytesResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for BytesResource {
 	
-	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _response = self.response ();
@@ -276,9 +276,9 @@ impl EmbeddedResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for EmbeddedResource {
 	
-	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _response = self.response ();

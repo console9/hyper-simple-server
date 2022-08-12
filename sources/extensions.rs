@@ -291,7 +291,7 @@ pub trait ResponseExtBuild <B>
 		Ok (self)
 	}
 	
-	fn ok_0 (self) -> Result<Self, ServerError> {
+	fn ok_0 (self) -> Result<Self, StdIoError> {
 		Ok (self)
 	}
 	
@@ -299,7 +299,7 @@ pub trait ResponseExtBuild <B>
 		future::ready (Ok (self))
 	}
 	
-	fn ready_0 (self) -> future::Ready<Result<Self, ServerError>> {
+	fn ready_0 (self) -> future::Ready<Result<Self, StdIoError>> {
 		future::ready (Ok (self))
 	}
 }
@@ -325,9 +325,9 @@ impl ResponseExtBuild<Body> for Response<Body> {
 #[ cfg (feature = "tokio--rt") ]
 pub trait BodyExt {
 	
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> ServerResult;
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult;
 	
-	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> ServerResult<Vec<u8>> {
+	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> StdIoResult<Vec<u8>> {
 		let mut _buffer = Vec::new ();
 		self.consume_into_vec (&mut _buffer, _runtime) ?;
 		Ok (_buffer)
@@ -342,7 +342,7 @@ impl <B> BodyExt for B
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : Error + Send + Sync + 'static,
 {
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> ServerResult {
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult {
 		
 		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
 		

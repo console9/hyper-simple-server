@@ -8,7 +8,7 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn main_with_handler (_handler : impl Handler, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> ServerResult {
+pub fn main_with_handler (_handler : impl Handler, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> StdIoResult {
 	
 	let _configuration = prepare_configuration (_configuration, _arguments) ?;
 	
@@ -18,7 +18,7 @@ pub fn main_with_handler (_handler : impl Handler, _configuration : Option<Confi
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn run_with_handler (_handler : impl Handler, mut _configuration : Configuration) -> ServerResult {
+pub fn run_with_handler (_handler : impl Handler, mut _configuration : Configuration) -> StdIoResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_handler));
 	
@@ -29,7 +29,7 @@ pub fn run_with_handler (_handler : impl Handler, mut _configuration : Configura
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn main_with_handler_dyn (_handler : impl HandlerDyn, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> ServerResult {
+pub fn main_with_handler_dyn (_handler : impl HandlerDyn, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> StdIoResult {
 	
 	let _configuration = prepare_configuration (_configuration, _arguments) ?;
 	
@@ -39,7 +39,7 @@ pub fn main_with_handler_dyn (_handler : impl HandlerDyn, _configuration : Optio
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn run_with_handler_dyn (_handler : impl HandlerDyn, mut _configuration : Configuration) -> ServerResult {
+pub fn run_with_handler_dyn (_handler : impl HandlerDyn, mut _configuration : Configuration) -> StdIoResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_handler));
 	
@@ -50,7 +50,7 @@ pub fn run_with_handler_dyn (_handler : impl HandlerDyn, mut _configuration : Co
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-routes") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn main_with_routes (_routes : impl Into<Routes>, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> ServerResult {
+pub fn main_with_routes (_routes : impl Into<Routes>, _configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> StdIoResult {
 	
 	let _configuration = prepare_configuration (_configuration, _arguments) ?;
 	
@@ -60,7 +60,7 @@ pub fn main_with_routes (_routes : impl Into<Routes>, _configuration : Option<Co
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-routes") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn run_with_routes (_routes : impl Into<Routes>, mut _configuration : Configuration) -> ServerResult {
+pub fn run_with_routes (_routes : impl Into<Routes>, mut _configuration : Configuration) -> StdIoResult {
 	
 	_configuration.handler = Some (HandlerDynArc::new (_routes.into ()));
 	
@@ -72,7 +72,7 @@ pub fn run_with_routes (_routes : impl Into<Routes>, mut _configuration : Config
 
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn prepare_configuration_http (_arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+pub fn prepare_configuration_http (_arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 	
 	let _configuration = Configuration::localhost_http () .build () ?;
 	
@@ -83,7 +83,7 @@ pub fn prepare_configuration_http (_arguments : Option<CliArguments>) -> ServerR
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hss-tls-any") ]
-pub fn prepare_configuration_https (_arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+pub fn prepare_configuration_https (_arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 	
 	let _configuration = Configuration::localhost_https () .build () ?;
 	
@@ -93,7 +93,7 @@ pub fn prepare_configuration_https (_arguments : Option<CliArguments>) -> Server
 
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-core") ]
-pub fn prepare_configuration (_configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+pub fn prepare_configuration (_configuration : Option<Configuration>, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 	
 	let _configuration = if let Some (_configuration) = _configuration {
 		_configuration
@@ -111,7 +111,7 @@ pub fn prepare_configuration (_configuration : Option<Configuration>, _arguments
 #[ cfg (feature = "hss-main") ]
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hss-cli") ]
-pub fn prepare_configuration_with_extensions (_configuration : Option<Configuration>, _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+pub fn prepare_configuration_with_extensions (_configuration : Option<Configuration>, _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 	
 	let _configuration = if let Some (_configuration) = _configuration {
 		_configuration

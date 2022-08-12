@@ -66,7 +66,7 @@ pub struct ConfigurationArguments {
 #[ cfg (feature = "hss-cli") ]
 impl ConfigurationArguments {
 	
-	pub fn with_defaults (_configuration : &Configuration) -> ServerResult<Self> {
+	pub fn with_defaults (_configuration : &Configuration) -> StdIoResult<Self> {
 		
 		let mut _arguments = Self::default ();
 		
@@ -249,7 +249,7 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn update (&self, _configuration : &mut Configuration) -> ServerResult {
+	pub fn update (&self, _configuration : &mut Configuration) -> StdIoResult {
 		
 		#[ cfg (unix) ]
 		if self.endpoint_socket_address.is_some () && self.endpoint_descriptor.is_some () {
@@ -341,11 +341,11 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn parse (_configuration : Configuration, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+	pub fn parse (_configuration : Configuration, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 		Self::parse_with_extensions (_configuration, (), _arguments)
 	}
 	
-	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> ServerResult<Configuration> {
+	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
 		
 		let _arguments = CliArguments::unwrap_or_args (_arguments);
 		let mut _arguments = _arguments.into_vec_str ();

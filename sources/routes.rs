@@ -40,7 +40,7 @@ impl Routes {
 			}
 	}
 	
-	pub fn resolve (&self, _path : &str) -> ServerResult<Option<RouteMatched>> {
+	pub fn resolve (&self, _path : &str) -> StdIoResult<Option<RouteMatched>> {
 		if let Some ((_route, _parameters)) = self.internals.tree.find (_path) {
 			let _route = _route.clone ();
 			let _parameters = _parameters.into_iter () .map (|(_name, _value)| (String::from (_name), String::from (_value))) .collect ();
@@ -110,7 +110,7 @@ impl Handler for Routes {
 	
 	type Future = HandlerFutureDynBox;
 	type ResponseBody = BodyDynBox;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		Routes::handle (self, _request)
@@ -137,7 +137,7 @@ impl RoutesBuilder {
 			}
 	}
 	
-	pub fn build (self) -> ServerResult<Routes> {
+	pub fn build (self) -> StdIoResult<Routes> {
 		
 		let _routes = self.routes;
 		let mut _fallback = self.fallback;
@@ -179,7 +179,7 @@ impl RoutesBuilder {
 			where
 				P : Into<RoutePaths<'a>>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RB::Error> + Send + Sync + 'static,
-				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -192,7 +192,7 @@ impl RoutesBuilder {
 			where
 				P : Into<RoutePaths<'a>>,
 				I : Into<HandlerFnSync<C, RB>>,
-				C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+				C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -206,7 +206,7 @@ impl RoutesBuilder {
 				P : Into<RoutePaths<'a>>,
 				I : Into<HandlerFnAsync<C, F, RB>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-				F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{

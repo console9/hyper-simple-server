@@ -29,7 +29,7 @@ type ServerInternals = Arc<RwLock<ServerInternals0>>;
 #[ cfg (feature = "hyper--server") ]
 impl Server {
 	
-	pub fn new (_configuration : Configuration) -> ServerResult<Self> {
+	pub fn new (_configuration : Configuration) -> StdIoResult<Self> {
 		let _self = ServerInternals0 {
 				configuration : _configuration,
 			};
@@ -46,32 +46,32 @@ impl Server {
 #[ cfg (feature = "hyper--server") ]
 impl Server {
 	
-	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
+	pub fn run_and_wait (_configuration : Configuration) -> StdIoResult {
 		let _handler = Self::handler_0 (&_configuration) ?;
 		Self::run_and_wait_with_handler (_configuration, _handler)
 	}
 	
-	pub async fn run (_configuration : Configuration) -> ServerResult {
+	pub async fn run (_configuration : Configuration) -> StdIoResult {
 		let _handler = Self::handler_0 (&_configuration) ?;
 		Self::run_with_handler (_configuration, _handler) .await
 	}
 	
-	pub fn serve_and_wait (&self) -> ServerResult {
+	pub fn serve_and_wait (&self) -> StdIoResult {
 		let _handler = self.handler () ?;
 		self.serve_and_wait_with_handler (_handler)
 	}
 	
-	pub async fn serve (&self) -> ServerResult {
+	pub async fn serve (&self) -> StdIoResult {
 		let _handler = self.handler () ?;
 		self.serve_with_handler (_handler) .await
 	}
 	
-	fn handler (&self) -> ServerResult<HandlerDynArc> {
+	fn handler (&self) -> StdIoResult<HandlerDynArc> {
 		let _self = self.internals.read () .or_wrap (0x0f9770a1) ?;
 		Self::handler_0 (&_self.configuration)
 	}
 	
-	fn handler_0 (_configuration : &Configuration) -> ServerResult<HandlerDynArc> {
+	fn handler_0 (_configuration : &Configuration) -> StdIoResult<HandlerDynArc> {
 		if let Some (_handler) = _configuration.handler.clone () {
 			Ok (_handler)
 		} else {
@@ -86,28 +86,28 @@ impl Server {
 #[ cfg (feature = "hyper--server") ]
 impl Server
 {
-	pub fn run_and_wait_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
+	pub fn run_and_wait_with_handler <H, F> (_configuration : Configuration, _handler : H) -> StdIoResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _server = Server::new (_configuration) ?;
 		_server.serve_and_wait_with_handler (_handler)
 	}
 	
-	pub async fn run_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
+	pub async fn run_with_handler <H, F> (_configuration : Configuration, _handler : H) -> StdIoResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _server = Server::new (_configuration) ?;
 		_server.serve_with_handler (_handler) .await
 	}
 	
-	pub fn serve_and_wait_with_handler <H, F> (&self, _handler : H) -> ServerResult
+	pub fn serve_and_wait_with_handler <H, F> (&self, _handler : H) -> StdIoResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
@@ -131,16 +131,16 @@ impl Server
 		_outcome
 	}
 	
-	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
+	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> StdIoResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _service = move |_ : &Connection| {
 				let _service = _handler.clone () .wrap ();
 				let _service = ServiceWrapper (_service);
 				async {
-					ServerResult::Ok (_service)
+					StdIoResult::Ok (_service)
 				}
 			};
 		
@@ -155,7 +155,7 @@ impl Server
 #[ cfg (feature = "hyper--server") ]
 impl Server {
 	
-	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
+	pub fn serve_builder (&self) -> StdIoResult<hyper::Builder<Accepter, ServerExecutor>> {
 		
 		let _self = self.internals.read () .or_panic (0x62cbf380);
 		
@@ -171,7 +171,7 @@ impl Server {
 		Ok (_builder)
 	}
 	
-	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> ServerResult
+	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> StdIoResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
 				SF : Future<Output = Result<Response<SB>, io::Error>> + Send + 'static,
@@ -183,14 +183,14 @@ impl Server {
 				let _service = hyper::service_fn (_service);
 				let _service = ServiceWrapper (_service);
 				async {
-					ServerResult::Ok (_service)
+					StdIoResult::Ok (_service)
 				}
 			};
 		
 		self.serve_with_make_service_fn (_make_service).await
 	}
 	
-	pub async fn serve_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (&self, _make_service : M) -> ServerResult
+	pub async fn serve_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (&self, _make_service : M) -> StdIoResult
 			where
 				M : FnMut (&Connection) -> MF + Send + 'static,
 				MF : Future<Output = Result<S, ME>> + Send + 'static,
@@ -221,7 +221,7 @@ impl Server {
 		_outcome
 	}
 	
-	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {
+	pub fn serve_protocol (&self) -> StdIoResult<hyper::Http> {
 		
 		let _self = self.internals.read () .or_panic (0xdd5eec49);
 		let _protocol = &_self.configuration.endpoint.protocol;
@@ -255,7 +255,7 @@ impl Server {
 		Ok (_http)
 	}
 	
-	pub fn serve_runtime (&self) -> ServerResult<Runtime> {
+	pub fn serve_runtime (&self) -> StdIoResult<Runtime> {
 		
 		let _self = self.internals.read () .or_panic (0xfc9b9ffb);
 		
@@ -478,7 +478,7 @@ fn server_start_jemalloc_stats () -> () {
 
 
 #[ cfg (feature = "tokio--rt-multi-thread") ]
-pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<Runtime> {
+pub fn runtime_multiple_threads (_threads : Option<usize>) -> StdIoResult<Runtime> {
 	let _threads = _threads.unwrap_or (1);
 	let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
 	_builder.worker_threads (_threads);
@@ -489,7 +489,7 @@ pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<Runti
 }
 
 #[ cfg (feature = "tokio--rt") ]
-pub fn runtime_current_thread () -> ServerResult<Runtime> {
+pub fn runtime_current_thread () -> StdIoResult<Runtime> {
 	let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
 	_builder.enable_all ();
 	_builder.build () .or_wrap (0x280fcb72)

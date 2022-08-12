@@ -10,7 +10,7 @@ pub trait Handler
 	where
 		Self : Send + Sync + 'static,
 {
-	type Future : Future<Output = ServerResult<Response<Self::ResponseBody>>> + Send + 'static;
+	type Future : Future<Output = StdIoResult<Response<Self::ResponseBody>>> + Send + 'static;
 	type ResponseBody : BodyTrait<Data = Bytes, Error = Self::ResponseBodyError> + Send + Sync + 'static;
 	type ResponseBodyError : Error + Send + Sync + 'static;
 	
@@ -34,9 +34,9 @@ impl <H> hyper::Service<Request<Body>> for HandlerWrapper<H>
 {
 	type Future = H::Future;
 	type Response = Response<H::ResponseBody>;
-	type Error = ServerError;
+	type Error = StdIoError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServerResult> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<StdIoResult> {
 		Poll::Ready (Ok (()))
 	}
 	
@@ -52,7 +52,7 @@ impl <H> hyper::Service<Request<Body>> for HandlerWrapper<H>
 pub struct HandlerFnAsync <C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
@@ -65,7 +65,7 @@ pub struct HandlerFnAsync <C, F, RB>
 impl <C, F, RB> Handler for HandlerFnAsync<C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
@@ -83,7 +83,7 @@ impl <C, F, RB> Handler for HandlerFnAsync<C, F, RB>
 impl <C, F, RB> From<C> for HandlerFnAsync<C, F, RB>
 	where
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-		F : Future<Output = ServerResult<Response<RB>>> + Send + 'static,
+		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
@@ -101,7 +101,7 @@ impl <C, F, RB> From<C> for HandlerFnAsync<C, F, RB>
 #[ cfg (feature = "hss-handler") ]
 pub struct HandlerFnSync <C, RB>
 	where
-		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
@@ -113,11 +113,11 @@ pub struct HandlerFnSync <C, RB>
 #[ cfg (feature = "hss-handler") ]
 impl <C, RB> Handler for HandlerFnSync<C, RB>
 	where
-		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
-	type Future = future::Ready<ServerResult<Response<RB>>>;
+	type Future = future::Ready<StdIoResult<Response<RB>>>;
 	type ResponseBody = RB;
 	type ResponseBodyError = RB::Error;
 	
@@ -130,7 +130,7 @@ impl <C, RB> Handler for HandlerFnSync<C, RB>
 #[ cfg (feature = "hss-handler") ]
 impl <C, RB> From<C> for HandlerFnSync<C, RB>
 	where
-		C : Fn (Request<Body>) -> ServerResult<Response<RB>> + Send + Sync + 'static,
+		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 		RB::Error : Error + Send + Sync + 'static,
 {
@@ -158,7 +158,7 @@ pub trait HandlerDyn
 impl <H> HandlerDyn for H
 	where
 		H : Handler + Send + Sync + 'static,
-		H::Future : Future<Output = ServerResult<Response<H::ResponseBody>>> + Send + 'static,
+		H::Future : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
 {
 	fn handle (&self, _request : Request<Body>) -> HandlerFutureDynBox {
 		let _future = Handler::handle (self, _request);
@@ -205,7 +205,7 @@ impl Handler for HandlerDynArc {
 	
 	type Future = HandlerFutureDynBox;
 	type ResponseBody = BodyDynBox;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		self.delegate (_request)
@@ -216,13 +216,13 @@ impl Handler for HandlerDynArc {
 
 
 #[ cfg (feature = "hss-handler") ]
-pub struct HandlerFutureDynBox (Pin<Box<dyn Future<Output = ServerResult<Response<BodyDynBox>>> + Send>>);
+pub struct HandlerFutureDynBox (Pin<Box<dyn Future<Output = StdIoResult<Response<BodyDynBox>>> + Send>>);
 
 
 #[ cfg (feature = "hss-handler") ]
 impl Future for HandlerFutureDynBox {
 	
-	type Output = ServerResult<Response<BodyDynBox>>;
+	type Output = StdIoResult<Response<BodyDynBox>>;
 	
 	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
 		let _self = Pin::into_inner (self);
@@ -236,12 +236,12 @@ impl HandlerFutureDynBox {
 	
 	pub fn new <F> (_future : F) -> Self
 			where
-				F : Future<Output = ServerResult<Response<BodyDynBox>>> + Send + 'static
+				F : Future<Output = StdIoResult<Response<BodyDynBox>>> + Send + 'static
 	{
 		Self (Box::pin (_future))
 	}
 	
-	pub fn ready (_result : ServerResult<Response<BodyDynBox>>) -> Self {
+	pub fn ready (_result : StdIoResult<Response<BodyDynBox>>) -> Self {
 		Self::new (future::ready (_result))
 	}
 	
@@ -249,7 +249,7 @@ impl HandlerFutureDynBox {
 		Self::ready (Ok (_response))
 	}
 	
-	pub fn ready_error (_error : ServerError) -> Self {
+	pub fn ready_error (_error : StdIoError) -> Self {
 		Self::ready (Err (_error))
 	}
 }
@@ -270,8 +270,8 @@ impl <B> From<Response<B>> for HandlerFutureDynBox
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
-impl From<ServerError> for HandlerFutureDynBox {
-	fn from (_error : ServerError) -> Self {
+impl From<StdIoError> for HandlerFutureDynBox {
+	fn from (_error : StdIoError) -> Self {
 		Self::ready_error (_error)
 	}
 }
@@ -285,7 +285,7 @@ pub trait HandlerSimpleAsync
 	where
 		Self : Send + Sync + 'static,
 {
-	type Future : Future<Output = ServerResult<Response<Body>>> + Send + 'static;
+	type Future : Future<Output = StdIoResult<Response<Body>>> + Send + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
 	
@@ -324,7 +324,7 @@ impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 {
 	type Future = HandlerSimpleAsyncWrapperFuture<H::Future>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _future = HandlerSimpleAsync::handle (&self.0, _request);
@@ -338,16 +338,16 @@ impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 #[ cfg (feature = "hss-extensions") ]
 pub struct HandlerSimpleAsyncWrapperFuture <F> (F)
 	where
-		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static + Unpin,
+		F : Future<Output = StdIoResult<Response<Body>>> + Send + 'static + Unpin,
 ;
 
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-extensions") ]
 impl <F> Future for HandlerSimpleAsyncWrapperFuture<F>
 	where
-		F : Future<Output = ServerResult<Response<Body>>> + Send + 'static + Unpin,
+		F : Future<Output = StdIoResult<Response<Body>>> + Send + 'static + Unpin,
 {
-	type Output = ServerResult<Response<BodyWrapper<Body>>>;
+	type Output = StdIoResult<Response<BodyWrapper<Body>>>;
 	
 	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
 		let _self = Pin::into_inner (self);
@@ -367,7 +367,7 @@ pub trait HandlerSimpleSync
 	where
 		Self : Send + Sync + 'static,
 {
-	fn handle (&self, _request : &Request<Body>, _response : &mut Response<Body>) -> ServerResult;
+	fn handle (&self, _request : &Request<Body>, _response : &mut Response<Body>) -> StdIoResult;
 	
 	fn wrap (self) -> HandlerSimpleSyncWrapper<Self> where Self : Sized {
 		HandlerSimpleSyncWrapper (self)
@@ -401,9 +401,9 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 	where
 		H : HandlerSimpleSync,
 {
-	type Future = future::Ready<ServerResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = ServerError;
+	type ResponseBodyError = StdIoError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let mut _response = Response::new (Body::empty ());
@@ -436,15 +436,15 @@ impl <B> BodyTrait for BodyWrapper<B>
 		B::Error : Error + Send + Sync + 'static,
 {
 	type Data = Bytes;
-	type Error = ServerError;
+	type Error = StdIoError;
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		let _future = self.delegate_pin_mut () .poll_data (_context);
 		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0x4e33a117))));
 		_future
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
 		let _future = self.delegate_pin_mut () .poll_trailers (_context);
 		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x3a25b983)));
 		_future
@@ -489,8 +489,8 @@ pub trait BodyDyn
 	where
 		Self : Send + 'static,
 {
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>>;
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>>;
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>>;
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>>;
 	
 	fn is_end_stream (&self) -> bool;
 	fn size_hint (&self) -> BodySizeHint;
@@ -503,13 +503,13 @@ impl <B> BodyDyn for B
 		B : BodyTrait<Data = Bytes> + Send + 'static,
 		B::Error : Error + Send + Sync + 'static,
 {
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		let _future = BodyTrait::poll_data (self, _context);
 		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.wrap (0xd89897d4))));
 		_future
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
 		let _future = BodyTrait::poll_trailers (self, _context);
 		let _future = _future.map (|_result| _result.map_err (|_error| _error.wrap (0x8adea6a0)));
 		_future
@@ -535,13 +535,13 @@ pub struct BodyDynBox (Pin<Box<dyn BodyDyn + Sync>>);
 impl BodyTrait for BodyDynBox {
 	
 	type Data = Bytes;
-	type Error = ServerError;
+	type Error = StdIoError;
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<ServerResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		self.delegate_pin_mut () .poll_data (_context)
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ServerResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
 		self.delegate_pin_mut () .poll_trailers (_context)
 	}
 	

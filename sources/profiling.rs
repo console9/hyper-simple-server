@@ -18,7 +18,7 @@ pub struct ProfilingSession {
 impl ProfilingSession {
 	
 	
-	pub fn new (_path : &path::Path) -> ServerResult<Self> {
+	pub fn new (_path : &path::Path) -> StdIoResult<Self> {
 		
 		let _path_final = _path.to_owned ();
 		
@@ -38,14 +38,14 @@ impl ProfilingSession {
 	}
 	
 	
-	pub fn new_and_start (_path : &path::Path) -> ServerResult<Self> {
+	pub fn new_and_start (_path : &path::Path) -> StdIoResult<Self> {
 		let mut _self = Self::new (_path) ?;
 		_self.start () ?;
 		Ok (_self)
 	}
 	
 	
-	pub fn start (&mut self) -> ServerResult {
+	pub fn start (&mut self) -> StdIoResult {
 		
 		if self.active == 0 {
 			profiling_start (&self.path_temporary) ?;
@@ -57,7 +57,7 @@ impl ProfilingSession {
 	}
 	
 	
-	pub fn stop (&mut self) -> ServerResult {
+	pub fn stop (&mut self) -> StdIoResult {
 		
 		if self.active == 0 {
 			return Err (error_with_code (0x628def32));
@@ -76,11 +76,11 @@ impl ProfilingSession {
 	}
 	
 	
-	pub fn stop_and_drop (mut self) -> ServerResult {
+	pub fn stop_and_drop (mut self) -> StdIoResult {
 		self.drop_0 ()
 	}
 	
-	fn drop_0 (&mut self) -> ServerResult {
+	fn drop_0 (&mut self) -> StdIoResult {
 		if self.active == 0 {
 			return Ok (());
 		}
@@ -102,7 +102,7 @@ impl Drop for ProfilingSession {
 
 
 #[ cfg (feature = "cpuprofiler") ]
-fn profiling_start (_path : &path::Path) -> ServerResult {
+fn profiling_start (_path : &path::Path) -> StdIoResult {
 	
 	let _path = _path.to_str () .or_wrap (0x977d8538) ?;
 	let _path = _path.to_owned () .into_bytes ();
@@ -123,7 +123,7 @@ fn profiling_start (_path : &path::Path) -> ServerResult {
 
 
 #[ cfg (feature = "cpuprofiler") ]
-fn profiling_stop () -> ServerResult {
+fn profiling_stop () -> StdIoResult {
 	
 	#[ cfg (debug_assertions) ]
 	eprintln! ("[ii] [27a3b301]  stopping `cpuprofiler` tracing...");

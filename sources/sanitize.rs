@@ -24,7 +24,7 @@ pub fn sanitize_authority (_authority : &Authority) -> StdIoResult<Option<Author
 	if let Some (_offset) = _authority.find ('@') {
 		
 		// NOTE:  The rest of `_uri.authority` is always safe, according to the `http::uri::authority::Authority::parse` implementation.
-		let _authority = Authority::try_from (&_authority[_offset + 1 ..]) .or_wrap (0xda6f459d) ?;
+		let _authority = Authority::try_from (&_authority[_offset + 1 ..]) .else_wrap (0xda6f459d) ?;
 		
 		Ok (Some (_authority))
 		
@@ -160,7 +160,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 						return Err (error_with_code (0x574c1224)),
 				}
 				
-				let mut _buffer = String::from_utf8 (_buffer) .or_wrap (0x88642ea3) ?;
+				let mut _buffer = String::from_utf8 (_buffer) .else_wrap (0x88642ea3) ?;
 				
 				while let Some (_offset) = _buffer.rfind ("//") {
 					_buffer.remove (_offset);
@@ -175,7 +175,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 					_buffer.push ('/');
 				}
 				while let Some (_offset_2) = _buffer.find ("/../") {
-					let _offset_1 = if _offset_2 > 0 { _buffer[0.._offset_2].rfind ('/') .or_panic (0x3693e145) } else { 0 };
+					let _offset_1 = if _offset_2 > 0 { _buffer[0.._offset_2].rfind ('/') .infallible (0x3693e145) } else { 0 };
 					_buffer.replace_range (_offset_1 .. _offset_2 + 4, "/");
 				}
 				
@@ -233,7 +233,7 @@ pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> StdIoResult<
 		_buffer.push_str (_query);
 	}
 	
-	let _path_and_query = PathAndQuery::try_from (_buffer) .or_wrap (0x7d1433ad) ?;
+	let _path_and_query = PathAndQuery::try_from (_buffer) .else_wrap (0x7d1433ad) ?;
 	
 	Ok (Some (_path_and_query))
 }

@@ -69,7 +69,7 @@ impl ProfilingSession {
 			
 			profiling_stop () ?;
 			
-			fs::rename (&self.path_temporary, &self.path_final) .or_wrap (0xfc22794e) ?;
+			fs::rename (&self.path_temporary, &self.path_final) .else_wrap (0xfc22794e) ?;
 		}
 		
 		Ok (())
@@ -94,7 +94,7 @@ impl ProfilingSession {
 impl Drop for ProfilingSession {
 	
 	fn drop (&mut self) -> () {
-		self.drop_0 () .or_panic (0xaebddcc0);
+		self.drop_0 () .else_panic (0xaebddcc0);
 	}
 }
 
@@ -104,19 +104,19 @@ impl Drop for ProfilingSession {
 #[ cfg (feature = "cpuprofiler") ]
 fn profiling_start (_path : &path::Path) -> StdIoResult {
 	
-	let _path = _path.to_str () .or_wrap (0x977d8538) ?;
+	let _path = _path.to_str () .else_wrap (0x977d8538) ?;
 	let _path = _path.to_owned () .into_bytes ();
 	
 	#[ cfg (debug_assertions) ]
 	eprintln! ("[ii] [1c05ae71]  starting `cpuprofiler` tracing...");
 	
-	let mut _profiler = ::cpuprofiler::PROFILER.lock () .or_wrap (0xd30eee91) ?;
+	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0xd30eee91) ?;
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::NotActive {
 		return Err (error_with_code (0x1bd8ceb5));
 	}
 	
-	_profiler.start (_path) .or_wrap (0x57e487d1) ?;
+	_profiler.start (_path) .else_wrap (0x57e487d1) ?;
 	
 	Ok (())
 }
@@ -128,13 +128,13 @@ fn profiling_stop () -> StdIoResult {
 	#[ cfg (debug_assertions) ]
 	eprintln! ("[ii] [27a3b301]  stopping `cpuprofiler` tracing...");
 	
-	let mut _profiler = ::cpuprofiler::PROFILER.lock () .or_wrap (0x678aa104) ?;
+	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0x678aa104) ?;
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::Active {
 		return Err (error_with_code (0x5dff5e52));
 	}
 	
-	_profiler.stop () .or_wrap (0x39363dfd) ?;
+	_profiler.stop () .else_wrap (0x39363dfd) ?;
 	
 	Ok (())
 }

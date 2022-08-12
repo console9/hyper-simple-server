@@ -30,16 +30,16 @@ impl FileResource {
 	
 	pub fn load (&self) -> StdIoResult<Bytes> {
 		if let Some (_cache) = self.cache.as_ref () {
-			let _cache = _cache.read () .or_wrap (0x6801d05a) ?;
+			let _cache = _cache.read () .else_wrap (0x6801d05a) ?;
 			if let Some (_data) = _cache.as_ref () {
 				return Ok (_data.clone ());
 			}
 			drop (_cache);
 		}
-		let _data = fs::read (&self.path) .or_wrap (0x0db95839) ?;
+		let _data = fs::read (&self.path) .else_wrap (0x0db95839) ?;
 		let _data = Bytes::from (_data);
 		if let Some (_cache) = self.cache.as_ref () {
-			let mut _cache = _cache.write () .or_panic (0xf103624b);
+			let mut _cache = _cache.write () .else_panic (0xf103624b);
 			*_cache = Some (_data.clone ());
 		}
 		Ok (_data)

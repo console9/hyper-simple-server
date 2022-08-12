@@ -174,12 +174,12 @@ impl Endpoint {
 		let _security = EndpointSecurity::Insecure;
 		#[ cfg (feature = "hss-tls-rust") ]
 		let _security = {
-			let _certificate = RustTlsCertificate::localhost () .or_panic (0xf64b30c4);
+			let _certificate = RustTlsCertificate::localhost () .infallible (0xf64b30c4);
 			EndpointSecurity::RustTls (_certificate)
 		};
 		#[ cfg (feature = "hss-tls-native") ]
 		let _security = {
-			let _certificate = NativeTlsCertificate::localhost () .or_panic (0xf6a595a9);
+			let _certificate = NativeTlsCertificate::localhost () .infallible (0xf6a595a9);
 			EndpointSecurity::NativeTls (_certificate)
 		};
 		
@@ -658,11 +658,11 @@ impl RustTlsCertificate {
 		
 		let _certificates = {
 			let mut _data = _data;
-			rustls_pem::certs (&mut _data) .or_wrap (0x1004be65) ?
+			rustls_pem::certs (&mut _data) .else_wrap (0x1004be65) ?
 		};
 		let _private_keys = {
 			let mut _data = _data;
-			rustls_pem::pkcs8_private_keys (&mut _data) .or_wrap (0x57b13036) ?
+			rustls_pem::pkcs8_private_keys (&mut _data) .else_wrap (0x57b13036) ?
 		};
 		
 		Self::load_from_parts (
@@ -724,7 +724,7 @@ impl NativeTlsCertificate {
 		
 		let _data = _data.as_ref ();
 		
-		let _identity = natls::Identity::from_pkcs12 (_data, _password) .or_wrap (0x93817715) ?;
+		let _identity = natls::Identity::from_pkcs12 (_data, _password) .else_wrap (0x93817715) ?;
 		
 		let _certificate = NativeTlsCertificate {
 				identity : _identity,

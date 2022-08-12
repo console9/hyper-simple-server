@@ -108,7 +108,7 @@ pub trait ResponseExt <B>
 	}
 	
 	fn set_header_string (&mut self, _name : impl IntoHeaderName, _value : String) -> &mut Self {
-		self.set_header (_name, HeaderValue::try_from (_value) .or_panic (0x627a7cff))
+		self.set_header (_name, HeaderValue::try_from (_value) .infallible (0x627a7cff))
 	}
 	
 	fn add_header_str_static (&mut self, _name : impl IntoHeaderName, _value : &'static str) -> &mut Self {
@@ -116,7 +116,7 @@ pub trait ResponseExt <B>
 	}
 	
 	fn add_header_string (&mut self, _name : impl IntoHeaderName, _value : String) -> &mut Self {
-		self.add_header (_name, HeaderValue::try_from (_value) .or_panic (0x1ac00c46))
+		self.add_header (_name, HeaderValue::try_from (_value) .infallible (0x1ac00c46))
 	}
 	
 	fn content_type (&self) -> Option<ContentType> {
@@ -254,23 +254,23 @@ pub trait ResponseExtBuild <B>
 	}
 	
 	fn new_301_string (_location : String) -> Self where B : Default {
-		Self::new_301 (HeaderValue::try_from (_location) .or_panic (0x15f9b93c))
+		Self::new_301 (HeaderValue::try_from (_location) .infallible (0x15f9b93c))
 	}
 	
 	fn new_302_string (_location : String) -> Self where B : Default {
-		Self::new_302 (HeaderValue::try_from (_location) .or_panic (0x0a94e02d))
+		Self::new_302 (HeaderValue::try_from (_location) .infallible (0x0a94e02d))
 	}
 	
 	fn new_303_string (_location : String) -> Self where B : Default {
-		Self::new_303 (HeaderValue::try_from (_location) .or_panic (0xa87f95a7))
+		Self::new_303 (HeaderValue::try_from (_location) .infallible (0xa87f95a7))
 	}
 	
 	fn new_307_string (_location : String) -> Self where B : Default {
-		Self::new_307 (HeaderValue::try_from (_location) .or_panic (0xd0e3f0f9))
+		Self::new_307 (HeaderValue::try_from (_location) .infallible (0xd0e3f0f9))
 	}
 	
 	fn new_308_string (_location : String) -> Self where B : Default {
-		Self::new_308 (HeaderValue::try_from (_location) .or_panic (0x69839071))
+		Self::new_308 (HeaderValue::try_from (_location) .infallible (0x69839071))
 	}
 	
 	fn new_redirect_with_code (_status : StatusCode, _location : impl Into<HeaderValue>) -> Self where B : Default {
@@ -347,7 +347,7 @@ impl <B> BodyExt for B
 		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
 		
 		let _runtime_0 = if _runtime.is_none () {
-			Some (tokio::RuntimeBuilder::new_current_thread () .build () .or_wrap (0x6d0d289e) ?)
+			Some (tokio::RuntimeBuilder::new_current_thread () .build () .else_wrap (0x6d0d289e) ?)
 		} else {
 			None
 		};
@@ -361,7 +361,7 @@ impl <B> BodyExt for B
 			} else {
 				break;
 			};
-			let mut _data = _next.or_wrap (0x401ac565) ?;
+			let mut _data = _next.else_wrap (0x401ac565) ?;
 			while _data.remaining () > 0 {
 				let _chunk = _data.chunk ();
 				_buffer.extend (_chunk);

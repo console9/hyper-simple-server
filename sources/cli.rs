@@ -118,7 +118,7 @@ impl ConfigurationArguments {
 		
 		#[ cfg (feature = "hss-server-profiling") ]
 		if let Some (_path) = _configuration.profiling.as_ref () {
-			let _path = _path.to_str () .or_wrap (0xd708ca76) ?;
+			let _path = _path.to_str () .else_wrap (0xd708ca76) ?;
 			_arguments.server_profiling = Some (_path.to_owned ());
 		}
 		

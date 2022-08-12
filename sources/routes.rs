@@ -310,7 +310,7 @@ impl RouteMatched {
 	
 	
 	pub fn parameter_nth (&self, _index : usize) -> &String {
-		& (self.parameters.get (_index) .or_panic (0xe86a76a8)) .1
+		& (self.parameters.get (_index) .else_panic (0xe86a76a8)) .1
 	}
 	
 	pub fn parameters_1 (&self) -> &String {
@@ -367,7 +367,7 @@ impl RouteMatched {
 	}
 	
 	fn resolve_or_panic (_request : &Request<Body>) -> &Self {
-		Self::resolve (_request) .or_panic (0x4c9197b5)
+		Self::resolve (_request) .else_panic (0x4c9197b5)
 	}
 }
 

@@ -67,7 +67,7 @@ impl Server {
 	}
 	
 	fn handler (&self) -> StdIoResult<HandlerDynArc> {
-		let _self = self.internals.read () .or_wrap (0x0f9770a1) ?;
+		let _self = self.internals.read () .else_wrap (0x0f9770a1) ?;
 		Self::handler_0 (&_self.configuration)
 	}
 	
@@ -111,7 +111,7 @@ impl Server
 	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
-			let _self = self.internals.read () .or_panic (0x0a78cbe3);
+			let _self = self.internals.read () .else_panic (0x0a78cbe3);
 			if let Some (_path) = &_self.configuration.profiling {
 				Some (ProfilingSession::new_and_start (_path) ?)
 			} else {
@@ -157,7 +157,7 @@ impl Server {
 	
 	pub fn serve_builder (&self) -> StdIoResult<hyper::Builder<Accepter, ServerExecutor>> {
 		
-		let _self = self.internals.read () .or_panic (0x62cbf380);
+		let _self = self.internals.read () .else_panic (0x62cbf380);
 		
 		eprintln! ("[ii] [83af6f05]  server listening on `{}`;", _self.configuration.endpoint.url ());
 		
@@ -207,7 +207,7 @@ impl Server {
 		let _builder = self.serve_builder () ?;
 		
 		let _future = _builder.serve (_service);
-		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .or_panic (0xa011830e); });
+		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .else_panic (0xa011830e); });
 		
 		#[ cfg (debug_assertions) ]
 		eprintln! ("[ii] [3aed0938]  server initialized;");
@@ -217,13 +217,13 @@ impl Server {
 		#[ cfg (debug_assertions) ]
 		eprintln! ("[ii] [3eff9778]  server terminated;");
 		
-		let _outcome = _outcome.or_wrap (0x73080376);
+		let _outcome = _outcome.else_wrap (0x73080376);
 		_outcome
 	}
 	
 	pub fn serve_protocol (&self) -> StdIoResult<hyper::Http> {
 		
-		let _self = self.internals.read () .or_panic (0xdd5eec49);
+		let _self = self.internals.read () .else_panic (0xdd5eec49);
 		let _protocol = &_self.configuration.endpoint.protocol;
 		
 		let mut _http = hyper::Http::new ();
@@ -257,7 +257,7 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> StdIoResult<Runtime> {
 		
-		let _self = self.internals.read () .or_panic (0xfc9b9ffb);
+		let _self = self.internals.read () .else_panic (0xfc9b9ffb);
 		
 		#[ cfg (feature = "hss-jemalloc") ]
 		if true {
@@ -438,7 +438,7 @@ fn server_start_strace () -> () {
 	process::Command::new ("strace")
 			.args (&["-f", "-p", & process::id () .to_string ()])
 			.spawn ()
-			.or_panic (0xff87ffef);
+			.else_panic (0xff87ffef);
 }
 
 
@@ -453,7 +453,7 @@ fn server_start_jemalloc_stats () -> () {
 	extern "C" fn _write (_ : * mut os::raw::c_void, _message : * const os::raw::c_char) {
 		#[ allow (unsafe_code) ]
 		let _message = unsafe { ffi::CStr::from_ptr (_message) };
-		let _message = _message.to_str () .or_panic (0x2d88d281);
+		let _message = _message.to_str () .infallible (0x2d88d281);
 		for _message in _message.split_terminator ("\n") {
 			if (_message == "___ Begin jemalloc statistics ___") || (_message == "--- End jemalloc statistics ---") {
 				continue;
@@ -485,13 +485,13 @@ pub fn runtime_multiple_threads (_threads : Option<usize>) -> StdIoResult<Runtim
 	_builder.max_blocking_threads (_threads * 4);
 	_builder.thread_keep_alive (time::Duration::from_secs (60));
 	_builder.enable_all ();
-	_builder.build () .or_wrap (0x2692223a)
+	_builder.build () .else_wrap (0x2692223a)
 }
 
 #[ cfg (feature = "tokio--rt") ]
 pub fn runtime_current_thread () -> StdIoResult<Runtime> {
 	let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
 	_builder.enable_all ();
-	_builder.build () .or_wrap (0x280fcb72)
+	_builder.build () .else_wrap (0x280fcb72)
 }
 

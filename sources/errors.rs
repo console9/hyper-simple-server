@@ -53,7 +53,7 @@ pub type ServerResult<V = ()> = StdIoResult<V>;
 
 pub trait ResultExtPanic <V> : Sized {
 	
-	fn or_panic (self, _code : u32) -> V;
+	fn else_panic (self, _code : u32) -> V;
 	
 	fn infallible (self, _code : u32) -> V;
 }
@@ -61,7 +61,7 @@ pub trait ResultExtPanic <V> : Sized {
 
 impl <V, EX : ErrorExtPanic> ResultExtPanic<V> for Result<V, EX> {
 	
-	fn or_panic (self, _code : u32) -> V {
+	fn else_panic (self, _code : u32) -> V {
 		match self {
 			Ok (_value) =>
 				_value,
@@ -83,7 +83,7 @@ impl <V, EX : ErrorExtPanic> ResultExtPanic<V> for Result<V, EX> {
 
 impl <V> ResultExtPanic<V> for Option<V> {
 	
-	fn or_panic (self, _code : u32) -> V {
+	fn else_panic (self, _code : u32) -> V {
 		match self {
 			Some (_value) =>
 				_value,
@@ -123,13 +123,13 @@ impl <E : Error> ErrorExtPanic for E {
 
 pub trait ResultExtWrap <V, E> : Sized {
 	
-	fn or_wrap (self, _code : u32) -> Result<V, E>;
+	fn else_wrap (self, _code : u32) -> Result<V, E>;
 }
 
 
 impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
 	
-	fn or_wrap (self, _code : u32) -> Result<V, io::Error> {
+	fn else_wrap (self, _code : u32) -> Result<V, io::Error> {
 		match self {
 			Ok (_value) =>
 				Ok (_value),
@@ -142,7 +142,7 @@ impl <V, E : Error> ResultExtWrap<V, io::Error> for Result<V, E> {
 
 impl <V> ResultExtWrap<V, io::Error> for Option<V> {
 	
-	fn or_wrap (self, _code : u32) -> Result<V, io::Error> {
+	fn else_wrap (self, _code : u32) -> Result<V, io::Error> {
 		if let Some (_value) = self {
 			Ok (_value)
 		} else {

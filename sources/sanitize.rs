@@ -41,7 +41,7 @@ pub fn sanitize_path (_path : &str) -> SanitizeResult<Option<String>> {
 	
 	let _path_as_str = _path;
 	let _path_as_bytes = _path_as_str.as_bytes ();
-	drop (_path);
+	mem::drop (_path);
 	
 	match _path_as_bytes {
 		

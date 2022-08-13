@@ -22,45 +22,56 @@ pub(crate) use crate::resources::*;
 
 
 pub(crate) use ::vrl_errors::*;
-pub(crate) use ::vrl_errors::{
-		panic,
+
+
+
+
+pub(crate) use ::std::{
+		fmt,
+		env,
+		net,
+		io,
+		fs,
+		path,
+		future,
+		mem,
+		os,
+		time,
+	};
+
+pub(crate) use ::std::{
+		format,
+		eprintln,
+	};
+
+pub(crate) use ::std::{
+		convert::{From, Into, TryInto, TryFrom, AsRef},
+		marker::{Sized, Send, Sync, Unpin, PhantomData},
+		ops::{Deref, Fn, FnMut},
+		iter::{Iterator, IntoIterator, Extend as _},
+		clone::Clone,
+		future::Future,
+		pin::Pin,
+		sync::Arc,
+		sync::RwLock,
+		task::Poll,
+		task::Context,
+		default::Default,
+		string::{String, ToString as _},
+		vec::Vec,
+		ffi::OsStr,
+		ffi::OsString,
+		boxed::Box,
+		option::{Option, Option::Some, Option::None},
+		result::{Result, Result::Ok, Result::Err},
 	};
 
 
-
-
-pub(crate) use ::std::*;
-pub(crate) use ::std::prelude::v1::*;
-
-
-pub(crate) use ::std::fmt;
-
-
-pub(crate) use ::std::convert::From;
-pub(crate) use ::std::convert::Into;
-pub(crate) use ::std::convert::TryInto;
-pub(crate) use ::std::convert::TryFrom;
-
-pub(crate) use ::std::future::Future;
 #[ cfg (feature = "futures") ]
-pub(crate) use ::futures::FutureExt as _;
-#[ cfg (feature = "futures") ]
-pub(crate) use ::futures::TryFutureExt as _;
-
-pub(crate) use ::std::marker::PhantomData;
-
-pub(crate) use ::std::ops::Deref;
-
-pub(crate) use ::std::pin::Pin;
-
-pub(crate) use ::std::sync::Arc;
-pub(crate) use ::std::sync::RwLock;
-
-pub(crate) use ::std::task::Poll;
-pub(crate) use ::std::task::Context;
-
-pub(crate) use ::std::ffi::OsStr;
-pub(crate) use ::std::ffi::OsString;
+pub(crate) use ::futures::{
+		FutureExt as _,
+		TryFutureExt as _,
+	};
 
 
 

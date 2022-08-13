@@ -34,7 +34,7 @@ impl FileResource {
 			if let Some (_data) = _cache.as_ref () {
 				return Ok (_data.clone ());
 			}
-			drop (_cache);
+			mem::drop (_cache);
 		}
 		let _data = fs::read (&self.path) .unwrap ();  // FIXME:  else_wrap
 		let _data = Bytes::from (_data);

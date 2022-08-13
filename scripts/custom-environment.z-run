@@ -3,11 +3,12 @@
 
 
 
-:: rust / features / set / quick / default :: export -- _RUST_FEATURES=default
-:: rust / features / set / quick / none :: export -- _RUST_FEATURES=features-none
-:: rust / features / set / quick / full :: export -- _RUST_FEATURES=hss-full
-:: rust / features / set / quick / full + jemalloc :: export -- _RUST_FEATURES=hss-full,hss-jemalloc
-:: rust / features / set / quick / full + jemalloc-debug :: export -- _RUST_FEATURES=hss-full,hss-jemalloc,hss-server-debug-jemalloc
+:: rust / features / set / quick / default :: export -- _RUST_FEATURES=default _EXAMPLE_FEATURES=default
+:: rust / features / set / quick / none :: export -- _RUST_FEATURES=features-none _EXAMPLE_FEATURES=default
+:: rust / features / set / quick / full :: export -- _RUST_FEATURES=hss-full _EXAMPLE_FEATURES=hss-full
+:: rust / features / set / quick / full + mimalloc :: export -- _RUST_FEATURES=hss-full,hss-mimalloc _EXAMPLE_FEATURES=hss-full,hss-mimalloc
+:: rust / features / set / quick / full + jemalloc :: export -- _RUST_FEATURES=hss-full,hss-jemalloc _EXAMPLE_FEATURES=hss-full,hss-jemalloc
+:: rust / features / set / quick / full + jemalloc-debug :: export -- _RUST_FEATURES=hss-full,hss-jemalloc,hss-server-debug-jemalloc _EXAMPLE_FEATURES=hss-full,hss-jemalloc,hss-server-debug-jemalloc
 
 
 

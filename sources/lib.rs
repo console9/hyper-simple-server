@@ -111,9 +111,16 @@ compile_error! ("enable any of HTTP/1 or HTTP/2");
 
 
 
-#[ cfg (feature = "hss-jemalloc") ]
+#[ cfg (all (feature = "hss-jemalloc", not (feature = "hss-mimalloc"))) ]
 #[global_allocator]
 static ALLOCATOR : ::jemallocator::Jemalloc = ::jemallocator::Jemalloc;
+
+#[ cfg (all (feature = "hss-mimalloc", not (feature = "hss-jemalloc"))) ]
+#[global_allocator]
+static ALLOCATOR : ::mimalloc::MiMalloc = ::mimalloc::MiMalloc;
+
+#[ cfg (all (feature = "hss-jemalloc", feature = "hss-mimalloc", not (feature = "features-fuzzing"))) ]
+compile_error! ("enable only one of `jemalloc` or `mimalloc`");
 
 
 
@@ -172,5 +179,8 @@ mod dependencies {
 	
 	#[ cfg (feature = "jemalloc-sys") ]
 	pub use ::jemalloc_sys;
+	
+	#[ cfg (feature = "mimalloc") ]
+	pub use ::mimalloc;
 }
 

@@ -222,6 +222,11 @@ hss-jemalloc = [
 ]
 
 # gate
+hss-mimalloc = [
+	"mimalloc",
+]
+
+# gate
 hss-server-debug-strace = []
 
 # gate
@@ -279,6 +284,8 @@ cpuprofiler = { version = "0.0.4", default-features = false, features = [], opti
 
 jemallocator = { version = "0.3.2", default-features = false, features = [], optional = true }
 jemalloc-sys = { version = "0.3.2", default-features = false, features = [], optional = true }
+
+mimalloc = { version = "0.1.29", default-features = false, features = [], optional = true }
 
 vrl-errors = { version = "*", default-features = false, features = [] }
 

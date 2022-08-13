@@ -32,16 +32,66 @@ impl <H> hyper::Service<Request<Body>> for HandlerWrapper<H>
 	where
 		H : Handler,
 {
-	type Future = H::Future;
+	type Future = HandlerServiceFuture<H>;
 	type Response = Response<H::ResponseBody>;
-	type Error = HandlerError;
+	type Error = ServiceError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<HandlerResult> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServiceResult> {
 		Poll::Ready (Ok (()))
 	}
 	
 	fn call (&mut self, _request : Request<Body>) -> Self::Future {
-		self.0.handle (_request)
+		let _future = self.0.handle (_request);
+		HandlerServiceFuture::Future (_future)
+	}
+}
+
+
+#[ cfg (feature = "hss-handler") ]
+pub enum HandlerServiceFuture <H : Handler>
+{
+	Future (H::Future),
+	Error (ServiceError),
+	Done,
+}
+
+#[ cfg (feature = "hss-handler") ]
+impl <H> Future for HandlerServiceFuture<H>
+	where
+		H : Handler,
+{
+	type Output = ServiceResult<Response<<H as Handler>::ResponseBody>>;
+	
+	fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Self::Output> {
+		#[ allow (unsafe_code) ]
+		let _self_0 = unsafe { self.get_unchecked_mut () };
+		match _self_0 {
+			HandlerServiceFuture::Future (_future) => {
+				#[ allow (unsafe_code) ]
+				let _delegate = unsafe { Pin::new_unchecked (_future) };
+				match _delegate.poll (_context) {
+					Poll::Pending =>
+						Poll::Pending,
+					Poll::Ready (Ok (_output)) => {
+						let _ = mem::replace (_self_0, HandlerServiceFuture::Done);
+						Poll::Ready (Ok (_output))
+					}
+					Poll::Ready (Err (_error)) => {
+						Poll::Ready (failed! (ServiceError, 0xa4844c05, cause => _error) .into_result ())
+					}
+				}
+			}
+			HandlerServiceFuture::Error (_error) => {
+				let _self_1 = mem::replace (_self_0, HandlerServiceFuture::Done);
+				if let HandlerServiceFuture::Error (_error) = _self_1 {
+					Poll::Ready (failed! (ServiceError, 0xa6499d03, cause => _error) .into_result ())
+				} else {
+					panic! (enforcement, 0xd83566d8);
+				}
+			}
+			HandlerServiceFuture::Done =>
+				Poll::Ready (failed! (ServiceError, 0xa50d12e0) .into_result ()),
+		}
 	}
 }
 

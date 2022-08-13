@@ -11,6 +11,9 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-server-core") ]
 ::vrl_errors::define_error! (pub ServerError, result : ServerResult);
 
+#[ cfg (any (feature = "hss-handler", feature = "hss-server-core")) ]
+::vrl_errors::define_error! (pub ServiceError, result : ServiceResult);
+
 #[ cfg (feature = "hss-config") ]
 ::vrl_errors::define_error! (pub ConfigurationError, result : ConfigurationResult);
 

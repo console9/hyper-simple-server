@@ -174,7 +174,7 @@ impl Server {
 	pub async fn serve_with_service_fn <S, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SF : Future<Output = HandlerResult<Response<SB>>> + Send + 'static,
+				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 				SBE : StdError + Send + Sync + 'static,
@@ -309,7 +309,7 @@ impl Server {
 #[ cfg (feature = "hyper--server") ]
 struct ServiceWrapper <S> (S)
 	where
-		S : hyper::Service<Request<Body>, Error = HandlerError>,
+		S : hyper::Service<Request<Body>, Error = ServiceError>,
 ;
 
 #[ cfg (feature = "hss-server-core") ]
@@ -317,10 +317,10 @@ struct ServiceWrapper <S> (S)
 #[ allow (dead_code) ]
 enum ServiceWrapperFuture <S>
 	where
-		S : hyper::Service<Request<Body>, Error = HandlerError>,
+		S : hyper::Service<Request<Body>, Error = ServiceError>,
 {
 	Future (S::Future),
-	Error (HandlerError),
+	Error (ServiceError),
 	Done,
 }
 
@@ -329,13 +329,13 @@ enum ServiceWrapperFuture <S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	where
-		S : hyper::Service<Request<Body>, Error = HandlerError>,
+		S : hyper::Service<Request<Body>, Error = ServiceError>,
 {
 	type Future = ServiceWrapperFuture<S>;
 	type Response = S::Response;
-	type Error = HandlerError;
+	type Error = ServiceError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<HandlerResult> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<ServiceResult> {
 		self.0.poll_ready (_context)
 	}
 	
@@ -367,7 +367,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> Future for ServiceWrapperFuture<S>
 	where
-		S : hyper::Service<Request<Body>, Error = HandlerError>,
+		S : hyper::Service<Request<Body>, Error = ServiceError>,
 {
 	type Output = <S::Future as Future>::Output;
 	
@@ -402,7 +402,7 @@ impl <S> Future for ServiceWrapperFuture<S>
 				}
 			}
 			ServiceWrapperFuture::Done =>
-				Poll::Ready (Err (failed! (HandlerError, 0x0722e578))),
+				Poll::Ready (Err (failed! (ServiceError, 0x0722e578))),
 		}
 	}
 }

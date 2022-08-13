@@ -17,3 +17,11 @@ define_error! (pub ConnectionError, result : ConnectionResult);
 define_error! (pub ProfilingError, result : ProfilingResult);
 
 
+
+
+pub use ::vrl_errors::{
+		ResultExtWrap,
+		ResultExtPanic,
+	};
+
+

@@ -3,15 +3,16 @@
 use ::hyper_simple_server as hss;
 
 use hss::ResponseExtBuild as _;
+use hss::ResultExtWrap as _;
 
 
 
 
-fn main () -> hss::StdIoResult {
+fn main () -> hss::MainResult {
 	
 	let mut _arguments = hss::CliArguments::from_args ();
 	
-	type Main = fn (hss::CliArguments) -> hss::StdIoResult;
+	type Main = fn (hss::CliArguments) -> hss::MainResult;
 	
 	let (_main, _arguments_remove_first) : (Main, _) = match _arguments.first_str () {
 		
@@ -24,7 +25,7 @@ fn main () -> hss::StdIoResult {
 		Some ("handler_sync") =>
 			(main_with_handler_sync, true),
 		Some (_main) =>
-			Err (hss::error_with_format (0xa5dbefb7, format_args! ("invalid main `{}`", _main))) ?,
+			Err (hss::MainError::new_with_format (0x639fb853, format_args! ("invalid main `{}`", _main))) ?,
 	};
 	
 	if _arguments_remove_first {
@@ -37,7 +38,7 @@ fn main () -> hss::StdIoResult {
 
 
 
-fn main_with_routes (_arguments : hss::CliArguments) -> hss::StdIoResult {
+fn main_with_routes (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [f8f30521]  starting `routes` server...");
 	
@@ -59,7 +60,8 @@ fn main_with_routes (_arguments : hss::CliArguments) -> hss::StdIoResult {
 			.with_route_fn_sync ("/", _handler_0)
 			.with_route_fn_sync (&["/1", "/1/"], _handler_1)
 			.with_route_fn_sync (&["/2", "/2/*any"], _handler_2)
-			.build () ?;
+			.build ()
+			.else_wrap (0xf35f8732) ?;
 	
 	return hss::main_with_routes (_routes, None, Some (_arguments));
 }
@@ -67,7 +69,7 @@ fn main_with_routes (_arguments : hss::CliArguments) -> hss::StdIoResult {
 
 
 
-fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::StdIoResult {
+fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
@@ -83,7 +85,7 @@ fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::StdIoResult {
 
 
 
-fn main_with_echo (_arguments : hss::CliArguments) -> hss::StdIoResult {
+fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [53dc40d3]  starting `echo` server...");
 	

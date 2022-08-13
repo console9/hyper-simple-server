@@ -24,7 +24,7 @@ pub enum Connection {
 #[ cfg (feature = "hss-accepter") ]
 impl Connection {
 	
-	fn poll_stream (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Pin<&mut dyn AsyncStream>>> {
+	fn poll_stream (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<ConnectionResult<Pin<&mut dyn AsyncStream>>> {
 		
 		let _self = Pin::into_inner (self);
 		
@@ -41,7 +41,7 @@ impl Connection {
 						Self::poll_stream (Pin::new (_self), _context)
 					}
 					Err (_error) =>
-						Poll::Ready (Err (_error)),
+						Poll::Ready (Err (_error.else_wrap (0xdaecdca2))),
 				}
 			
 			#[ cfg (feature = "hss-tls-rust") ]
@@ -84,7 +84,7 @@ impl tokio::AsyncRead for Connection {
 			Ok (_stream) =>
 				_stream.poll_read (_context, _buffer),
 			Err (_error) =>
-				Poll::Ready (Err (_error)),
+				Poll::Ready (Err (_error.into_std_io_error ())),
 		}
 	}
 }
@@ -98,7 +98,7 @@ impl tokio::AsyncWrite for Connection {
 			Ok (_stream) =>
 				_stream.poll_write (_context, _buffer),
 			Err (_error) =>
-				Poll::Ready (Err (_error)),
+				Poll::Ready (Err (_error.into_std_io_error ())),
 		}
 	}
 	
@@ -107,7 +107,7 @@ impl tokio::AsyncWrite for Connection {
 			Ok (_stream) =>
 				_stream.poll_flush (_context),
 			Err (_error) =>
-				Poll::Ready (Err (_error)),
+				Poll::Ready (Err (_error.into_std_io_error ())),
 		}
 	}
 	
@@ -116,7 +116,7 @@ impl tokio::AsyncWrite for Connection {
 			Ok (_stream) =>
 				_stream.poll_shutdown (_context),
 			Err (_error) =>
-				Poll::Ready (Err (_error)),
+				Poll::Ready (Err (_error.into_std_io_error ())),
 		}
 	}
 }

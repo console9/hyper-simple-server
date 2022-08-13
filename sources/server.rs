@@ -171,12 +171,13 @@ impl Server {
 		Ok (_builder)
 	}
 	
-	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> ServerResult
+	pub async fn serve_with_service_fn <S, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
 				SF : Future<Output = HandlerResult<Response<SB>>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = StdIoError> + Send + Sync + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
 	{
 		let _make_service = move |_ : &Connection| {
 				let _service = _service.clone ();

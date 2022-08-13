@@ -20,7 +20,7 @@ pub enum Accepter {
 #[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
-	pub fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Connection>>> {
+	pub fn poll (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<AccepterResult<Connection>>> {
 		
 		let _self = Pin::into_inner (self);
 		
@@ -29,7 +29,7 @@ impl Accepter {
 			Ok ((_socket, _address)) =>
 				(_socket, _address),
 			Err (_error) =>
-				return Poll::Ready (Some (Err (_error))),
+				return Poll::Ready (Some (Err (_error.else_wrap (0x0a858a00)))),
 		};
 		
 		match _self {
@@ -66,7 +66,7 @@ impl Accepter {
 #[ cfg (feature = "hss-accepter") ]
 impl Accepter {
 	
-	pub fn new (_endpoint : &Endpoint) -> StdIoResult<Self> {
+	pub fn new (_endpoint : &Endpoint) -> AccepterResult<Self> {
 		
 		let _listener = new_listener (&_endpoint.address) ?;
 		let _listener = Arc::new (_listener);
@@ -112,7 +112,7 @@ impl Accepter {
 impl hyper::Accept for Accepter {
 	
 	type Conn = Connection;
-	type Error = StdIoError;
+	type Error = AccepterError;
 	
 	fn poll_accept (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<Result<Self::Conn, Self::Error>>> {
 		self.poll (_context)
@@ -123,12 +123,12 @@ impl hyper::Accept for Accepter {
 
 
 #[ cfg (feature = "hss-accepter") ]
-fn new_listener (_address : &EndpointAddress) -> StdIoResult<tokio::TcpListener> {
+fn new_listener (_address : &EndpointAddress) -> AccepterResult<tokio::TcpListener> {
 	
 	#[ allow (unsafe_code) ]
 	let _listener = match _address {
 		EndpointAddress::Socket (_address) =>
-			net::TcpListener::bind (_address) ?,
+			net::TcpListener::bind (_address) .else_wrap (0x4d3122c5) ?,
 		#[ cfg (unix) ]
 		EndpointAddress::Descriptor (_descriptor) =>
 			unsafe {
@@ -136,9 +136,9 @@ fn new_listener (_address : &EndpointAddress) -> StdIoResult<tokio::TcpListener>
 			},
 	};
 	
-	_listener.set_nonblocking (true) ?;
+	_listener.set_nonblocking (true) .else_wrap (0x5e2c30a5) ?;
 	
-	let _listener = tokio::TcpListener::from_std (_listener) ?;
+	let _listener = tokio::TcpListener::from_std (_listener) .else_wrap (0xfb9275f0) ?;
 	
 	Ok (_listener)
 }
@@ -148,7 +148,7 @@ fn new_listener (_address : &EndpointAddress) -> StdIoResult<tokio::TcpListener>
 
 #[ cfg (feature = "hss-accepter") ]
 #[ cfg (feature = "hss-tls-rust") ]
-fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &EndpointProtocol) -> StdIoResult<tokio_rustls::TlsAcceptor> {
+fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &EndpointProtocol) -> AccepterResult<tokio_rustls::TlsAcceptor> {
 	
 	let _resolver = {
 		struct Resolver (RustTlsCertificate);
@@ -182,7 +182,7 @@ fn new_rustls_accepter (_certificate : &RustTlsCertificate, _protocol : &Endpoin
 
 #[ cfg (feature = "hss-accepter") ]
 #[ cfg (feature = "hss-tls-native") ]
-fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> StdIoResult<tokio_natls::TlsAcceptor> {
+fn new_native_accepter (_certificate : &NativeTlsCertificate, _protocol : &EndpointProtocol) -> AccepterResult<tokio_natls::TlsAcceptor> {
 	
 	let _configuration = {
 		let mut _builder = natls::TlsAcceptor::builder (_certificate.identity.clone ());

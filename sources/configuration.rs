@@ -210,8 +210,8 @@ impl EndpointAddress {
 		EndpointAddress::Socket (_address.into ())
 	}
 	
-	pub fn from_socket_address_parse (_address : &(impl net::ToSocketAddrs + ?Sized)) -> StdIoResult<Self> {
-		let mut _addresses = _address.to_socket_addrs () ?;
+	pub fn from_socket_address_parse (_address : &(impl net::ToSocketAddrs + ?Sized)) -> ConfigurationResult<Self> {
+		let mut _addresses = _address.to_socket_addrs () .else_wrap (0xb0092d06) ?;
 		let _address = if let Some (_address) = _addresses.next () {
 			_address
 		} else {
@@ -366,7 +366,7 @@ impl ConfigurationBuilder {
 			}
 	}
 	
-	pub fn build (self) -> StdIoResult<Configuration> {
+	pub fn build (self) -> ConfigurationResult<Configuration> {
 		
 		let ConfigurationBuilder {
 				endpoint : _endpoint,
@@ -403,7 +403,7 @@ impl ConfigurationBuilder {
 		#[ cfg (feature = "hss-routes") ]
 		if _handler_0.is_none () {
 			if let Some (_routes) = _routes {
-				let _routes = _routes.build () ?;
+				let _routes = _routes.build () .else_wrap (0x7b27305a) ?;
 				_handler_0 = Some (HandlerDynArc::new (_routes));
 			}
 		}
@@ -441,7 +441,7 @@ impl ConfigurationBuilder {
 		self.with_endpoint_address (_address)
 	}
 	
-	pub fn with_endpoint_socket_address_parse (self, _address : &(impl net::ToSocketAddrs + ?Sized)) -> StdIoResult<Self> {
+	pub fn with_endpoint_socket_address_parse (self, _address : &(impl net::ToSocketAddrs + ?Sized)) -> ConfigurationResult<Self> {
 		let _address = EndpointAddress::from_socket_address_parse (_address) ?;
 		Ok (self.with_endpoint_address (_address))
 	}
@@ -477,12 +477,12 @@ impl ConfigurationBuilder {
 		self
 	}
 	
-	pub fn with_endpoint_certificate_rustls_from_pem_file (self, _path : impl AsRef<path::Path>) -> StdIoResult<Self> {
+	pub fn with_endpoint_certificate_rustls_from_pem_file (self, _path : impl AsRef<path::Path>) -> ConfigurationResult<Self> {
 		let _certificate = RustTlsCertificate::load_from_pem_file (_path) ?;
 		Ok (self.with_endpoint_certificate_rustls (_certificate))
 	}
 	
-	pub fn with_endpoint_certificate_rustls_from_pem_data (self, _data : impl AsRef<[u8]>) -> StdIoResult<Self> {
+	pub fn with_endpoint_certificate_rustls_from_pem_data (self, _data : impl AsRef<[u8]>) -> ConfigurationResult<Self> {
 		let _certificate = RustTlsCertificate::load_from_pem_data (_data) ?;
 		Ok (self.with_endpoint_certificate_rustls (_certificate))
 	}
@@ -498,12 +498,12 @@ impl ConfigurationBuilder {
 		self
 	}
 	
-	pub fn with_endpoint_certificate_native_from_pkcs12_file (self, _path : impl AsRef<path::Path>, _password : &str) -> StdIoResult<Self> {
+	pub fn with_endpoint_certificate_native_from_pkcs12_file (self, _path : impl AsRef<path::Path>, _password : &str) -> ConfigurationResult<Self> {
 		let _certificate = NativeTlsCertificate::load_from_pkcs12_file (_path, _password) ?;
 		Ok (self.with_endpoint_certificate_native (_certificate))
 	}
 	
-	pub fn with_endpoint_certificate_native_from_pkcs12_data (self, _data : impl AsRef<[u8]>, _password : &str) -> StdIoResult<Self> {
+	pub fn with_endpoint_certificate_native_from_pkcs12_data (self, _data : impl AsRef<[u8]>, _password : &str) -> ConfigurationResult<Self> {
 		let _certificate = NativeTlsCertificate::load_from_pkcs12_data (_data, _password) ?;
 		Ok (self.with_endpoint_certificate_native (_certificate))
 	}
@@ -647,12 +647,12 @@ impl ConfigurationBuilder {
 #[ cfg (feature = "hss-tls-rust") ]
 impl RustTlsCertificate {
 	
-	pub fn load_from_pem_file (_path : impl AsRef<path::Path>) -> StdIoResult<Self> {
-		let _data = fs::read (_path) ?;
+	pub fn load_from_pem_file (_path : impl AsRef<path::Path>) -> ConfigurationResult<Self> {
+		let _data = fs::read (_path) .else_wrap (0xdc5db5fe) ?;
 		Self::load_from_pem_data (&_data)
 	}
 	
-	pub fn load_from_pem_data (_data : impl AsRef<[u8]>) -> StdIoResult<Self> {
+	pub fn load_from_pem_data (_data : impl AsRef<[u8]>) -> ConfigurationResult<Self> {
 		
 		let _data = _data.as_ref ();
 		
@@ -671,7 +671,7 @@ impl RustTlsCertificate {
 			)
 	}
 	
-	pub fn load_from_parts <'a> (mut _certificates : impl Iterator<Item = &'a [u8]>, mut _private_keys : impl Iterator<Item = &'a [u8]>) -> StdIoResult<Self> {
+	pub fn load_from_parts <'a> (mut _certificates : impl Iterator<Item = &'a [u8]>, mut _private_keys : impl Iterator<Item = &'a [u8]>) -> ConfigurationResult<Self> {
 		let _certificates = {
 			let _certificates : Vec<_> = _certificates.map (<[u8]>::to_vec) .map (rustls::Certificate) .collect ();
 			if _certificates.is_empty () {
@@ -692,7 +692,7 @@ impl RustTlsCertificate {
 		Self::load_from_parts_0 (_certificates, _private_key)
 	}
 	
-	fn load_from_parts_0 (_certificates : Vec<rustls::Certificate>, _private_key : rustls::PrivateKey) -> StdIoResult<Self> {
+	fn load_from_parts_0 (_certificates : Vec<rustls::Certificate>, _private_key : rustls::PrivateKey) -> ConfigurationResult<Self> {
 		let _certified = {
 			let _private_key = rustls::sign::any_supported_type (&_private_key) .map_err (|_| failed! (0x5c4797d0, "invalid private key")) ?;
 			rustls::sign::CertifiedKey::new (_certificates, Arc::new (_private_key))
@@ -703,7 +703,7 @@ impl RustTlsCertificate {
 		Ok (_certificate)
 	}
 	
-	pub fn localhost () -> StdIoResult<Self> {
+	pub fn localhost () -> ConfigurationResult<Self> {
 		let _bundle = include_str! ("./tls-testing-bundle.pem");
 		Self::load_from_pem_data (_bundle)
 	}
@@ -715,12 +715,12 @@ impl RustTlsCertificate {
 #[ cfg (feature = "hss-tls-native") ]
 impl NativeTlsCertificate {
 	
-	pub fn load_from_pkcs12_file (_path : impl AsRef<path::Path>, _password : &str) -> StdIoResult<Self> {
+	pub fn load_from_pkcs12_file (_path : impl AsRef<path::Path>, _password : &str) -> ConfigurationResult<Self> {
 		let _data = fs::read (_path) ?;
 		Self::load_from_pkcs12_data (&_data, _password)
 	}
 	
-	pub fn load_from_pkcs12_data (_data : impl AsRef<[u8]>, _password : &str) -> StdIoResult<Self> {
+	pub fn load_from_pkcs12_data (_data : impl AsRef<[u8]>, _password : &str) -> ConfigurationResult<Self> {
 		
 		let _data = _data.as_ref ();
 		
@@ -733,7 +733,7 @@ impl NativeTlsCertificate {
 		Ok (_certificate)
 	}
 	
-	pub fn localhost () -> StdIoResult<Self> {
+	pub fn localhost () -> ConfigurationResult<Self> {
 		let _bundle = include_bytes! ("./tls-testing-bundle.p12");
 		Self::load_from_pkcs12_data (_bundle, "bundle")
 	}

@@ -66,7 +66,7 @@ pub struct ConfigurationArguments {
 #[ cfg (feature = "hss-cli") ]
 impl ConfigurationArguments {
 	
-	pub fn with_defaults (_configuration : &Configuration) -> StdIoResult<Self> {
+	pub fn with_defaults (_configuration : &Configuration) -> CliResult<Self> {
 		
 		let mut _arguments = Self::default ();
 		
@@ -249,7 +249,7 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn update (&self, _configuration : &mut Configuration) -> StdIoResult {
+	pub fn update (&self, _configuration : &mut Configuration) -> CliResult {
 		
 		#[ cfg (unix) ]
 		if self.endpoint_socket_address.is_some () && self.endpoint_descriptor.is_some () {
@@ -257,7 +257,7 @@ impl ConfigurationArguments {
 		}
 		
 		if let Some (_address) = self.endpoint_socket_address.as_ref () {
-			_configuration.endpoint.address = EndpointAddress::from_socket_address_parse (_address) ?;
+			_configuration.endpoint.address = EndpointAddress::from_socket_address_parse (_address) .else_wrap (0xa7dd30b6) ?;
 		}
 		#[ cfg (unix) ]
 		if let Some (_descriptor) = self.endpoint_descriptor {
@@ -291,7 +291,7 @@ impl ConfigurationArguments {
 		}
 		#[ cfg (feature = "hss-tls-rust") ]
 		if let Some (_path) = self.endpoint_rust_tls_certificate_pem_path.as_ref () {
-			_configuration.endpoint.security = EndpointSecurity::RustTls (RustTlsCertificate::load_from_pem_file (_path) ?);
+			_configuration.endpoint.security = EndpointSecurity::RustTls (RustTlsCertificate::load_from_pem_file (_path) .else_wrap (0x1676bffe) ?);
 		} else if let Some (_certificate) = self.endpoint_rust_tls_certificate_fallback.as_ref () {
 			if let Some (false) = self.endpoint_insecure {
 				_configuration.endpoint.security = EndpointSecurity::RustTls (_certificate.clone ());
@@ -341,11 +341,11 @@ impl ConfigurationArguments {
 	}
 	
 	
-	pub fn parse (_configuration : Configuration, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
+	pub fn parse (_configuration : Configuration, _arguments : Option<CliArguments>) -> CliResult<Configuration> {
 		Self::parse_with_extensions (_configuration, (), _arguments)
 	}
 	
-	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> StdIoResult<Configuration> {
+	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> CliResult<Configuration> {
 		
 		let _arguments = CliArguments::unwrap_or_args (_arguments);
 		let mut _arguments = _arguments.into_vec_str ();

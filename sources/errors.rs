@@ -18,17 +18,18 @@ pub(crate) mod exports {
 		};
 	
 	pub use super::{
-			
-			ServerError,
-			ServerResult,
-			
+			*,
 		};
 }
 
 
 
 
-pub type ServerError = StdIoError;
-pub type ServerResult<V = ()> = StdIoResult<V>;
+define_error! (pub ServerError, result : ServerResult);
+define_error! (pub ConfigurationError, result : ConfigurationResult);
+define_error! (pub RoutesError, result : RoutesResult);
+define_error! (pub SanitizeError, result : SanitizeResult);
+define_error! (pub CliError, result : CliResult);
+define_error! (pub MainError, result : MainResult);
 
 

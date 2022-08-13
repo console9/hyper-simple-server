@@ -347,7 +347,7 @@ impl <B> BodyExt for B
 		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
 		
 		let _runtime_0 = if _runtime.is_none () {
-			Some (tokio::RuntimeBuilder::new_current_thread () .build () .else_wrap (0x6d0d289e) ?)
+			Some (tokio::RuntimeBuilder::new_current_thread () .build () ?)
 		} else {
 			None
 		};
@@ -361,7 +361,7 @@ impl <B> BodyExt for B
 			} else {
 				break;
 			};
-			let mut _data = _next.else_wrap (0x401ac565) ?;
+			let mut _data = _next.unwrap ();  // FIXME:  else_wrap
 			while _data.remaining () > 0 {
 				let _chunk = _data.chunk ();
 				_buffer.extend (_chunk);

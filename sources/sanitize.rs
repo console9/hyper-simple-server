@@ -6,7 +6,7 @@ use crate::prelude::*;
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_scheme (_scheme : &Scheme) -> StdIoResult<Option<Scheme>> {
+pub fn sanitize_scheme (_scheme : &Scheme) -> SanitizeResult<Option<Scheme>> {
 	
 	// NOTE:  The `_uri.scheme` is always safe, according to the `http::uri::scheme::Scheme2::parse_exact` implementation.
 	
@@ -17,7 +17,7 @@ pub fn sanitize_scheme (_scheme : &Scheme) -> StdIoResult<Option<Scheme>> {
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_authority (_authority : &Authority) -> StdIoResult<Option<Authority>> {
+pub fn sanitize_authority (_authority : &Authority) -> SanitizeResult<Option<Authority>> {
 	
 	let _authority = _authority.as_str ();
 	
@@ -37,7 +37,7 @@ pub fn sanitize_authority (_authority : &Authority) -> StdIoResult<Option<Author
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
+pub fn sanitize_path (_path : &str) -> SanitizeResult<Option<String>> {
 	
 	let _path_as_str = _path;
 	let _path_as_bytes = _path_as_str.as_bytes ();
@@ -192,7 +192,7 @@ pub fn sanitize_path (_path : &str) -> StdIoResult<Option<String>> {
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_query (_query : &str) -> StdIoResult<Option<String>> {
+pub fn sanitize_query (_query : &str) -> SanitizeResult<Option<String>> {
 	
 	match _query {
 		
@@ -209,7 +209,7 @@ pub fn sanitize_query (_query : &str) -> StdIoResult<Option<String>> {
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> StdIoResult<Option<PathAndQuery>> {
+pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> SanitizeResult<Option<PathAndQuery>> {
 	
 	let _path = sanitize_path (_path_and_query.path ()) ?;
 	
@@ -242,7 +242,7 @@ pub fn sanitize_path_and_query (_path_and_query : &PathAndQuery) -> StdIoResult<
 
 
 #[ cfg (feature = "hss-sanitize") ]
-pub fn sanitize_uri (_uri : &Uri) -> StdIoResult<Option<Uri>> {
+pub fn sanitize_uri (_uri : &Uri) -> SanitizeResult<Option<Uri>> {
 	
 //	eprintln! ("[dd] [34b470a9]  `{}` | scheme: {:?} | authority: {:?} | path: {:?} | query: {:?}", _uri, _uri.scheme (), _uri.authority (), _uri.path (), _uri.query ());
 	

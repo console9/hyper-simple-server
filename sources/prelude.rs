@@ -24,6 +24,7 @@ pub(crate) use crate::resources::*;
 pub(crate) use ::vrl_errors::*;
 pub(crate) use ::vrl_errors::{
 		panic,
+		Error as _,
 	};
 
 

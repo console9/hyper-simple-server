@@ -40,7 +40,7 @@ impl Routes {
 			}
 	}
 	
-	pub fn resolve (&self, _path : &str) -> StdIoResult<Option<RouteMatched>> {
+	pub fn resolve (&self, _path : &str) -> RoutesResult<Option<RouteMatched>> {
 		if let Some ((_route, _parameters)) = self.internals.tree.find (_path) {
 			let _route = _route.clone ();
 			let _parameters = _parameters.into_iter () .map (|(_name, _value)| (String::from (_name), String::from (_value))) .collect ();
@@ -74,7 +74,7 @@ impl Routes {
 			Ok (_route_matched) =>
 				_route_matched,
 			Err (_error) =>
-				return Ok (HandlerFutureDynBox::ready_error (_error)),
+				return Ok (HandlerFutureDynBox::ready_error (_error.else_wrap (0xf78de1d8))),
 		};
 		if let Some (_route_matched) = _route_matched {
 			let _route = _route_matched.route.clone ();
@@ -137,7 +137,7 @@ impl RoutesBuilder {
 			}
 	}
 	
-	pub fn build (self) -> StdIoResult<Routes> {
+	pub fn build (self) -> RoutesResult<Routes> {
 		
 		let _routes = self.routes;
 		let mut _fallback = self.fallback;

@@ -17,7 +17,9 @@ fn main () -> hss::MainResult {
 	let (_main, _arguments_remove_first) : (Main, _) = match _arguments.first_str () {
 		
 		None =>
-			(main_with_echo, false),
+			(main_with_hello, false),
+		Some ("hello") =>
+			(main_with_hello, true),
 		Some ("echo") =>
 			(main_with_echo, true),
 		Some ("routes") =>
@@ -93,6 +95,22 @@ fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 		let _uri = _request.uri ();
 		let _output = format! ("`{}` | scheme: {:?} | authority: {:?} | path: {:?} | query: {:?}", _uri, _uri.scheme (), _uri.authority (), _uri.path (), _uri.query ());
 		hss::Response::new_200_with_text (_output) .ok ()
+	};
+	
+	let _handler = hss::HandlerFnSync::from (_handler);
+	
+	return hss::main_with_handler (_handler, None, Some (_arguments));
+}
+
+
+
+
+fn main_with_hello (_arguments : hss::CliArguments) -> hss::MainResult {
+	
+	eprintln! ("[ii] [8759f202]  starting `hello` server...");
+	
+	let _handler = |_request : hss::Request<hss::Body>| {
+		hss::Response::new_200_with_text ("hello world!\n") .ok ()
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);

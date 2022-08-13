@@ -110,7 +110,7 @@ impl Handler for Routes {
 	
 	type Future = HandlerFutureDynBox;
 	type ResponseBody = BodyDynBox;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		Routes::handle (self, _request)

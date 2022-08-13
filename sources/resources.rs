@@ -99,7 +99,7 @@ impl Handler for FileResource {
 	
 	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		match self.response () {
@@ -189,7 +189,7 @@ impl Handler for BytesResource {
 	
 	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _response = self.response ();
@@ -278,7 +278,7 @@ impl Handler for EmbeddedResource {
 	
 	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _response = self.response ();

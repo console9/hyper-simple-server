@@ -205,7 +205,7 @@ impl Handler for HandlerDynArc {
 	
 	type Future = HandlerFutureDynBox;
 	type ResponseBody = BodyDynBox;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		self.delegate (_request)
@@ -324,7 +324,7 @@ impl <H> Handler for HandlerSimpleAsyncWrapper<H>
 {
 	type Future = HandlerSimpleAsyncWrapperFuture<H::Future>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let _future = HandlerSimpleAsync::handle (&self.0, _request);
@@ -403,7 +403,7 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 {
 	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
-	type ResponseBodyError = StdIoError;
+	type ResponseBodyError = HandlerError;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let mut _response = Response::new (Body::empty ());
@@ -436,15 +436,15 @@ impl <B> BodyTrait for BodyWrapper<B>
 		B::Error : StdError + Send + Sync + 'static,
 {
 	type Data = Bytes;
-	type Error = StdIoError;
+	type Error = HandlerError;
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<HandlerResult<Bytes>>> {
 		let _future = self.delegate_pin_mut () .poll_data (_context);
 		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.else_wrap (0x4e33a117))));
 		_future
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<HandlerResult<Option<Headers>>> {
 		let _future = self.delegate_pin_mut () .poll_trailers (_context);
 		let _future = _future.map (|_result| _result.map_err (|_error| _error.else_wrap (0x3a25b983)));
 		_future
@@ -489,8 +489,8 @@ pub trait BodyDyn
 	where
 		Self : Send + 'static,
 {
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>>;
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>>;
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<HandlerResult<Bytes>>>;
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<HandlerResult<Option<Headers>>>;
 	
 	fn is_end_stream (&self) -> bool;
 	fn size_hint (&self) -> BodySizeHint;
@@ -503,13 +503,13 @@ impl <B> BodyDyn for B
 		B : BodyTrait<Data = Bytes> + Send + 'static,
 		B::Error : StdError + Send + Sync + 'static,
 {
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<HandlerResult<Bytes>>> {
 		let _future = BodyTrait::poll_data (self, _context);
 		let _future = _future.map (|_option| _option.map (|_result| _result.map_err (|_error| _error.else_wrap (0xd89897d4))));
 		_future
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<HandlerResult<Option<Headers>>> {
 		let _future = BodyTrait::poll_trailers (self, _context);
 		let _future = _future.map (|_result| _result.map_err (|_error| _error.else_wrap (0x8adea6a0)));
 		_future
@@ -535,13 +535,13 @@ pub struct BodyDynBox (Pin<Box<dyn BodyDyn + Sync>>);
 impl BodyTrait for BodyDynBox {
 	
 	type Data = Bytes;
-	type Error = StdIoError;
+	type Error = HandlerError;
 	
-	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
+	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<HandlerResult<Bytes>>> {
 		self.delegate_pin_mut () .poll_data (_context)
 	}
 	
-	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<StdIoResult<Option<Headers>>> {
+	fn poll_trailers (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<HandlerResult<Option<Headers>>> {
 		self.delegate_pin_mut () .poll_trailers (_context)
 	}
 	

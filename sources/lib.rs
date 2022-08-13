@@ -67,7 +67,7 @@ pub use {
 	crate::cli::*,
 	crate::connection::*,
 	crate::configuration::*,
-	crate::errors::exports::*,
+	crate::errors::*,
 	crate::extensions::*,
 	crate::resources::*,
 	crate::handler::*,

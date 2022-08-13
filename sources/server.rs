@@ -67,7 +67,7 @@ impl Server {
 	}
 	
 	fn handler (&self) -> ServerResult<HandlerDynArc> {
-		let _self = self.internals.read () .unwrap ();  // FIXME:  infallible
+		let _self = self.internals.read () .infallible_unexpected (0xeb521424);
 		Self::handler_0 (&_self.configuration)
 	}
 	
@@ -111,7 +111,7 @@ impl Server
 	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
-			let _self = self.internals.read ();  // FIXME:  infallible
+			let _self = self.internals.read () .infallible_unexpected (0x40b466b4);
 			if let Some (_path) = &_self.configuration.profiling {
 				Some (ProfilingSession::new_and_start (_path) ?)
 			} else {
@@ -157,7 +157,7 @@ impl Server {
 	
 	pub fn serve_builder (&self) -> ServerResult<hyper::Builder<Accepter, ServerExecutor>> {
 		
-		let _self = self.internals.read () .unwrap ();  // FIXME:  infallible
+		let _self = self.internals.read () .infallible_unexpected (0xb22266f2);
 		
 		eprintln! ("[ii] [83af6f05]  server listening on `{}`;", _self.configuration.endpoint.url ());
 		
@@ -223,7 +223,7 @@ impl Server {
 	
 	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {
 		
-		let _self = self.internals.read () .unwrap ();  // FIXME:  infallible
+		let _self = self.internals.read () .infallible_unexpected (0xbaf6b552);
 		let _protocol = &_self.configuration.endpoint.protocol;
 		
 		let mut _http = hyper::Http::new ();
@@ -257,7 +257,7 @@ impl Server {
 	
 	pub fn serve_runtime (&self) -> ServerResult<Runtime> {
 		
-		let _self = self.internals.read () .unwrap ();  // FIXME:  infallible
+		let _self = self.internals.read () .infallible_unexpected (0xe9c6c99d);
 		
 		#[ cfg (feature = "hss-jemalloc") ]
 		if true {

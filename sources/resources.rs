@@ -30,16 +30,16 @@ impl FileResource {
 	
 	pub fn load (&self) -> HandlerResult<Bytes> {
 		if let Some (_cache) = self.cache.as_ref () {
-			let _cache = _cache.read () .unwrap ();  // FIXME:  else_wrap
+			let _cache = _cache.read () .infallible_unexpected (0x3c83dd82);
 			if let Some (_data) = _cache.as_ref () {
 				return Ok (_data.clone ());
 			}
 			mem::drop (_cache);
 		}
-		let _data = fs::read (&self.path) .unwrap ();  // FIXME:  else_wrap
+		let _data = fs::read (&self.path) .else_wrap (0xbd232b35) ?;
 		let _data = Bytes::from (_data);
 		if let Some (_cache) = self.cache.as_ref () {
-			let mut _cache = _cache.write () .unwrap ();  // FIXME:  else_wrap
+			let mut _cache = _cache.write () .infallible_unexpected (0xf0898318);
 			*_cache = Some (_data.clone ());
 		}
 		Ok (_data)

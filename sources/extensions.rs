@@ -361,7 +361,7 @@ impl <B> BodyExt for B
 			} else {
 				break;
 			};
-			let mut _data = _next.unwrap ();  // FIXME:  else_wrap
+			let mut _data = _next.else_wrap (0xcc4e4d42) ?;
 			while _data.remaining () > 0 {
 				let _chunk = _data.chunk ();
 				_buffer.extend (_chunk);

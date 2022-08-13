@@ -194,9 +194,9 @@ impl Server {
 			where
 				M : FnMut (&Connection) -> MF + Send + 'static,
 				MF : Future<Output = Result<S, ME>> + Send + 'static,
-				ME : Error + Send + Sync + 'static,
+				ME : StdError + Send + Sync + 'static,
 				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
-				SE : Error + Send + Sync + 'static,
+				SE : StdError + Send + Sync + 'static,
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,

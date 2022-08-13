@@ -12,7 +12,7 @@ pub trait Handler
 {
 	type Future : Future<Output = StdIoResult<Response<Self::ResponseBody>>> + Send + 'static;
 	type ResponseBody : BodyTrait<Data = Bytes, Error = Self::ResponseBodyError> + Send + Sync + 'static;
-	type ResponseBodyError : Error + Send + Sync + 'static;
+	type ResponseBodyError : StdError + Send + Sync + 'static;
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future;
 	
@@ -54,7 +54,7 @@ pub struct HandlerFnAsync <C, F, RB>
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	function : C,
 	phantom : PhantomData<fn(RB)>,
@@ -67,7 +67,7 @@ impl <C, F, RB> Handler for HandlerFnAsync<C, F, RB>
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	type Future = F;
 	type ResponseBody = RB;
@@ -85,7 +85,7 @@ impl <C, F, RB> From<C> for HandlerFnAsync<C, F, RB>
 		C : Fn (Request<Body>) -> F + Send + Sync + 'static,
 		F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
 		Self {
@@ -103,7 +103,7 @@ pub struct HandlerFnSync <C, RB>
 	where
 		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	function : C,
 	phantom : PhantomData<fn(RB)>,
@@ -115,7 +115,7 @@ impl <C, RB> Handler for HandlerFnSync<C, RB>
 	where
 		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	type Future = future::Ready<StdIoResult<Response<RB>>>;
 	type ResponseBody = RB;
@@ -132,7 +132,7 @@ impl <C, RB> From<C> for HandlerFnSync<C, RB>
 	where
 		C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
 		RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		RB::Error : Error + Send + Sync + 'static,
+		RB::Error : StdError + Send + Sync + 'static,
 {
 	fn from (_function : C) -> Self {
 		Self {
@@ -260,7 +260,7 @@ impl HandlerFutureDynBox {
 impl <B> From<Response<B>> for HandlerFutureDynBox
 	where
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static,
-		B::Error : Error + Send + Sync + 'static,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	fn from (_response : Response<B>) -> Self {
 		Self::ready_response (_response.map (BodyDynBox::new))
@@ -424,7 +424,7 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 pub struct BodyWrapper <B> (B)
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
+		B::Error : StdError + Send + Sync + 'static,
 ;
 
 
@@ -433,7 +433,7 @@ pub struct BodyWrapper <B> (B)
 impl <B> BodyTrait for BodyWrapper<B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	type Data = Bytes;
 	type Error = StdIoError;
@@ -465,7 +465,7 @@ impl <B> BodyTrait for BodyWrapper<B>
 impl <B> BodyWrapper<B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static + Unpin,
-		B::Error : Error + Send + Sync + 'static,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	pub fn new (_body : B) -> Self {
 		Self (_body)
@@ -501,7 +501,7 @@ pub trait BodyDyn
 impl <B> BodyDyn for B
 	where
 		B : BodyTrait<Data = Bytes> + Send + 'static,
-		B::Error : Error + Send + Sync + 'static,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	fn poll_data (self : Pin<&mut Self>, _context : &mut Context<'_>) -> Poll<Option<StdIoResult<Bytes>>> {
 		let _future = BodyTrait::poll_data (self, _context);

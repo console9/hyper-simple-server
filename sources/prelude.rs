@@ -24,7 +24,6 @@ pub(crate) use crate::resources::*;
 pub(crate) use ::vrl_errors::*;
 pub(crate) use ::vrl_errors::{
 		panic,
-		Error as _,
 	};
 
 
@@ -41,8 +40,6 @@ pub(crate) use ::std::convert::From;
 pub(crate) use ::std::convert::Into;
 pub(crate) use ::std::convert::TryInto;
 pub(crate) use ::std::convert::TryFrom;
-
-pub(crate) use ::std::error::Error;
 
 pub(crate) use ::std::future::Future;
 #[ cfg (feature = "futures") ]

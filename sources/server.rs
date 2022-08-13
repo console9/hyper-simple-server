@@ -200,7 +200,7 @@ impl Server {
 				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
-				SBE : Error + Send + Sync + 'static,
+				SBE : StdError + Send + Sync + 'static,
 	{
 		
 		let _service = hyper::make_service_fn (_make_service);

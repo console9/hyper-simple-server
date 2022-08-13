@@ -644,6 +644,7 @@ impl ConfigurationBuilder {
 
 
 
+#[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-tls-rust") ]
 impl RustTlsCertificate {
 	
@@ -712,11 +713,12 @@ impl RustTlsCertificate {
 
 
 
+#[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-tls-native") ]
 impl NativeTlsCertificate {
 	
 	pub fn load_from_pkcs12_file (_path : impl AsRef<path::Path>, _password : &str) -> ConfigurationResult<Self> {
-		let _data = fs::read (_path) ?;
+		let _data = fs::read (_path) .else_wrap (0xa75efd55) ?;
 		Self::load_from_pkcs12_data (&_data, _password)
 	}
 	

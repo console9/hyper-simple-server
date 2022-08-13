@@ -113,7 +113,7 @@ impl Server
 		let _profiling = {
 			let _self = self.internals.read () .infallible_unexpected (0x40b466b4);
 			if let Some (_path) = &_self.configuration.profiling {
-				Some (ProfilingSession::new_and_start (_path) ?)
+				Some (ProfilingSession::new_and_start (_path) .else_wrap (0xa5d732b7) ?)
 			} else {
 				None
 			}
@@ -125,7 +125,7 @@ impl Server
 		
 		#[ cfg (feature = "hss-server-profiling") ]
 		if let Some (_profiling) = _profiling {
-			_profiling.stop_and_drop () ?;
+			_profiling.stop_and_drop () .else_wrap (0x386af255) ?;
 		}
 		
 		_outcome
@@ -280,7 +280,7 @@ impl Server {
 			if _threads > 0 {
 				#[ cfg (debug_assertions) ]
 				eprintln! ("[ii] [cf4d96e6]  using multi-threaded executor (with {} threads);", _threads);
-				let _runtime = runtime_multiple_threads (Some (_threads)) ?;
+				let _runtime = runtime_multiple_threads (Some (_threads)) .else_wrap (0x48aefd8f) ?;
 				_runtime_0 = Some (_runtime);
 			}
 		}
@@ -288,7 +288,7 @@ impl Server {
 		if _runtime_0.is_none () {
 			#[ cfg (debug_assertions) ]
 			eprintln! ("[ii] [25065ee8]  using current-thread executor (with 1 thread);");
-			let _runtime = runtime_current_thread () ?;
+			let _runtime = runtime_current_thread () .else_wrap (0x2c0999c6) ?;
 			_runtime_0 = Some (_runtime);
 		};
 		
@@ -479,7 +479,7 @@ fn server_start_jemalloc_stats () -> () {
 
 
 #[ cfg (feature = "tokio--rt-multi-thread") ]
-pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<Runtime> {
+pub fn runtime_multiple_threads (_threads : Option<usize>) -> RuntimeResult<Runtime> {
 	let _threads = _threads.unwrap_or (1);
 	let mut _builder = tokio::RuntimeBuilder::new_multi_thread ();
 	_builder.worker_threads (_threads);
@@ -490,7 +490,7 @@ pub fn runtime_multiple_threads (_threads : Option<usize>) -> ServerResult<Runti
 }
 
 #[ cfg (feature = "tokio--rt") ]
-pub fn runtime_current_thread () -> ServerResult<Runtime> {
+pub fn runtime_current_thread () -> RuntimeResult<Runtime> {
 	let mut _builder = tokio::RuntimeBuilder::new_current_thread ();
 	_builder.enable_all ();
 	_builder.build () .else_wrap (0x280fcb72)

@@ -34,6 +34,7 @@ pub(crate) use ::std::{
 		mem,
 		os,
 		time,
+		process,
 	};
 
 pub(crate) use ::std::{
@@ -44,8 +45,9 @@ pub(crate) use ::std::{
 pub(crate) use ::std::{
 		convert::{From, Into, TryInto, TryFrom, AsRef},
 		marker::{Sized, Send, Sync, Unpin, PhantomData},
-		ops::{Deref, Fn, FnMut},
+		ops::{Deref, Fn, FnMut, Drop},
 		iter::{Iterator, IntoIterator, Extend as _},
+		borrow::ToOwned as _,
 		clone::Clone,
 		future::Future,
 		pin::Pin,

@@ -291,15 +291,7 @@ pub trait ResponseExtBuild <B>
 		Ok (self)
 	}
 	
-	fn ok_0 (self) -> HandlerResult<Self> {
-		Ok (self)
-	}
-	
 	fn ready <E> (self) -> future::Ready<Result<Self, E>> {
-		future::ready (Ok (self))
-	}
-	
-	fn ready_0 (self) -> future::Ready<HandlerResult<Self>> {
 		future::ready (Ok (self))
 	}
 }
@@ -325,9 +317,9 @@ impl ResponseExtBuild<Body> for Response<Body> {
 #[ cfg (feature = "tokio--rt") ]
 pub trait BodyExt {
 	
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> HandlerResult;
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult;
 	
-	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> HandlerResult<Vec<u8>> {
+	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> StdIoResult<Vec<u8>> {
 		let mut _buffer = Vec::new ();
 		self.consume_into_vec (&mut _buffer, _runtime) ?;
 		Ok (_buffer)
@@ -342,12 +334,12 @@ impl <B> BodyExt for B
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : StdError + Send + Sync + 'static,
 {
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> HandlerResult {
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult {
 		
 		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
 		
 		let _runtime_0 = if _runtime.is_none () {
-			Some (tokio::RuntimeBuilder::new_current_thread () .build () .else_wrap (0xf8e18683) ?)
+			Some (tokio::RuntimeBuilder::new_current_thread () .build () ?)
 		} else {
 			None
 		};
@@ -361,7 +353,7 @@ impl <B> BodyExt for B
 			} else {
 				break;
 			};
-			let mut _data = _next.else_wrap (0xcc4e4d42) ?;
+			let mut _data = _next.map_err (|_error| StdIoError::new (StdIoErrorKind::Other, _error)) ?;
 			while _data.remaining () > 0 {
 				let _chunk = _data.chunk ();
 				_buffer.extend (_chunk);

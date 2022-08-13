@@ -300,7 +300,7 @@ impl ConfigurationArguments {
 		#[ cfg (feature = "hss-tls-native") ]
 		if let Some (_path) = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () {
 			let _password = self.endpoint_native_tls_certificate_pkcs12_password.as_ref () .map_or_else (|| "", String::as_str);
-			_configuration.endpoint.security = EndpointSecurity::NativeTls (NativeTlsCertificate::load_from_pkcs12_file (_path, _password) ?);
+			_configuration.endpoint.security = EndpointSecurity::NativeTls (NativeTlsCertificate::load_from_pkcs12_file (_path, _password) .else_wrap (0x5b91a1db) ?);
 		} else if let Some (_certificate) = self.endpoint_native_tls_certificate_fallback.as_ref () {
 			if let Some (false) = self.endpoint_insecure {
 				_configuration.endpoint.security = EndpointSecurity::NativeTls (_certificate.clone ());

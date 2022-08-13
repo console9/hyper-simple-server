@@ -110,13 +110,13 @@ fn profiling_start (_path : &path::Path) -> ProfilingResult {
 	#[ cfg (debug_assertions) ]
 	eprintln! ("[ii] [1c05ae71]  starting `cpuprofiler` tracing...");
 	
-	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0xd30eee91) ?;
+	let mut _profiler = ::cpuprofiler::PROFILER.lock () .infallible_unexpected (0xd30eee91);
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::NotActive {
 		fail! (0x1bd8ceb5);
 	}
 	
-	_profiler.start (_path) .else_wrap (0x57e487d1) ?;
+	_profiler.start (_path) .else_replace (0x57e487d1) ?;
 	
 	Ok (())
 }
@@ -128,13 +128,13 @@ fn profiling_stop () -> ProfilingResult {
 	#[ cfg (debug_assertions) ]
 	eprintln! ("[ii] [27a3b301]  stopping `cpuprofiler` tracing...");
 	
-	let mut _profiler = ::cpuprofiler::PROFILER.lock () .else_wrap (0x678aa104) ?;
+	let mut _profiler = ::cpuprofiler::PROFILER.lock () .infallible_unexpected (0x678aa104);
 	
 	if _profiler.state () != ::cpuprofiler::ProfilerState::Active {
 		fail! (0x5dff5e52);
 	}
 	
-	_profiler.stop () .else_wrap (0x39363dfd) ?;
+	_profiler.stop () .else_replace (0x39363dfd) ?;
 	
 	Ok (())
 }

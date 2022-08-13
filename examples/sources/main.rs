@@ -74,7 +74,7 @@ fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResult {
 	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
 	let _handler = |_request : hss::Request<hss::Body>| {
-		hss::Response::new_200 () .ok_0 ()
+		hss::Response::new_200 () .ok ()
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
@@ -92,7 +92,7 @@ fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 	let _handler = |_request : hss::Request<hss::Body>| {
 		let _uri = _request.uri ();
 		let _output = format! ("`{}` | scheme: {:?} | authority: {:?} | path: {:?} | query: {:?}", _uri, _uri.scheme (), _uri.authority (), _uri.path (), _uri.query ());
-		hss::Response::new_200_with_text (_output) .ok_0 ()
+		hss::Response::new_200_with_text (_output) .ok ()
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);

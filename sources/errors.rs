@@ -1,5 +1,8 @@
 
 
+#![ allow (unused_imports) ]
+
+
 use crate::prelude::*;
 
 
@@ -35,6 +38,9 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-accepter") ]
 ::vrl_errors::define_error! (pub ConnectionError, result : ConnectionResult);
 
+#[ cfg (feature = "tokio--rt") ]
+::vrl_errors::define_error! (pub RuntimeError, result : RuntimeResult);
+
 #[ cfg (feature = "cpuprofiler") ]
 ::vrl_errors::define_error! (pub ProfilingError, result : ProfilingResult);
 
@@ -62,9 +68,12 @@ mod imports {
 			ResultExtWrap,
 			ResultExtPanic,
 			ResultExtUnexpected,
+			ResultExtReplace,
 			
 			StdError,
+			
 			StdIoError,
+			StdIoErrorKind,
 			StdIoResult,
 			
 			failed,

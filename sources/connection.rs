@@ -41,7 +41,7 @@ impl Connection {
 						Self::poll_stream (Pin::new (_self), _context)
 					}
 					Err (_error) =>
-						Poll::Ready (Err (_error.else_wrap (0xdaecdca2))),
+						Poll::Ready (ConnectionError::new_with_cause (0xcdd933c6, _error) .into_result ()),
 				}
 			
 			#[ cfg (feature = "hss-tls-rust") ]
@@ -56,7 +56,7 @@ impl Connection {
 						Self::poll_stream (Pin::new (_self), _context)
 					}
 					Err (_error) =>
-						Poll::Ready (Err (_error.wrap (0xba9facee))),
+						Poll::Ready (ConnectionError::new_with_cause (0xda0a3946, _error) .into_result ()),
 				}
 			
 			#[ cfg (feature = "hss-tls-native") ]

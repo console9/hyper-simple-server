@@ -25,6 +25,7 @@ pub(crate) mod exports {
 
 
 
+define_error! (pub HandlerError, result : HandlerResult);
 define_error! (pub ServerError, result : ServerResult);
 define_error! (pub ConfigurationError, result : ConfigurationResult);
 define_error! (pub RoutesError, result : RoutesResult);

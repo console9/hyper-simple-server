@@ -517,7 +517,7 @@ impl ConfigurationBuilder {
 	pub fn with_handler <H, F, RB> (self, _handler : H) -> Self
 			where
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RB::Error> + Send + Sync + 'static,
-				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -528,7 +528,7 @@ impl ConfigurationBuilder {
 	pub fn with_handler_fn_sync <I, C, RB> (self, _handler : I) -> Self
 			where
 				I : Into<HandlerFnSync<C, RB>>,
-				C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
+				C : Fn (Request<Body>) -> HandlerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -540,7 +540,7 @@ impl ConfigurationBuilder {
 			where
 				I : Into<HandlerFnAsync<C, F, RB>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -576,7 +576,7 @@ impl ConfigurationBuilder {
 			where
 				P : Into<RoutePaths<'a>>,
 				H : Handler<Future = F, ResponseBody = RB, ResponseBodyError = RB::Error> + Send + Sync + 'static,
-				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -589,7 +589,7 @@ impl ConfigurationBuilder {
 			where
 				P : Into<RoutePaths<'a>>,
 				I : Into<HandlerFnSync<C, RB>>,
-				C : Fn (Request<Body>) -> StdIoResult<Response<RB>> + Send + Sync + 'static,
+				C : Fn (Request<Body>) -> HandlerResult<Response<RB>> + Send + Sync + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{
@@ -603,7 +603,7 @@ impl ConfigurationBuilder {
 				P : Into<RoutePaths<'a>>,
 				I : Into<HandlerFnAsync<C, F, RB>>,
 				C : Fn (Request<Body>) -> F + Send + Sync + 'static,
-				F : Future<Output = StdIoResult<Response<RB>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<RB>>> + Send + 'static,
 				RB : BodyTrait<Data = Bytes> + Send + Sync + 'static,
 				RB::Error : Error + Send + Sync + 'static,
 	{

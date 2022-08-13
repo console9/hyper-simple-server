@@ -89,7 +89,7 @@ impl Server
 	pub fn run_and_wait_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _server = Server::new (_configuration) ?;
 		_server.serve_and_wait_with_handler (_handler)
@@ -98,7 +98,7 @@ impl Server
 	pub async fn run_with_handler <H, F> (_configuration : Configuration, _handler : H) -> ServerResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _server = Server::new (_configuration) ?;
 		_server.serve_with_handler (_handler) .await
@@ -107,7 +107,7 @@ impl Server
 	pub fn serve_and_wait_with_handler <H, F> (&self, _handler : H) -> ServerResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
@@ -134,7 +134,7 @@ impl Server
 	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
 			where
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = StdIoResult<Response<H::ResponseBody>>> + Send + 'static,
+				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
 		let _service = move |_ : &Connection| {
 				let _service = _handler.clone () .wrap ();
@@ -174,7 +174,7 @@ impl Server {
 	pub async fn serve_with_service_fn <S, SF, SB, SBD> (&self, _service : S) -> ServerResult
 			where
 				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SF : Future<Output = StdIoResult<Response<SB>>> + Send + 'static,
+				SF : Future<Output = HandlerResult<Response<SB>>> + Send + 'static,
 				SB : BodyTrait<Data = SBD, Error = StdIoError> + Send + Sync + 'static,
 				SBD : Buf + Send + 'static,
 	{
@@ -308,7 +308,7 @@ impl Server {
 #[ cfg (feature = "hyper--server") ]
 struct ServiceWrapper <S> (S)
 	where
-		S : hyper::Service<Request<Body>, Error = StdIoError>,
+		S : hyper::Service<Request<Body>, Error = HandlerError>,
 ;
 
 #[ cfg (feature = "hss-server-core") ]
@@ -316,10 +316,10 @@ struct ServiceWrapper <S> (S)
 #[ allow (dead_code) ]
 enum ServiceWrapperFuture <S>
 	where
-		S : hyper::Service<Request<Body>, Error = StdIoError>,
+		S : hyper::Service<Request<Body>, Error = HandlerError>,
 {
 	Future (S::Future),
-	Error (StdIoError),
+	Error (HandlerError),
 	Done,
 }
 
@@ -328,13 +328,13 @@ enum ServiceWrapperFuture <S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 	where
-		S : hyper::Service<Request<Body>, Error = StdIoError>,
+		S : hyper::Service<Request<Body>, Error = HandlerError>,
 {
 	type Future = ServiceWrapperFuture<S>;
 	type Response = S::Response;
-	type Error = StdIoError;
+	type Error = HandlerError;
 	
-	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<StdIoResult> {
+	fn poll_ready (&mut self, _context : &mut Context<'_>) -> Poll<HandlerResult> {
 		self.0.poll_ready (_context)
 	}
 	
@@ -346,7 +346,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 				if true {
 					eprintln! ("[ww] [aace2099]  URI sanitize failed for `{}`:  {}", _request.uri (), _error);
 				}
-				return ServiceWrapperFuture::Error (_error.into_std_io_error ());
+				return ServiceWrapperFuture::Error (_error.else_wrap (0x38318654));
 			}
 			Ok (Some (_uri)) => {
 				if true {
@@ -366,7 +366,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 #[ cfg (feature = "hyper--server") ]
 impl <S> Future for ServiceWrapperFuture<S>
 	where
-		S : hyper::Service<Request<Body>, Error = StdIoError>,
+		S : hyper::Service<Request<Body>, Error = HandlerError>,
 {
 	type Output = <S::Future as Future>::Output;
 	
@@ -401,7 +401,7 @@ impl <S> Future for ServiceWrapperFuture<S>
 				}
 			}
 			ServiceWrapperFuture::Done =>
-				Poll::Ready (Err (failed! (ServerError, 0x0722e578) .into_std_io_error ())),  // FIXME:  ???
+				Poll::Ready (Err (failed! (HandlerError, 0x0722e578))),
 		}
 	}
 }

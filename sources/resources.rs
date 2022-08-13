@@ -28,7 +28,7 @@ impl FileResource {
 			}
 	}
 	
-	pub fn load (&self) -> StdIoResult<Bytes> {
+	pub fn load (&self) -> HandlerResult<Bytes> {
 		if let Some (_cache) = self.cache.as_ref () {
 			let _cache = _cache.read () .unwrap ();  // FIXME:  else_wrap
 			if let Some (_data) = _cache.as_ref () {
@@ -85,7 +85,7 @@ impl FileResource {
 		Self::new (_path, Some (ContentType::Icon), false)
 	}
 	
-	pub fn response (&self) -> StdIoResult<Response<Body>> {
+	pub fn response (&self) -> HandlerResult<Response<Body>> {
 		let _data = self.load () ?;
 		let _response = Response::new_200_with_body (_data, self.content_type);
 		Ok (_response)
@@ -97,7 +97,7 @@ impl FileResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for FileResource {
 	
-	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
 	type ResponseBodyError = StdIoError;
 	
@@ -187,7 +187,7 @@ impl BytesResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for BytesResource {
 	
-	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
 	type ResponseBodyError = StdIoError;
 	
@@ -276,7 +276,7 @@ impl EmbeddedResource {
 #[ cfg (feature = "hss-resources") ]
 impl Handler for EmbeddedResource {
 	
-	type Future = future::Ready<StdIoResult<Response<Self::ResponseBody>>>;
+	type Future = future::Ready<HandlerResult<Response<Self::ResponseBody>>>;
 	type ResponseBody = BodyWrapper<Body>;
 	type ResponseBodyError = StdIoError;
 	

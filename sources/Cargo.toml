@@ -12,7 +12,7 @@ version = "0.6.0"
 license = "MIT"
 
 edition = "2021"
-rust-version = "1.58"
+rust-version = "1.62"
 resolver = "2"
 publish = false
 

@@ -92,7 +92,6 @@ pub(crate) mod accepter;
 pub(crate) mod cli;
 pub(crate) mod configuration;
 pub(crate) mod connection;
-pub(crate) mod errors;
 pub(crate) mod exports;
 pub(crate) mod extensions;
 pub(crate) mod resources;
@@ -103,6 +102,8 @@ pub(crate) mod routes;
 pub(crate) mod sanitize;
 pub(crate) mod server;
 pub(crate) mod profiling;
+
+pub mod errors;
 
 
 #[ cfg (all (feature = "hss-server-core", not (feature = "hyper--server-http"), not (feature = "features-fuzzing"))) ]

@@ -27,7 +27,7 @@ fn main () -> hss::MainResult {
 		Some ("handler_sync") =>
 			(main_with_handler_sync, true),
 		Some (_main) =>
-			Err (hss::MainError::new_with_format (0x639fb853, format_args! ("invalid main `{}`", _main))) ?,
+			hss::fail! (0x639fb853, "invalid main `{}`", _main),
 	};
 	
 	if _arguments_remove_first {

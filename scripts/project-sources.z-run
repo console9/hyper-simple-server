@@ -4,29 +4,22 @@
 << sources / grep / codes / duplicate
 	#! <bash+>
 	Z_expect_no_arguments
-	( grep \
-			-h \
-			-o \
-			-E \
-			-e '\[[0-9a-f]{8}\]' \
-			-e '0x[0-9a-f]{8}' \
-			-r \
-			-- \
-			"${_RUST_SOURCES}" \
-			"${_EXAMPLES:-/dev/null}" \
-	|| true ) \
+	_patterns=(
+			'\{[0-9a-f]{8}\}'  '\[[0-9a-f]{8}\]'  '0x[0-9a-f]{8}(?=[^0-9a-f]|$)'
+			'\{[0-9a-f]{16}\}' '\[[0-9a-f]{16}\]' '0x[0-9a-f]{16}(?=[^0-9a-f]|$)'
+			'\{[0-9a-f]{32}\}' '\[[0-9a-f]{32}\]' '0x[0-9a-f]{32}(?=[^0-9a-f]|$)'
+		)
+	_sources=(
+			"${_RUST_SOURCES}"
+			"${_EXAMPLES:-/dev/null}"
+		)
+	for _pattern in "${_patterns[@]}" ; do
+		grep -h -o -i -P -e "${_pattern}" -r -- "${_sources[@]}" || true
+	done \
 	| sort \
 	| uniq -d \
 	| while read -r -- _token ; do
-		grep \
-				-F \
-				-e "${_token}" \
-				--color \
-				-r \
-				-- \
-				"${_RUST_SOURCES}" \
-				"${_EXAMPLES:-/dev/null}" \
-		#
+		grep -F -e "${_token}" --color -H -n -r -- "${_sources[@]}"
 	done
 !!
 
@@ -34,18 +27,22 @@
 << sources / grep / codes / invalid
 	#! <bash+>
 	Z_expect_no_arguments
-	grep \
-			-o \
-			-E \
-			-e '\[[0-9a-f]{5,7}\]' \
-			-e '\[[0-9a-f]{9,11}\]' \
-			-e '0x[0-9a-f]{5,7}[^0-9a-f]' \
-			-e '0x[0-9a-f]{9,11}' \
-			-r \
-			-- \
-			"${_RUST_SOURCES}" \
-			"${_EXAMPLES:-/dev/null}" \
-	|| true \
-	#
+	test "${#}" -eq 0
+	_patterns=(
+			'\{[0-9a-f]{1,7}\}'   '\[[0-9a-f]{1,7}\]'   '0x[0-9a-f]{1,7}(?=[^0-9a-f]|$)'
+			'\{[0-9a-f]{9,15}\}'  '\[[0-9a-f]{9,15}\]'  '0x[0-9a-f]{9,15}(?=[^0-9a-f]|$)'
+			'\{[0-9a-f]{17,31}\}' '\[[0-9a-f]{17,31}\]' '0x[0-9a-f]{17,31}(?=[^0-9a-f]|$)'
+		)
+	_sources=(
+			"${_RUST_SOURCES}"
+			"${_EXAMPLES:-/dev/null}"
+		)
+	for _pattern in "${_patterns[@]}" ; do
+		grep -h -o -i -P -e "${_pattern}" -r -- "${_sources[@]}" || true
+	done \
+	| sort \
+	| while read -r -- _token ; do
+		grep -F -e "${_token}" --color -H -n -r -- "${_sources[@]}"
+	done
 !!
 

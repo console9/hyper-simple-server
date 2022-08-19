@@ -86,7 +86,7 @@ impl <H> Future for HandlerServiceFuture<H>
 				if let HandlerServiceFuture::Error (_error) = _self_1 {
 					Poll::Ready (failed! (ServiceError, 0xa6499d03, cause => _error) .into_result ())
 				} else {
-					panic! (enforcement, 0xd83566d8);
+					panic! (enforcement, 0xcf44f1ce);
 				}
 			}
 			HandlerServiceFuture::Done =>

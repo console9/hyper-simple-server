@@ -374,7 +374,11 @@ overflow-checks = true
 
 [patch.crates-io]
 
-vrl-errors = { path = "../../volution-rust-libraries/sources/errors" }
+# vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
+
+vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "console9" }
+
+# vrl-errors = { path = "../../volution-rust-libraries/sources/errors" }
 
 
 

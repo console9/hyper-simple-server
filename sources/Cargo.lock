@@ -863,6 +863,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "vrl-errors"
 version = "0.1.0"
+source = "git+https://github.com/volution/volution-rust-libraries?branch=console9#53d1380d6c5377ea6a8798222a9b36a25dd19ad6"
 
 [[package]]
 name = "want"

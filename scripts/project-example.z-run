@@ -103,7 +103,7 @@
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
-	rm -R -f -- "${_RUST_OUTPUTS}/doc"
+	#- rm -R -f -- "${_RUST_OUTPUTS}/doc"
 	Z_zexec ':: tools / cargo' doc --bin "${_EXAMPLE_BIN}" --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 
@@ -112,7 +112,7 @@
 	Z_expect_no_arguments
 	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
-	rm -R -f -- "${_RUST_OUTPUTS}/doc"
+	#- rm -R -f -- "${_RUST_OUTPUTS}/doc"
 	Z_zexec ':: tools / cargo' doc --bin "${_EXAMPLE_BIN}" --no-deps --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
 

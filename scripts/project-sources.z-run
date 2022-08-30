@@ -11,7 +11,7 @@
 		)
 	_sources=(
 			"${_RUST_SOURCES}"
-			"${_EXAMPLES:-/dev/null}"
+			"${_EXAMPLE_SOURCES:-/dev/null}"
 		)
 	for _pattern in "${_patterns[@]}" ; do
 		grep -h -o -i -P -e "${_pattern}" -r -- "${_sources[@]}" || true
@@ -35,7 +35,7 @@
 		)
 	_sources=(
 			"${_RUST_SOURCES}"
-			"${_EXAMPLES:-/dev/null}"
+			"${_EXAMPLE_SOURCES:-/dev/null}"
 		)
 	for _pattern in "${_patterns[@]}" ; do
 		grep -h -o -i -P -e "${_pattern}" -r -- "${_sources[@]}" || true

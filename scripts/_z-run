@@ -25,8 +25,9 @@
 &&== env-fallback _RUST_TARGET native
 &&== env-fallback _RUST_LINKAGE dynamic
 
-&&== env-path _EXAMPLES ./examples
-&&== env-fallback _EXAMPLE_BIN example
+&&== env _EXAMPLE_CRATE example
+&&== env _EXAMPLE_BIN example
+&&== env-path _EXAMPLE_SOURCES ./examples
 &&== env-fallback _EXAMPLE_FEATURES default
 
 

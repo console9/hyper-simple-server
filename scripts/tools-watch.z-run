@@ -6,8 +6,8 @@
 --<< tools / watch
 	#! <bash+>
 	_watch_paths=( --watch "${_RUST_SOURCES}" )
-	if test -n "${_EXAMPLES:-}" ; then
-		_watch_paths+=( --watch "${_EXAMPLES}" )
+	if test -n "${_EXAMPLE_SOURCES:-}" ; then
+		_watch_paths+=( --watch "${_EXAMPLE_SOURCES}" )
 	fi
 	exec -- \
 		nodaemon \

@@ -6,7 +6,7 @@
 << release / run / example
 	#! <bash+>
 	Z_log_cut
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
@@ -21,7 +21,7 @@
 << debug / run / example
 	#! <bash+>
 	Z_log_cut
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zspawn ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES}" --locked
 	Z_log_cut
@@ -39,7 +39,7 @@
 << release / build / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zexec ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --release --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
@@ -47,7 +47,7 @@
 << debug / build / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zexec ':: tools / cargo' build --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
@@ -58,7 +58,7 @@
 << debug / check / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zexec ':: tools / cargo' check --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
@@ -66,7 +66,7 @@
 << debug / lint / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
 	Z_zexec ':: tools / cargo' clippy --bin "${_EXAMPLE_BIN}" --no-default-features --features "${_RUST_FEATURES}" --locked
 !!
@@ -77,21 +77,48 @@
 << dependencies / update / conservative / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	Z_zexec ':: tools / cargo' update
 !!
 
 << dependencies / update / aggressive / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
 << dependencies / fetch / example
 	#! <bash+>
 	Z_expect_no_arguments
-	export -- _RUST_MANIFEST="${_EXAMPLES}/Cargo.toml"
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
 	Z_zexec ':: tools / cargo' fetch --locked
+!!
+
+
+
+
+<< docs / example / internals / build
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
+	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
+	rm -R -f -- "${_RUST_OUTPUTS}/doc"
+	Z_zexec ':: tools / cargo' doc --bin "${_EXAMPLE_BIN}" --no-deps --document-private-items --no-default-features --features "${_RUST_FEATURES}" --locked
+!!
+
+<< docs / example / exports / build
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
+	export -- _RUST_FEATURES="${_EXAMPLE_FEATURES}"
+	rm -R -f -- "${_RUST_OUTPUTS}/doc"
+	Z_zexec ':: tools / cargo' doc --bin "${_EXAMPLE_BIN}" --no-deps --no-default-features --features "${_RUST_FEATURES}" --locked
+!!
+
+<< docs / example / open
+	#! <bash+>
+	Z_expect_no_arguments
+	exec -- x-www guest:rust-docs open "file:${_RUST_OUTPUTS}/doc/${_EXAMPLE_CRATE}/index.html"
 !!
 

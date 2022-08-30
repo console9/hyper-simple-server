@@ -8,7 +8,7 @@ use hss::ResultExtWrap as _;
 
 
 
-fn main () -> hss::MainResult {
+pub fn main () -> hss::MainResult {
 	
 	let mut _arguments = hss::CliArguments::from_args ();
 	
@@ -40,7 +40,7 @@ fn main () -> hss::MainResult {
 
 
 
-fn main_with_routes (_arguments : hss::CliArguments) -> hss::MainResult {
+pub fn main_with_routes (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [f8f30521]  starting `routes` server...");
 	
@@ -71,7 +71,7 @@ fn main_with_routes (_arguments : hss::CliArguments) -> hss::MainResult {
 
 
 
-fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResult {
+pub fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [e3d58d00]  starting `handler_sync` server...");
 	
@@ -87,7 +87,7 @@ fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResult {
 
 
 
-fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
+pub fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [53dc40d3]  starting `echo` server...");
 	
@@ -105,7 +105,7 @@ fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 
 
 
-fn main_with_hello (_arguments : hss::CliArguments) -> hss::MainResult {
+pub fn main_with_hello (_arguments : hss::CliArguments) -> hss::MainResult {
 	
 	eprintln! ("[ii] [8759f202]  starting `hello` server...");
 	

@@ -245,10 +245,11 @@ impl RoutesBuilder {
 		let mut _paths = _paths.into ();
 		let _handler = _handler.into ();
 		while let Some (_path) = _paths.next () {
+			let _extensions = http::Extensions::new ();
 			let _route = Route {
 					path : String::from (_path),
 					handler : RouteHandler::HandlerDynArc (_handler.clone_arc ()),
-					extensions : http::Extensions::new (),
+					extensions : Arc::new (_extensions),
 				};
 			self = self.with_route_object (_route);
 		}
@@ -269,7 +270,7 @@ impl RoutesBuilder {
 pub struct Route {
 	pub path : String,
 	pub handler : RouteHandler,
-	pub extensions : Extensions,
+	pub extensions : Arc<Extensions>,
 }
 
 

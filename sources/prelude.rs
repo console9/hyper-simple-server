@@ -63,6 +63,9 @@ pub(crate) use ::std::{
 		boxed::Box,
 		option::{Option, Option::Some, Option::None},
 		result::{Result, Result::Ok, Result::Err},
+		thread,
+		ffi,
+		ptr,
 	};
 
 

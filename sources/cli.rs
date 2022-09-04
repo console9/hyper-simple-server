@@ -443,12 +443,31 @@ pub struct CliArguments {
 }
 
 
-#[ cfg (feature = "hss-cli") ]
 impl CliArguments {
 	
 	pub fn unwrap_or_args (_arguments : Option<CliArguments>) -> CliArguments {
 		_arguments.unwrap_or_else (CliArguments::from_args)
 	}
+}
+
+
+#[ cfg (not (feature = "hss-cli")) ]
+impl CliArguments {
+	
+	pub fn from_args () -> CliArguments {
+		if env::args_os () .len () <= 1 {
+			CliArguments {
+					_private : (),
+				}
+		} else {
+			panic! (enforcement, 0x77d3da3b)
+		}
+	}
+}
+
+
+#[ cfg (feature = "hss-cli") ]
+impl CliArguments {
 	
 	pub fn from_args () -> CliArguments {
 		CliArguments (env::args_os () .into_iter () .skip (1) .collect ())

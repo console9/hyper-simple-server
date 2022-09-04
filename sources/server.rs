@@ -41,18 +41,20 @@ impl Server {
 }
 
 
+
+
 #[ cfg (feature = "hss-handler") ]
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hyper--server") ]
 impl Server {
 	
 	pub fn run_and_wait (_configuration : Configuration) -> ServerResult {
-		let _handler = Self::handler_0 (&_configuration) ?;
+		let _handler = Self::handler_from_configuration (&_configuration) ?;
 		Self::run_and_wait_with_handler (_configuration, _handler)
 	}
 	
 	pub async fn run (_configuration : Configuration) -> ServerResult {
-		let _handler = Self::handler_0 (&_configuration) ?;
+		let _handler = Self::handler_from_configuration (&_configuration) ?;
 		Self::run_with_handler (_configuration, _handler) .await
 	}
 	
@@ -68,10 +70,10 @@ impl Server {
 	
 	fn handler (&self) -> ServerResult<HandlerDynArc> {
 		let _self = self.internals.read () .infallible_unexpected (0xeb521424);
-		Self::handler_0 (&_self.configuration)
+		Self::handler_from_configuration (&_self.configuration)
 	}
 	
-	fn handler_0 (_configuration : &Configuration) -> ServerResult<HandlerDynArc> {
+	fn handler_from_configuration (_configuration : &Configuration) -> ServerResult<HandlerDynArc> {
 		if let Some (_handler) = _configuration.handler.clone () {
 			Ok (_handler)
 		} else {
@@ -79,6 +81,8 @@ impl Server {
 		}
 	}
 }
+
+
 
 
 #[ cfg (feature = "hss-handler") ]
@@ -109,6 +113,159 @@ impl Server
 				H : Handler<Future = F> + Send + Sync + 'static + Clone,
 				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
 	{
+		let _service = move |_ : &Connection| {
+				let _handler = _handler.clone ();
+				let _service = _handler.wrap ();
+				let _service = ServiceWrapper::new (_service);
+				async {
+					ServerResult::Ok (_service)
+				}
+			};
+		
+		self.serve_and_wait_with_make_service_fn (_service)
+	}
+	
+	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
+			where
+				H : Handler<Future = F> + Send + Sync + 'static + Clone,
+				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
+	{
+		let _service = move |_ : &Connection| {
+				let _handler = _handler.clone ();
+				let _service = _handler.wrap ();
+				let _service = ServiceWrapper::new (_service);
+				async {
+					ServerResult::Ok (_service)
+				}
+			};
+		
+		self.serve_with_make_service_fn (_service) .await
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
+impl Server {
+	
+	pub fn run_and_wait_with_service_fn <S, SF, SB, SBD, SBE> (_configuration : Configuration, _service : S) -> ServerResult
+			where
+				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
+				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_and_wait_with_service_fn (_service)
+	}
+	
+	pub async fn run_with_service_fn <S, SF, SB, SBD, SBE> (_configuration : Configuration, _service : S) -> ServerResult
+			where
+				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
+				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_with_service_fn (_service) .await
+	}
+	
+	pub fn serve_and_wait_with_service_fn <S, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
+			where
+				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
+				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _service = move |_ : &Connection| {
+				let _service = _service.clone ();
+				let _service = hyper::service_fn (_service);
+				let _service = ServiceWrapper::new (_service);
+				async {
+					ServerResult::Ok (_service)
+				}
+			};
+		
+		self.serve_and_wait_with_make_service_fn (_service)
+	}
+	
+	pub async fn serve_with_service_fn <S, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
+			where
+				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
+				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _make_service = move |_ : &Connection| {
+				let _service = _service.clone ();
+				let _service = hyper::service_fn (_service);
+				let _service = ServiceWrapper::new (_service);
+				async {
+					ServerResult::Ok (_service)
+				}
+			};
+		
+		self.serve_with_make_service_fn (_make_service) .await
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
+impl Server {
+	
+	pub fn run_and_wait_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (_configuration : Configuration, _make_service : M) -> ServerResult
+			where
+				M : FnMut (&Connection) -> MF + Send + 'static,
+				MF : Future<Output = Result<S, ME>> + Send + 'static,
+				ME : StdError + Send + Sync + 'static,
+				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
+				SE : StdError + Send + Sync + 'static,
+				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_and_wait_with_make_service_fn (_make_service)
+	}
+	
+	pub async fn run_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (_configuration : Configuration, _make_service : M) -> ServerResult
+			where
+				M : FnMut (&Connection) -> MF + Send + 'static,
+				MF : Future<Output = Result<S, ME>> + Send + 'static,
+				ME : StdError + Send + Sync + 'static,
+				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
+				SE : StdError + Send + Sync + 'static,
+				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
+		let _server = Server::new (_configuration) ?;
+		_server.serve_with_make_service_fn (_make_service) .await
+	}
+	
+	pub fn serve_and_wait_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (&self, _make_service : M) -> ServerResult
+			where
+				M : FnMut (&Connection) -> MF + Send + 'static,
+				MF : Future<Output = Result<S, ME>> + Send + 'static,
+				ME : StdError + Send + Sync + 'static,
+				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
+				SE : StdError + Send + Sync + 'static,
+				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
+	{
 		#[ cfg (feature = "hss-server-profiling") ]
 		let _profiling = {
 			let _self = self.internals.read () .infallible_unexpected (0x40b466b4);
@@ -120,7 +277,7 @@ impl Server
 		};
 		
 		let _runtime = self.serve_runtime () ?;
-		let _future = self.serve_with_handler (_handler);
+		let _future = self.serve_with_make_service_fn (_make_service);
 		let _outcome = _runtime.block_on (_future);
 		
 		#[ cfg (feature = "hss-server-profiling") ]
@@ -131,20 +288,34 @@ impl Server
 		_outcome
 	}
 	
-	pub async fn serve_with_handler <H, F> (&self, _handler : H) -> ServerResult
+	pub async fn serve_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (&self, _make_service : M) -> ServerResult
 			where
-				H : Handler<Future = F> + Send + Sync + 'static + Clone,
-				F : Future<Output = HandlerResult<Response<H::ResponseBody>>> + Send + 'static,
+				M : FnMut (&Connection) -> MF + Send + 'static,
+				MF : Future<Output = Result<S, ME>> + Send + 'static,
+				ME : StdError + Send + Sync + 'static,
+				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
+				SE : StdError + Send + Sync + 'static,
+				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
+				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
+				SBD : Buf + Send + 'static,
+				SBE : StdError + Send + Sync + 'static,
 	{
-		let _service = move |_ : &Connection| {
-				let _service = _handler.clone () .wrap ();
-				let _service = ServiceWrapper (_service);
-				async {
-					ServerResult::Ok (_service)
-				}
-			};
+		let _service = hyper::make_service_fn (_make_service);
+		let _builder = self.serve_builder () ?;
 		
-		self.serve_with_make_service_fn (_service) .await
+		let _future = _builder.serve (_service);
+		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .else_panic (0xa011830e); });
+		
+		#[ cfg (debug_assertions) ]
+		eprintln! ("[ii] [3aed0938]  server initialized;");
+		
+		let _outcome = _future.await;
+		
+		#[ cfg (debug_assertions) ]
+		eprintln! ("[ii] [3eff9778]  server terminated;");
+		
+		let _outcome = _outcome.else_wrap (0x73080376);
+		_outcome
 	}
 }
 
@@ -169,57 +340,6 @@ impl Server {
 		let _builder = _builder.executor (_executor);
 		
 		Ok (_builder)
-	}
-	
-	pub async fn serve_with_service_fn <S, SF, SB, SBD, SBE> (&self, _service : S) -> ServerResult
-			where
-				S : FnMut (Request<Body>) -> SF + Send + 'static + Clone,
-				SF : Future<Output = ServiceResult<Response<SB>>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
-				SBD : Buf + Send + 'static,
-				SBE : StdError + Send + Sync + 'static,
-	{
-		let _make_service = move |_ : &Connection| {
-				let _service = _service.clone ();
-				let _service = hyper::service_fn (_service);
-				let _service = ServiceWrapper (_service);
-				async {
-					ServerResult::Ok (_service)
-				}
-			};
-		
-		self.serve_with_make_service_fn (_make_service).await
-	}
-	
-	pub async fn serve_with_make_service_fn <M, MF, ME, S, SF, SE, SB, SBD, SBE> (&self, _make_service : M) -> ServerResult
-			where
-				M : FnMut (&Connection) -> MF + Send + 'static,
-				MF : Future<Output = Result<S, ME>> + Send + 'static,
-				ME : StdError + Send + Sync + 'static,
-				S : hyper::Service<Request<Body>, Response = Response<SB>, Future = SF, Error = SE> + Send + 'static,
-				SE : StdError + Send + Sync + 'static,
-				SF : Future<Output = Result<Response<SB>, SE>> + Send + 'static,
-				SB : BodyTrait<Data = SBD, Error = SBE> + Send + Sync + 'static,
-				SBD : Buf + Send + 'static,
-				SBE : StdError + Send + Sync + 'static,
-	{
-		
-		let _service = hyper::make_service_fn (_make_service);
-		let _builder = self.serve_builder () ?;
-		
-		let _future = _builder.serve (_service);
-		let _future = _future.with_graceful_shutdown (async { tokio::ctrl_c () .await .else_panic (0xa011830e); });
-		
-		#[ cfg (debug_assertions) ]
-		eprintln! ("[ii] [3aed0938]  server initialized;");
-		
-		let _outcome = _future.await;
-		
-		#[ cfg (debug_assertions) ]
-		eprintln! ("[ii] [3eff9778]  server terminated;");
-		
-		let _outcome = _outcome.else_wrap (0x73080376);
-		_outcome
 	}
 	
 	pub fn serve_protocol (&self) -> ServerResult<hyper::Http> {
@@ -312,6 +432,7 @@ struct ServiceWrapper <S> (S)
 		S : hyper::Service<Request<Body>, Error = ServiceError>,
 ;
 
+
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hyper--server") ]
 #[ allow (dead_code) ]
@@ -322,6 +443,19 @@ enum ServiceWrapperFuture <S>
 	Future (S::Future),
 	Error (ServiceError),
 	Done,
+}
+
+
+#[ cfg (feature = "hss-server-core") ]
+#[ cfg (feature = "hyper--server") ]
+impl <S> ServiceWrapper<S>
+	where
+		S : hyper::Service<Request<Body>, Error = ServiceError>,
+{
+	
+	fn new (_service : S) -> Self {
+		ServiceWrapper (_service)
+	}
 }
 
 
@@ -362,6 +496,7 @@ impl <S> hyper::Service<Request<Body>> for ServiceWrapper<S>
 		ServiceWrapperFuture::Future (_future)
 	}
 }
+
 
 #[ cfg (feature = "hss-server-core") ]
 #[ cfg (feature = "hyper--server") ]
@@ -488,6 +623,7 @@ pub fn runtime_multiple_threads (_threads : Option<usize>) -> RuntimeResult<Runt
 	_builder.enable_all ();
 	_builder.build () .else_wrap (0x2692223a)
 }
+
 
 #[ cfg (feature = "tokio--rt") ]
 pub fn runtime_current_thread () -> RuntimeResult<Runtime> {

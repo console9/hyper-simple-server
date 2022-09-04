@@ -48,6 +48,7 @@ pub use http_body::{
 		SizeHint as BodySizeHint,
 		Data as BodyData,
 		Trailers as BodyTrailers,
+		Empty as BodyEmpty,
 	};
 
 #[ cfg (feature = "bytes") ]

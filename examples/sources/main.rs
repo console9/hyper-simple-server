@@ -2,6 +2,8 @@
 
 use ::hyper_simple_server as hss;
 
+use ::std::sync::Arc;
+
 use hss::ResponseExtBuild as _;
 use hss::ResultExtWrap as _;
 
@@ -80,6 +82,7 @@ pub fn main_with_handler_sync (_arguments : hss::CliArguments) -> hss::MainResul
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
+	let _handler = Arc::new (_handler);
 	
 	return hss::main_with_handler (_handler, None, Some (_arguments));
 }
@@ -98,6 +101,7 @@ pub fn main_with_echo (_arguments : hss::CliArguments) -> hss::MainResult {
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
+	let _handler = Arc::new (_handler);
 	
 	return hss::main_with_handler (_handler, None, Some (_arguments));
 }
@@ -114,6 +118,7 @@ pub fn main_with_hello (_arguments : hss::CliArguments) -> hss::MainResult {
 	};
 	
 	let _handler = hss::HandlerFnSync::from (_handler);
+	let _handler = Arc::new (_handler);
 	
 	return hss::main_with_handler (_handler, None, Some (_arguments));
 }

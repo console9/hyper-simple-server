@@ -22,6 +22,21 @@ pub trait Handler
 }
 
 
+#[ cfg (feature = "hss-handler") ]
+impl <H> Handler for Arc<H>
+		where
+			H : Handler,
+{
+	type Future = H::Future;
+	type ResponseBody = H::ResponseBody;
+	type ResponseBodyError = H::ResponseBodyError;
+	
+	fn handle (&self, _request : Request<Body>) -> Self::Future {
+		Arc::as_ref (self) .handle (_request)
+	}
+}
+
+
 
 
 #[ cfg (feature = "hss-handler") ]

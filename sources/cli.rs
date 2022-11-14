@@ -392,9 +392,9 @@ impl CliExtensions for () {
 #[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-cli") ]
 pub enum CliArgument<'a> {
-	String (&'a mut String, &'static str, &'static str),
+	String (&'a mut String, &'static str, bool, &'static str),
 	StringConst (&'a mut String, &'a mut str, &'static str, &'static str),
-	Boolean (&'a mut bool, &'static str, &'static str),
+	Boolean (&'a mut bool, &'static str, bool, &'static str),
 	BooleanConst (&'a mut bool, bool, &'static str, &'static str),
 }
 
@@ -404,14 +404,22 @@ impl CliExtensions for CliArgument<'_> {
 	
 	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
 		match self {
-			CliArgument::String (_variable, _flag, _help) => {
-				_parser.refer (_variable) .metavar ("<string>") .add_option (&[_flag], argparse::Store, _help);
+			CliArgument::String (_variable, _flag, _required, _help) => {
+				let mut _option = _parser.refer (_variable);
+				_option.metavar ("<string>") .add_option (&[_flag], argparse::Store, _help);
+				if _required {
+					_option.required ();
+				}
 			}
 			CliArgument::StringConst (_variable, _value, _flag, _help) => {
 				_parser.refer (_variable) .metavar ("<string>") .add_option (&[_flag], argparse::StoreConst (_value.into ()), _help);
 			}
-			CliArgument::Boolean (_variable, _flag, _help) => {
-				_parser.refer (_variable) .metavar ("<boolean>") .add_option (&[_flag], argparse::Store, _help);
+			CliArgument::Boolean (_variable, _flag, _required, _help) => {
+				let mut _option = _parser.refer (_variable);
+				_option.metavar ("<boolean>") .add_option (&[_flag], argparse::Store, _help);
+				if _required {
+					_option.required ();
+				}
 			}
 			CliArgument::BooleanConst (_variable, _value, _flag, _help) => {
 				_parser.refer (_variable) .metavar ("<boolean>") .add_option (&[_flag], argparse::StoreConst (_value), _help);

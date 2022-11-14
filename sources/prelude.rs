@@ -44,7 +44,7 @@ pub(crate) use ::std::{
 
 pub(crate) use ::std::{
 		convert::{From, Into, TryInto, TryFrom, AsRef},
-		marker::{Sized, Send, Sync, Unpin, PhantomData},
+		marker::{Copy, Sized, Send, Sync, Unpin, PhantomData},
 		ops::{Deref, Fn, FnMut, Drop},
 		iter::{Iterator, IntoIterator, Extend as _, ExactSizeIterator as _},
 		borrow::ToOwned as _,

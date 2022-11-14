@@ -93,6 +93,9 @@ pub trait ResponseExt <B>
 	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
 	
+	fn get_headers (&self) -> &HeaderMap;
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self;
+	
 	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self;
 	
 	fn set_status_200 (&mut self) -> &mut Self {
@@ -151,6 +154,15 @@ impl <B> ResponseExt<B> for Response<B>
 		self
 	}
 	
+	fn get_headers (&self) -> &HeaderMap {
+		self.headers ()
+	}
+	
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self {
+		(* self.headers_mut ()) = _headers;
+		self
+	}
+	
 	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
 		self.headers () .get (_name)
 	}
@@ -195,6 +207,10 @@ pub trait ResponseExtBuild <B>
 	
 	fn new_201 () -> Self where B : Default {
 		Self::new_with_status (consts::CREATED)
+	}
+	
+	fn new_204 () -> Self where B : Default {
+		Self::new_with_status (consts::NO_CONTENT)
 	}
 	
 	fn new_200_with_body (_body : impl Into<B>, _content_type : Option<impl Into<HeaderValue>>) -> Self {

@@ -12,6 +12,9 @@ pub trait RequestExt <B>
 		B::Error : StdError + Send + Sync + 'static,
 		Self : Sized,
 {
+	fn from_parts (_parts : RequestParts, _body : B) -> Self;
+	fn into_parts (self) -> (RequestParts, B);
+	
 	fn is_get (&self) -> bool;
 	fn is_head (&self) -> bool;
 	fn is_put (&self) -> bool;
@@ -85,6 +88,14 @@ impl <B> RequestExt<B> for Request<B>
 	fn header_all (&self, _name : impl AsHeaderName) -> http::header::GetAll<'_, HeaderValue> {
 		self.headers () .get_all (_name)
 	}
+	
+	fn into_parts (self) -> (RequestParts, B) {
+		Request::into_parts (self)
+	}
+	
+	fn from_parts (_parts : RequestParts, _body : B) -> Self {
+		Request::from_parts (_parts, _body)
+	}
 }
 
 
@@ -97,6 +108,9 @@ pub trait ResponseExt <B>
 		B::Error : StdError + Send + Sync + 'static,
 		Self : Sized,
 {
+	fn from_parts (_parts : ResponseParts, _body : B) -> Self;
+	fn into_parts (self) -> (ResponseParts, B);
+	
 	fn status (&self) -> StatusCode;
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self;
 	
@@ -198,6 +212,14 @@ impl <B> ResponseExt<B> for Response<B>
 	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self {
 		*self.body_mut () = _body.into ();
 		self
+	}
+	
+	fn into_parts (self) -> (ResponseParts, B) {
+		Response::into_parts (self)
+	}
+	
+	fn from_parts (_parts : ResponseParts, _body : B) -> Self {
+		Response::from_parts (_parts, _body)
 	}
 }
 

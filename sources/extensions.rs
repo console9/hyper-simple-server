@@ -8,7 +8,9 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-extensions") ]
 pub trait RequestExt <B>
 	where
-		B : BodyTrait,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+		Self : Sized,
 {
 	fn is_get (&self) -> bool;
 	fn is_head (&self) -> bool;
@@ -31,13 +33,20 @@ pub trait RequestExt <B>
 	fn header_host (&self) -> Option<&str> {
 		self.header_str (consts::HOST)
 	}
+	
+	fn into_body_dyn_box (self) -> Request<BodyDynBox> {
+		let (_parts, _body) = self.into_parts ();
+		let _body = BodyDynBox::new (_body);
+		Request::from_parts (_parts, _body)
+	}
 }
 
 
 #[ cfg (feature = "hss-extensions") ]
 impl <B> RequestExt<B> for Request<B>
 	where
-		B : BodyTrait,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	fn is_get (&self) -> bool {
 		self.method () == Method::GET
@@ -84,7 +93,9 @@ impl <B> RequestExt<B> for Request<B>
 #[ cfg (feature = "hss-extensions") ]
 pub trait ResponseExt <B>
 	where
-		B : BodyTrait,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+		Self : Sized,
 {
 	fn status (&self) -> StatusCode;
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self;
@@ -137,13 +148,20 @@ pub trait ResponseExt <B>
 	fn content_type_or_unknown (&self) -> ContentType {
 		self.content_type () .unwrap_or (ContentType::Unknown)
 	}
+	
+	fn into_body_dyn_box (self) -> Response<BodyDynBox> {
+		let (_parts, _body) = self.into_parts ();
+		let _body = BodyDynBox::new (_body);
+		Response::from_parts (_parts, _body)
+	}
 }
 
 
 #[ cfg (feature = "hss-extensions") ]
 impl <B> ResponseExt<B> for Response<B>
 	where
-		B : BodyTrait,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
 {
 	fn status (&self) -> StatusCode {
 		self.status ()
@@ -189,7 +207,8 @@ impl <B> ResponseExt<B> for Response<B>
 #[ cfg (feature = "hss-extensions") ]
 pub trait ResponseExtBuild <B>
 	where
-		B : BodyTrait,
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
 		Self : Sized,
 		Self : ResponseExt<B>,
 {

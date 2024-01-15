@@ -47,7 +47,7 @@ pub(crate) use ::std::{
 		marker::{Copy, Sized, Send, Sync, Unpin, PhantomData},
 		ops::{Deref, Fn, FnMut, Drop},
 		iter::{Iterator, IntoIterator, Extend as _, ExactSizeIterator as _},
-		borrow::ToOwned as _,
+		borrow::{Cow, ToOwned as _},
 		clone::Clone,
 		future::Future,
 		pin::Pin,
@@ -122,6 +122,7 @@ pub(crate) mod tokio {
 	pub(crate) use ::tokio::runtime::{
 			Runtime,
 			Builder as RuntimeBuilder,
+			Handle as RuntimeHandle,
 		};
 	#[ cfg (feature = "tokio--rt") ]
 	pub(crate) use ::tokio::task::{

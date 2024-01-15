@@ -6,10 +6,85 @@ use crate::prelude::*;
 
 
 #[ cfg (feature = "hss-extensions") ]
+pub trait HeadersExt
+	where
+		Self : Sized,
+{
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue>;
+	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
+	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
+	
+	fn get_headers (&self) -> &HeaderMap;
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self;
+	
+	// FIXME:  Duplicates `get_header` and related.
+	fn header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
+		self.get_header (_name)
+	}
+	
+	// FIXME:  Duplicates `get_headers` and related.
+	fn header_all (&self, _name : impl AsHeaderName) -> http::header::GetAll<'_, HeaderValue> {
+		self.get_headers () .get_all (_name)
+	}
+	
+	fn header_str (&self, _name : impl AsHeaderName) -> Option<&str> {
+		self.get_header (_name) .and_then (|_value| _value.to_str () .ok ())
+	}
+	
+	fn header_host (&self) -> Option<&str> {
+		self.header_str (consts::HOST)
+	}
+	
+	fn header_host_normalized (&self) -> Option<Cow<str>> {
+		// FIXME:  Check if header is actually properly formatted!
+		let _host = self.header_host () ?;
+		let _host = _host.trim_matches ('.');
+		let _is_lowercase = _host.find (char::is_uppercase) .is_none ();
+		if _is_lowercase {
+			Some (Cow::Borrowed (_host))
+		} else {
+			Some (Cow::Owned (_host.to_lowercase ()))
+		}
+	}
+}
+
+
+#[ cfg (feature = "hss-extensions") ]
+impl HeadersExt for HeaderMap {
+	
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
+		self.get (_name)
+	}
+	
+	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.insert (_name, _value.into ());
+		self
+	}
+	
+	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.append (_name, _value.into ());
+		self
+	}
+	
+	fn get_headers (&self) -> &HeaderMap {
+		self
+	}
+	
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self {
+		*self = _headers;
+		self
+	}
+}
+
+
+
+
+#[ cfg (feature = "hss-extensions") ]
 pub trait RequestExt <B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : StdError + Send + Sync + 'static,
+		Self : HeadersExt,
 		Self : Sized,
 {
 	fn from_parts (_parts : RequestParts, _body : B) -> Self;
@@ -22,25 +97,48 @@ pub trait RequestExt <B>
 	fn is_delete (&self) -> bool;
 	fn is_patch (&self) -> bool;
 	fn is_options (&self) -> bool;
+	fn method_str (&self) -> &str;
 	
 	fn uri_path (&self) -> &str;
 	fn uri_query (&self) -> Option<&str>;
 	
-	fn header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue>;
-	fn header_all (&self, _name : impl AsHeaderName) -> http::header::GetAll<'_, HeaderValue>;
-	
-	fn header_str (&self, _name : impl AsHeaderName) -> Option<&str> {
-		self.header (_name) .and_then (|_value| _value.to_str () .ok ())
-	}
-	
-	fn header_host (&self) -> Option<&str> {
-		self.header_str (consts::HOST)
-	}
+	fn body_size (&self) -> Option<u64>;
 	
 	fn into_body_dyn_box (self) -> Request<BodyDynBox> {
 		let (_parts, _body) = self.into_parts ();
 		let _body = BodyDynBox::new (_body);
 		Request::from_parts (_parts, _body)
+	}
+}
+
+
+#[ cfg (feature = "hss-extensions") ]
+impl <B> HeadersExt for Request<B>
+	where
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+{
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
+		self.headers () .get_header (_name)
+	}
+	
+	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.headers_mut () .set_header (_name, _value);
+		self
+	}
+	
+	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.headers_mut () .add_header (_name, _value);
+		self
+	}
+	
+	fn get_headers (&self) -> &HeaderMap {
+		self.headers () .get_headers ()
+	}
+	
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self {
+		self.headers_mut () .set_headers (_headers);
+		self
 	}
 }
 
@@ -72,6 +170,9 @@ impl <B> RequestExt<B> for Request<B>
 	fn is_options (&self) -> bool {
 		self.method () == Method::OPTIONS
 	}
+	fn method_str (&self) -> &str {
+		self.method () .as_str ()
+	}
 	
 	fn uri_path (&self) -> &str {
 		self.uri () .path ()
@@ -81,12 +182,8 @@ impl <B> RequestExt<B> for Request<B>
 		self.uri () .query ()
 	}
 	
-	fn header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
-		self.headers () .get (_name)
-	}
-	
-	fn header_all (&self, _name : impl AsHeaderName) -> http::header::GetAll<'_, HeaderValue> {
-		self.headers () .get_all (_name)
+	fn body_size (&self) -> Option<u64> {
+		self.body () .size_hint () .exact ()
 	}
 	
 	fn into_parts (self) -> (RequestParts, B) {
@@ -106,6 +203,7 @@ pub trait ResponseExt <B>
 	where
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : StdError + Send + Sync + 'static,
+		Self : HeadersExt,
 		Self : Sized,
 {
 	fn from_parts (_parts : ResponseParts, _body : B) -> Self;
@@ -114,12 +212,13 @@ pub trait ResponseExt <B>
 	fn status (&self) -> StatusCode;
 	fn set_status (&mut self, _status : StatusCode) -> &mut Self;
 	
-	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue>;
-	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
-	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self;
-	
-	fn get_headers (&self) -> &HeaderMap;
-	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self;
+	fn status_u16 (&self) -> u16 {
+		self.status () .as_u16 ()
+	}
+	fn set_status_u16 (&mut self, _status : u16) -> Result<&mut Self, ::http::status::InvalidStatusCode> {
+		let _status = StatusCode::from_u16 (_status) ?;
+		Ok (self.set_status (_status))
+	}
 	
 	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self;
 	
@@ -163,10 +262,43 @@ pub trait ResponseExt <B>
 		self.content_type () .unwrap_or (ContentType::Unknown)
 	}
 	
+	fn body_size (&self) -> Option<u64>;
+	
 	fn into_body_dyn_box (self) -> Response<BodyDynBox> {
 		let (_parts, _body) = self.into_parts ();
 		let _body = BodyDynBox::new (_body);
 		Response::from_parts (_parts, _body)
+	}
+}
+
+
+#[ cfg (feature = "hss-extensions") ]
+impl <B> HeadersExt for Response<B>
+	where
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+{
+	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
+		self.headers () .get_header (_name)
+	}
+	
+	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.headers_mut () .set_header (_name, _value);
+		self
+	}
+	
+	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
+		self.headers_mut () .add_header (_name, _value);
+		self
+	}
+	
+	fn get_headers (&self) -> &HeaderMap {
+		self.headers () .get_headers ()
+	}
+	
+	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self {
+		self.headers_mut () .set_headers (_headers);
+		self
 	}
 }
 
@@ -186,32 +318,13 @@ impl <B> ResponseExt<B> for Response<B>
 		self
 	}
 	
-	fn get_headers (&self) -> &HeaderMap {
-		self.headers ()
-	}
-	
-	fn set_headers (&mut self, _headers : HeaderMap) -> &mut Self {
-		(* self.headers_mut ()) = _headers;
-		self
-	}
-	
-	fn get_header (&self, _name : impl AsHeaderName) -> Option<&HeaderValue> {
-		self.headers () .get (_name)
-	}
-	
-	fn set_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
-		self.headers_mut () .insert (_name, _value.into ());
-		self
-	}
-	
-	fn add_header (&mut self, _name : impl IntoHeaderName, _value : impl Into<HeaderValue>) -> &mut Self {
-		self.headers_mut () .append (_name, _value.into ());
-		self
-	}
-	
 	fn set_body (&mut self, _body : impl Into<B>) -> &mut Self {
 		*self.body_mut () = _body.into ();
 		self
+	}
+	
+	fn body_size (&self) -> Option<u64> {
+		self.body () .size_hint () .exact ()
 	}
 	
 	fn into_parts (self) -> (ResponseParts, B) {
@@ -370,15 +483,19 @@ impl ResponseExtBuild<Body> for Response<Body> {
 
 
 
+
+
+
+
 #[ cfg (feature = "hss-extensions") ]
 #[ cfg (feature = "tokio--rt") ]
 pub trait BodyExt {
 	
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult;
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _limit : Option<usize>, _runtime : Option<&Runtime>) -> BodyResult;
 	
-	fn consume_to_vec (&mut self, _runtime : Option<&Runtime>) -> StdIoResult<Vec<u8>> {
+	fn consume_to_vec (&mut self, _limit : Option<usize>, _runtime : Option<&Runtime>) -> BodyResult<Vec<u8>> {
 		let mut _buffer = Vec::new ();
-		self.consume_into_vec (&mut _buffer, _runtime) ?;
+		self.consume_into_vec (&mut _buffer, _limit, _runtime) ?;
 		Ok (_buffer)
 	}
 }
@@ -391,35 +508,73 @@ impl <B> BodyExt for B
 		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
 		B::Error : StdError + Send + Sync + 'static,
 {
-	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _runtime : Option<&Runtime>) -> StdIoResult {
-		
-		_buffer.reserve (BodyTrait::size_hint (self) .lower () as usize);
-		
-		let _runtime_0 = if _runtime.is_none () {
-			Some (tokio::RuntimeBuilder::new_current_thread () .build () ?)
+	fn consume_into_vec (&mut self, _buffer : &mut Vec<u8>, _limit : Option<usize>, _runtime : Option<&Runtime>) -> BodyResult {
+		if let Some (_runtime) = _runtime {
+			_runtime.block_on (body_consume_into_vec (self, _buffer, _limit))
+		} else if let Ok (_runtime_handle) = tokio::RuntimeHandle::try_current () {
+			_runtime_handle.block_on (body_consume_into_vec (self, _buffer, _limit))
 		} else {
-			None
-		};
-		
-		let _runtime = _runtime.or (_runtime_0.as_ref ()) .infallible (0x022bb6d6);
-		
-		loop {
-			let _next = _runtime.block_on (self.data ());
-			let _next = if let Some (_next) = _next {
-				_next
-			} else {
-				break;
-			};
-			let mut _data = _next.map_err (|_error| StdIoError::new (StdIoErrorKind::Other, _error)) ?;
-			while _data.remaining () > 0 {
-				let _chunk = _data.chunk ();
-				_buffer.extend (_chunk);
-				let _chunk_size = _chunk.len ();
-				_data.advance (_chunk_size);
-			}
+			fail! (0x395326d7);
 		}
-		
-		Ok (())
 	}
+}
+
+
+
+
+#[ cfg (feature = "hss-extensions") ]
+#[ cfg (feature = "tokio--rt") ]
+pub async fn body_consume_into_vec <B> (_body : &mut B, _buffer : &mut Vec<u8>, _limit : Option<usize>) -> BodyResult
+	where
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+{
+	let _body_size_hint = BodyTrait::size_hint (_body);
+	let _body_size_lower = _body_size_hint.lower () .try_into () .else_wrap (0x2e5e16d2) ?;
+	let _limit = _limit.unwrap_or (u32::MAX as usize);
+	
+	if _body_size_lower > _limit {
+		fail! (0x4b61ba4e);
+	}
+	if _body_size_lower >= 0 {
+		_buffer.reserve (_body_size_lower);
+	}
+	
+	let mut _amount = 0;
+	
+	loop {
+		let _next = _body.data () .await;
+		let _next = if let Some (_next) = _next {
+			_next
+		} else {
+			break;
+		};
+		let mut _data = _next.else_wrap (0xe7956afe) ?;
+		while _data.remaining () > 0 {
+			let _chunk = _data.chunk ();
+			let _chunk_size = _chunk.len ();
+			if (_amount + _chunk_size) > _limit {
+				fail! (0xf0805723);
+			}
+			_buffer.extend (_chunk);
+			_data.advance (_chunk_size);
+			_amount += _chunk_size;
+		}
+	}
+	
+	Ok (())
+}
+
+
+#[ cfg (feature = "hss-extensions") ]
+#[ cfg (feature = "tokio--rt") ]
+pub async fn body_consume_to_vec <B> (_body : &mut B, _limit : Option<usize>) -> BodyResult<Vec<u8>>
+	where
+		B : BodyTrait<Data = Bytes> + Send + Sync + 'static + Unpin,
+		B::Error : StdError + Send + Sync + 'static,
+{
+	let mut _buffer = Vec::new ();
+	body_consume_into_vec (_body, &mut _buffer, _limit) .await ?;
+	Ok (_buffer)
 }
 

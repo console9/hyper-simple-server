@@ -38,6 +38,9 @@ use crate::prelude::*;
 #[ cfg (feature = "hss-accepter") ]
 ::vrl_errors::define_error! (pub ConnectionError, result : ConnectionResult);
 
+#[ cfg (feature = "hss-extensions") ]
+::vrl_errors::define_error! (pub BodyError, result : BodyResult);
+
 #[ cfg (feature = "tokio--rt") ]
 ::vrl_errors::define_error! (pub RuntimeError, result : RuntimeResult);
 

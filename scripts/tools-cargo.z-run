@@ -77,18 +77,6 @@
 			printf -- '[ee]  invalid Rust linkage `%s`;  aborting!\n' "${_RUST_LINKAGE}" >&2
 		;;
 	esac
-	_rustflags+=(
-			-C linker=clang
-		#!	-C link-arg=-fuse-ld=mold
-			-C link-arg=-fuse-ld=lld
-		#!	-C link-arg=-Wl,--compress-debug-sections=zlib
-		)
-	_rustflags+=(
-		#?	-C split-debuginfo=unpacked
-		)
-	_rustflags+=(
-			-C force-frame-pointers=yes
-		)
 	
 	export -- CARGO_BUILD_RUSTFLAGS="${_rustflags[*]}"
 	

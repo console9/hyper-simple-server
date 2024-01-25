@@ -12,6 +12,7 @@
 	shift -- 1
 	
 	_arguments=()
+	_chdir=''
 	
 	case "${_command}" in
 		( check | build | run | doc | clippy )
@@ -31,10 +32,13 @@
 					--target-dir "${_RUST_OUTPUTS}"
 				)
 		;;
-		( metadata | update | fetch | tree | outdated )
+		( metadata | update | fetch | tree | upgrade | outdated | license )
 			_arguments+=(
 					--manifest-path "${_RUST_MANIFEST:-${_RUST_SOURCES}/Cargo.toml}"
 				)
+		;;
+		( duplicates | audit )
+			_chdir="${_RUST_SOURCES}"
 		;;
 		( exec | exec-with-target | exec-without-target | exec-without-manifest )
 			Z_enforce 0x00266037 'expected command!' test "${#}" -ge 1
@@ -85,6 +89,10 @@
 	fi
 	if test ! -e "${_RUST_OUTPUTS}" ; then
 		mkdir -- "${_RUST_OUTPUTS}"
+	fi
+	
+	if test -n "${_chdir}" ; then
+		cd -- "${_chdir}"
 	fi
 	
 	exec -- \

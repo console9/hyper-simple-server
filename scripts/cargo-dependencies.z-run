@@ -15,10 +15,46 @@
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
+<< dependencies / outdated / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' outdated --aggressive
+!!
+
+<< dependencies / upgrade / compatible / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' upgrade --incompatible ignore --recursive true
+!!
+
+<< dependencies / upgrade / incompatible / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' upgrade --incompatible allow --recursive true
+!!
+
 << dependencies / fetch / lib
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' fetch --locked
+!!
+
+<< dependencies / licenses / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' license --all-features --do-not-bundle --avoid-build-deps --avoid-dev-deps
+!!
+
+<< dependencies / duplicates / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' duplicates
+!!
+
+<< dependencies / audit / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' audit
 !!
 
 

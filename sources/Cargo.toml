@@ -264,7 +264,7 @@ features-none = []
 [dependencies]
 
 hyper = { version = "^0.14", default-features = false, features = [], optional = true }
-tokio = { version = "^1.29", default-features = false, features = [], optional = true }
+tokio = { version = "^1.35", default-features = false, features = [], optional = true }
 http = { version = "^0.2", default-features = false, features = [], optional = true }
 http-body = { version = "^0.4", default-features = false, features = [], optional = true }
 bytes = { version = "^1.5", default-features = false, features = [], optional = true }
@@ -277,13 +277,13 @@ native-tls = { version = "^0.2", default-features = false, features = [], option
 tokio-native-tls = { version = "^0.3", default-features = false, features = [], optional = true }
 
 futures = { version = "^0.3", default-features = false, features = [], optional = true }
-path-tree = { version = "^0.2", default-features = false, features = [], optional = true }
+path-tree = { version = "^0.4", default-features = false, features = [], optional = true }
 argparse = { version = "^0.2", default-features = false, features = [], optional = true }
 
 cpuprofiler = { version = "^0.0", default-features = false, features = [], optional = true }
 
-jemallocator = { version = "^0.3", default-features = false, features = [], optional = true }
-jemalloc-sys = { version = "^0.3", default-features = false, features = [], optional = true }
+jemallocator = { version = "^0.5", default-features = false, features = [], optional = true }
+jemalloc-sys = { version = "^0.5", default-features = false, features = [], optional = true }
 
 mimalloc = { version = "^0.1", default-features = false, features = [], optional = true }
 

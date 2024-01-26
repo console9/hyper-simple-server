@@ -1,0 +1,21 @@
+#!/dev/null
+
+
+
+
+&&== env _RUST_CRATE hyper_simple_server
+&&== env-path _RUST_SOURCES ./sources
+&&== env-path _RUST_OUTPUTS ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}
+&&== env-fallback _RUST_FEATURES default
+&&== env-fallback _RUST_TARGET native
+&&== env-fallback _RUST_LINKAGE dynamic
+
+
+
+
+&&== env _EXAMPLE_CRATE example
+&&== env _EXAMPLE_BIN example
+&&== env-path _EXAMPLE_SOURCES ./examples
+&&== env-fallback _EXAMPLE_FEATURES default
+
+

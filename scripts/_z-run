@@ -11,55 +11,41 @@
 ::// sources / ...
 ::// release / ...
 ::// rust / ...
+::// tls / ...
 ::// *
 
-::// tls / ...
+
+
+
+&& _/common/project-common.z-run
+&& _/common/project-sources.z-run
+&& _/common/project-features.z-run
+&& _/common/project-generators.z-run
+&& _/common/project-example.z-run
+&& _/common/project-all.z-run
+
+&& _/common/rust-environment.z-run
+&& _/common/cargo-dependencies.z-run
+&& _/common/cargo-publish.z-run
+
+&& _/common/tools-cargo.z-run
+&& _/common/tools-watch.z-run
+
+&& _/common/testing-curl.z-run
+&& _/common/testing-wrk.z-run
+&& _/common/testing-nat.z-run
 
 
 
 
-&&== env _RUST_CRATE hyper_simple_server
-&&== env-path _RUST_SOURCES ./sources
-&&== env-path _RUST_OUTPUTS ./.target/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}
-&&== env-fallback _RUST_FEATURES default
-&&== env-fallback _RUST_TARGET native
-&&== env-fallback _RUST_LINKAGE dynamic
-
-&&== env _EXAMPLE_CRATE example
-&&== env _EXAMPLE_BIN example
-&&== env-path _EXAMPLE_SOURCES ./examples
-&&== env-fallback _EXAMPLE_FEATURES default
-
-
-
-
-&& _/project-common.z-run
-&& _/project-sources.z-run
-&& _/project-features.z-run
-&& _/project-generators.z-run
-&& _/project-example.z-run
-&& _/project-all.z-run
-
-&& _/cargo-dependencies.z-run
-&& _/cargo-publish.z-run
-
-&& _/tools-cargo.z-run
-&& _/tools-watch.z-run
-
-&& _/testing-curl.z-run
-&& _/testing-wrk.z-run
-&& _/testing-nat.z-run
-
-
-
-
+&& _/custom-configurations.z-run
 && _/custom-environment.z-run
 && _/custom-features.z-run
-&& _/custom-generators.z-run
 && _/custom-tls.z-run
 
 
 
 
 &&?? ./.git/.local.z-run
+
 

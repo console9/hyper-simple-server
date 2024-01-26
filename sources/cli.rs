@@ -11,31 +11,20 @@ use crate::prelude::*;
 pub struct ConfigurationArguments {
 	
 	pub endpoint_socket_address : Option<String>,
-	pub endpoint_socket_address_help : String,
 	
 	#[ cfg (unix) ]
 	pub endpoint_descriptor : Option<u32>,
-	#[ cfg (unix) ]
-	pub endpoint_descriptor_help : String,
 	
 	#[ cfg (feature = "hyper--server-http1") ]
 	pub endpoint_protocol_http1 : Option<bool>,
-	#[ cfg (feature = "hyper--server-http1") ]
-	pub endpoint_protocol_http1_help : String,
 	#[ cfg (feature = "hyper--server-http2") ]
 	pub endpoint_protocol_http2 : Option<bool>,
-	#[ cfg (feature = "hyper--server-http2") ]
-	pub endpoint_protocol_http2_help : String,
 	
 	#[ cfg (feature = "hss-tls-any") ]
 	pub endpoint_insecure : Option<bool>,
-	#[ cfg (feature = "hss-tls-any") ]
-	pub endpoint_insecure_help : String,
 	
 	#[ cfg (feature = "hss-tls-rust") ]
 	pub endpoint_rust_tls_certificate_pem_path : Option<String>,
-	#[ cfg (feature = "hss-tls-rust") ]
-	pub endpoint_rust_tls_certificate_pem_path_help : String,
 	#[ cfg (feature = "hss-tls-rust") ]
 	pub endpoint_rust_tls_certificate_fallback : Option<RustTlsCertificate>,
 	
@@ -44,19 +33,13 @@ pub struct ConfigurationArguments {
 	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_pkcs12_password : Option<String>,
 	#[ cfg (feature = "hss-tls-native") ]
-	pub endpoint_native_tls_certificate_pkcs12_path_help : String,
-	#[ cfg (feature = "hss-tls-native") ]
 	pub endpoint_native_tls_certificate_fallback : Option<NativeTlsCertificate>,
 	
 	#[ cfg (feature = "hss-server-mt") ]
 	pub server_threads : Option<usize>,
-	#[ cfg (feature = "hss-server-mt") ]
-	pub server_threads_help : String,
 	
 	#[ cfg (feature = "hss-server-profiling") ]
 	pub server_profiling : Option<String>,
-	#[ cfg (feature = "hss-server-profiling") ]
-	pub server_profiling_help : String,
 }
 
 
@@ -127,124 +110,112 @@ impl ConfigurationArguments {
 	
 	
 	#[ allow (single_use_lifetimes) ]
-	pub fn prepare <'a> (&'a mut self, _parser : &mut argparse::ArgumentParser<'a>) -> () {
+	pub fn prepare <'a> (&'a mut self, _flags : &mut FlagsParserBuilder<'a>) -> () {
 		
-		self.endpoint_socket_address_help = self.endpoint_socket_address.as_ref () .map_or_else (
+		{
+		let _help = self.endpoint_socket_address.as_ref () .map_or_else (
 				|| format! ("listen on TCP socket address"),
 				|_address| format! ("listen on TCP socket address (default `{}`)", _address));
-		let mut _argument = _parser.refer (&mut self.endpoint_socket_address);
-		{
-			_argument
-				.metavar ("<socket-address>")
-				.add_option (&["--listen-address"], argparse::StoreOption, &self.endpoint_socket_address_help)
-				.add_option (&["--listen-any-80"], argparse::StoreConst (Some (String::from ("0.0.0.0:80"))), "listen on any IP with port 80 (might require root or capabilities)")
-				.add_option (&["--listen-any-8080"], argparse::StoreConst (Some (String::from ("0.0.0.0:8080"))), "listen on any IP with port 8080")
-				.add_option (&["--listen-localhost-8080"], argparse::StoreConst (Some (String::from ("127.0.0.1:8080"))), "listen on localhost with port 8080");
-		}
+		let mut _argument = _flags.define_complex (&mut self.endpoint_socket_address);
+		_argument.define_flag ((), "listen-address") .with_placeholder ("socket-address") .with_description (_help);
+		_argument.define_switch ((), "listen-any-80", String::from ("0.0.0.0:80")) .with_description ("listen on any IP with port 80 (might require root or capabilities)");
+		_argument.define_switch ((), "listen-any-8080", String::from ("0.0.0.0:8080")) .with_description ("listen on any IP with port 8080");
+		_argument.define_switch ((), "listen-localhost-8080", String::from ("127.0.0.1:8080")) .with_description ("listen on localhost with port 8080");
 		#[ cfg (feature = "hss-tls-any") ]
 		{
-			_argument
-				.add_option (&["--listen-any-443"], argparse::StoreConst (Some (String::from ("0.0.0.0:443"))), "listen on any IP with port 443 (might require root or capabilities)")
-				.add_option (&["--listen-any-8443"], argparse::StoreConst (Some (String::from ("0.0.0.0:8443"))), "listen on any IP with port 8443")
-				.add_option (&["--listen-localhost-8443"], argparse::StoreConst (Some (String::from ("127.0.0.1:8443"))), "listen on localhost with port 8443")
-			;
+		_argument.define_switch ((), "listen-any-443", String::from ("0.0.0.0:443")) .with_description ("listen on any IP with port 443 (might require root or capabilities)");
+		_argument.define_switch ((), "listen-any-8443", String::from ("0.0.0.0:8443")) .with_description ("listen on any IP with port 8443");
+		_argument.define_switch ((), "listen-localhost-8443", String::from ("127.0.0.1:8443")) .with_description ("listen on localhost with port 8443");
+		}
 		}
 		
 		#[ cfg (unix) ]
 		{
-		self.endpoint_descriptor_help = self.endpoint_descriptor.as_ref () .map_or_else (
+		let _help = self.endpoint_descriptor.as_ref () .map_or_else (
 				|| format! ("listen on TCP socket with descriptor"),
 				|_descriptor| format! ("listen on TCP socket with descriptor (default `{}`)", _descriptor));
-		_parser.refer (&mut self.endpoint_descriptor)
-				.metavar ("<socket-descriptor>")
-				.add_option (&["--listen-descriptor"], argparse::StoreOption, &self.endpoint_descriptor_help);
+		let mut _argument = _flags.define_complex (&mut self.endpoint_descriptor);
+		_argument.define_flag ((), "listen-descriptor") .with_placeholder ("socket-descriptor") .with_description (_help);
 		}
 		
 		#[ cfg (feature = "hyper--server-http1") ]
 		{
-		self.endpoint_protocol_http1_help = self.endpoint_protocol_http1.as_ref () .map_or_else (
+		let _help = self.endpoint_protocol_http1.as_ref () .map_or_else (
 				|| format! ("enable HTTP/1 support"),
 				|_enabled| format! ("enable HTTP/1 support (default `{}`)", _enabled));
-		_parser.refer (&mut self.endpoint_protocol_http1)
-				.add_option (&["--enable-http1"], argparse::StoreConst (Some (true)), &self.endpoint_protocol_http1_help)
-				.add_option (&["--disable-http1"], argparse::StoreConst (Some (false)), "");
+		let mut _argument = _flags.define_complex (&mut self.endpoint_protocol_http1);
+		_argument.define_switch ((), "enable-http1", true) .with_description (_help);
+		_argument.define_switch ((), "disable-http1", false);
 		}
 		
 		#[ cfg (feature = "hyper--server-http2") ]
 		{
-		self.endpoint_protocol_http2_help = self.endpoint_protocol_http2.as_ref () .map_or_else (
+		let _help = self.endpoint_protocol_http2.as_ref () .map_or_else (
 				|| format! ("enable HTTP/2 support"),
 				|_enabled| format! ("enable HTTP/2 support (default `{}`)", _enabled));
-		_parser.refer (&mut self.endpoint_protocol_http2)
-				.add_option (&["--enable-http2"], argparse::StoreConst (Some (true)), &self.endpoint_protocol_http2_help)
-				.add_option (&["--disable-http2"], argparse::StoreConst (Some (false)), "");
+		let mut _argument = _flags.define_complex (&mut self.endpoint_protocol_http2);
+		_argument.define_switch ((), "enable-http2", true) .with_description (_help);
+		_argument.define_switch ((), "disable-http2", false);
 		}
 		
 		#[ cfg (feature = "hss-tls-any") ]
 		{
-		self.endpoint_insecure_help = if self.endpoint_insecure.unwrap_or (false) {
+		let _help = if self.endpoint_insecure.unwrap_or (false) {
 				format! ("disable TLS support (default disabled)")
 			} else {
 				format! ("disable TLS support (default enabled)")
 			};
-		_parser.refer (&mut self.endpoint_insecure)
-				.add_option (&["--disable-tls"], argparse::StoreConst (Some (true)), &self.endpoint_insecure_help)
-				.add_option (&["--enable-tls"], argparse::StoreConst (Some (false)), "");
+		let mut _argument = _flags.define_complex (&mut self.endpoint_insecure);
+		_argument.define_switch ((), "disable-tls", true) .with_description (_help);
+		_argument.define_switch ((), "enable-tls", false);
 		}
 		
 		#[ cfg (feature = "hss-tls-rust") ]
 		{
-		let _endpoint_has_certificate_fallback = self.endpoint_rust_tls_certificate_fallback.is_some ();
-		self.endpoint_rust_tls_certificate_pem_path_help = self.endpoint_rust_tls_certificate_pem_path.as_ref () .map_or_else (
-				|| if _endpoint_has_certificate_fallback {
+		let _help = self.endpoint_rust_tls_certificate_pem_path.as_ref () .map_or_else (
+				|| if self.endpoint_rust_tls_certificate_fallback.is_some () {
 					format! ("load TLS certificate in PEM format (with Rust TLS library) from path (default embedded in binary)")
 				} else {
 					format! ("load TLS certificate in PEM format (with Rust TLS library) from path")
 				},
 				|_path| format! ("load TLS certificate in PEM format (with Rust TLS library) from path (default `{}`)", _path));
-		_parser.refer (&mut self.endpoint_rust_tls_certificate_pem_path)
-				.metavar ("<path>")
-				.add_option (&["--load-rust-tls-pem-path"], argparse::StoreOption, &self.endpoint_rust_tls_certificate_pem_path_help);
+		let mut _argument = _flags.define_complex (&mut self.endpoint_rust_tls_certificate_pem_path);
+		_argument.define_flag ((), "load-rust-tls-pem-path") .with_placeholder ("path") .with_description (_help);
 		}
 		
 		#[ cfg (feature = "hss-tls-native") ]
 		{
-		let _endpoint_has_certificate_fallback = self.endpoint_native_tls_certificate_fallback.is_some ();
-		self.endpoint_native_tls_certificate_pkcs12_path_help = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () .map_or_else (
-				|| if _endpoint_has_certificate_fallback {
+		let _help = self.endpoint_native_tls_certificate_pkcs12_path.as_ref () .map_or_else (
+				|| if self.endpoint_native_tls_certificate_fallback.is_some () {
 					format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path (default embedded in binary)")
 				} else {
 					format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path")
 				},
 				|_path| format! ("load TLS certificate in PKCS#12 format (with native TLS library) from path (default `{}`)", _path));
-		_parser.refer (&mut self.endpoint_native_tls_certificate_pkcs12_path)
-				.metavar ("<path>")
-				.add_option (&["--load-native-tls-pkcs12-path"], argparse::StoreOption, &self.endpoint_native_tls_certificate_pkcs12_path_help);
-		_parser.refer (&mut self.endpoint_native_tls_certificate_pkcs12_password)
-				.metavar ("<password>")
-				.add_option (&["--load-native-tls-pkcs12-password"], argparse::StoreOption, "");
+		let mut _argument = _flags.define_complex (&mut self.endpoint_native_tls_certificate_pkcs12_path);
+		_argument.define_flag ((), "load-native-tls-pkcs12-path") .with_placeholder ("path") .with_description (_help);
+		let mut _argument = _flags.define_complex (&mut self.endpoint_native_tls_certificate_pkcs12_password);
+		_argument.define_flag ((), "load-native-tls-pkcs12-password") .with_placeholder ("password");
 		}
 		
 		#[ cfg (feature = "hss-server-mt") ]
 		{
-		self.server_threads_help = self.server_threads.as_ref () .map_or_else (
+		let _help = self.server_threads.as_ref () .map_or_else (
 				|| format! ("enable server multi-threading"),
 				|_threads| format! ("enable server multi-threading (default `{}` threads)", _threads));
-		_parser.refer (&mut self.server_threads)
-				.metavar ("<server-threads>")
-				.add_option (&["--server-threads"], argparse::StoreOption, &self.server_threads_help)
-				.add_option (&["--no-server-threads"], argparse::StoreConst (None), "");
+		let mut _argument = _flags.define_complex (&mut self.server_threads);
+		_argument.define_flag ((), "server-threads") .with_placeholder ("server-threads") .with_description (_help);
+		_argument.define_switch ((), "no-server-threads", 0);
 		}
 		
 		#[ cfg (feature = "hss-server-profiling") ]
 		{
-		self.server_profiling_help = self.server_profiling.as_ref () .map_or_else (
+		let _help = self.server_profiling.as_ref () .map_or_else (
 				|| format! ("enable server profiling"),
 				|_profiling| format! ("enable server profiling (default `{}` path)", _profiling));
-		_parser.refer (&mut self.server_profiling)
-				.metavar ("<server-profiling>")
-				.add_option (&["--server-profiling"], argparse::StoreOption, &self.server_profiling_help)
-				.add_option (&["--no-server-profiling"], argparse::StoreConst (None), "");
+		let mut _argument = _flags.define_complex (&mut self.server_profiling);
+		_argument.define_flag ((), "server-profiling") .with_placeholder ("path") .with_placeholder ("path") .with_description (_help);
+		_argument.define_clear ((), "no-server-profiling");
 		}
 	}
 	
@@ -348,23 +319,25 @@ impl ConfigurationArguments {
 	pub fn parse_with_extensions (mut _configuration : Configuration, mut _extensions : impl CliExtensions, _arguments : Option<CliArguments>) -> CliResult<Configuration> {
 		
 		let _arguments = CliArguments::unwrap_or_args (_arguments);
-		let mut _arguments = _arguments.into_vec_str ();
-		_arguments.insert (0, "<cli>".into ());
 		
 		let mut _self = Self::with_defaults (&_configuration) ?;
 		
 		{
-			let mut _parser = argparse::ArgumentParser::new ();
-			_self.prepare (&mut _parser);
-			_extensions.prepare (&mut _parser);
-			match _parser.parse (_arguments, &mut io::stdout (), &mut io::stderr ()) {
-				Ok (()) =>
-					(),
-				Err (0) =>
-					::std::process::exit (0),
-				Err (_code) =>
-					fail! (0x4fec67d5, "invalid arguments!"),
+			
+			let mut _flags = FlagsParserBuilder::new ();
+			_self.prepare (&mut _flags);
+			_extensions.prepare (&mut _flags);
+			_flags.define_help ('h', "help");
+			let _flags = _flags.build () .else_wrap (0x0d9c5d84) ?;
+			
+			let _flags = _flags.parse_vec_os_string (_arguments.into_vec_os (), false);
+			
+			if _flags.is_help_requested () {
+				_flags.help_print (io::stdout () .lock ()) .else_wrap (0xd0e47823) ?;
+				::std::process::exit (0);
 			}
+			
+			_flags.done () .else_wrap (0x6bfd9ab1) ?;
 		}
 		
 		_self.update (&mut _configuration) ?;
@@ -378,14 +351,14 @@ impl ConfigurationArguments {
 #[ cfg (feature = "hss-cli") ]
 pub trait CliExtensions {
 	
-	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a;
+	fn prepare <'a> (self, _flags : &mut FlagsParserBuilder<'a>) -> () where Self : 'a;
 }
 
 #[ cfg (feature = "hss-config") ]
 #[ cfg (feature = "hss-cli") ]
 impl CliExtensions for () {
 	
-	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {}
+	fn prepare <'a> (self, _flags : &mut FlagsParserBuilder<'a>) -> () where Self : 'a {}
 }
 
 
@@ -402,27 +375,29 @@ pub enum CliArgument<'a> {
 #[ cfg (feature = "hss-cli") ]
 impl CliExtensions for CliArgument<'_> {
 	
-	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
+	fn prepare <'a> (self, _flags : &mut FlagsParserBuilder<'a>) -> () where Self : 'a {
 		match self {
 			CliArgument::String (_variable, _flag, _required, _help) => {
-				let mut _option = _parser.refer (_variable);
-				_option.metavar ("<string>") .add_option (&[_flag], argparse::Store, _help);
+				let mut _argument = _flags.define_complex (_variable);
+				_argument.define_flag ((), _flag) .with_description (_help);
 				if _required {
-					_option.required ();
+					//  FIXME:  _argument.with_required (true);
 				}
 			}
 			CliArgument::StringConst (_variable, _value, _flag, _help) => {
-				_parser.refer (_variable) .metavar ("<string>") .add_option (&[_flag], argparse::StoreConst (_value.into ()), _help);
+				let mut _argument = _flags.define_complex (_variable);
+				_argument.define_switch ((), _flag, String::from (_value)) .with_description (_help);
 			}
 			CliArgument::Boolean (_variable, _flag, _required, _help) => {
-				let mut _option = _parser.refer (_variable);
-				_option.metavar ("<boolean>") .add_option (&[_flag], argparse::Store, _help);
+				let mut _argument = _flags.define_complex (_variable);
+				_argument.define_flag ((), _flag) .with_description (_help);
 				if _required {
-					_option.required ();
+					//  FIXME:  _argument.with_required (true);
 				}
 			}
 			CliArgument::BooleanConst (_variable, _value, _flag, _help) => {
-				_parser.refer (_variable) .metavar ("<boolean>") .add_option (&[_flag], argparse::StoreConst (_value), _help);
+				let mut _argument = _flags.define_complex (_variable);
+				_argument.define_switch ((), _flag, _value) .with_description (_help);
 			}
 		}
 	}
@@ -432,9 +407,9 @@ impl CliExtensions for CliArgument<'_> {
 #[ cfg (feature = "hss-cli") ]
 impl <const N : usize> CliExtensions for [CliArgument<'_>; N] {
 	
-	fn prepare <'a> (self, _parser : &mut argparse::ArgumentParser<'a>) -> () where Self : 'a {
+	fn prepare <'a> (self, _flags : &mut FlagsParserBuilder<'a>) -> () where Self : 'a {
 		for _argument in self {
-			_argument.prepare (_parser);
+			_argument.prepare (_flags);
 		}
 	}
 }

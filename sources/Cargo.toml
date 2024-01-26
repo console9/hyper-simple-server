@@ -192,7 +192,7 @@ hss-main = []
 
 # gate
 hss-cli = [
-	"argparse",
+	"vrl-cli-arguments",
 ]
 
 
@@ -278,7 +278,6 @@ tokio-native-tls = { version = "^0.3", default-features = false, features = [], 
 
 futures = { version = "^0.3", default-features = false, features = [], optional = true }
 path-tree = { version = "^0.4", default-features = false, features = [], optional = true }
-argparse = { version = "^0.2", default-features = false, features = [], optional = true }
 
 cpuprofiler = { version = "^0.0", default-features = false, features = [], optional = true }
 
@@ -288,6 +287,7 @@ jemalloc-sys = { version = "^0.5", default-features = false, features = [], opti
 mimalloc = { version = "^0.1", default-features = false, features = [], optional = true }
 
 vrl-errors = { version = "*", default-features = false, features = [] }
+vrl-cli-arguments = { version = "*", default-features = false, features = [], optional = true }
 
 
 
@@ -375,8 +375,16 @@ overflow-checks = true
 [patch.crates-io]
 
 # vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
-vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "console9" }
+# vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
+
+# vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "console9" }
+# vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", branch = "console9" }
+
+vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
+vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
+
 # vrl-errors = { path = "../../volution-rust-libraries/sources/errors" }
+# vrl-cli-arguments = { path = "../../volution-rust-libraries/sources/cli-arguments" }
 
 
 

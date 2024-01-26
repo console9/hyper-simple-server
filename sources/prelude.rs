@@ -166,6 +166,12 @@ pub(crate) use ::tokio_native_tls as tokio_natls;
 #[ cfg (feature = "path-tree") ]
 pub(crate) use ::path_tree;
 
-#[ cfg (feature = "argparse") ]
-pub(crate) use ::argparse;
+#[ cfg (feature = "vrl-cli-arguments") ]
+pub(crate) use ::vrl_cli_arguments::{
+		self as vcli,
+		FlagsParserBuilder,
+		FlagsParser,
+		FlagsParsed,
+		WithFlagDefinition as _,
+	};
 

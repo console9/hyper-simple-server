@@ -3,6 +3,15 @@
 
 
 
+<< dependencies / fetch / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' fetch --locked
+!!
+
+
+
+
 << dependencies / update / conservative / lib
 	#! <bash+>
 	Z_expect_no_arguments
@@ -15,11 +24,23 @@
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
-<< dependencies / outdated / lib
+
+
+
+<< dependencies / outdated / conservative / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' outdated
+!!
+
+<< dependencies / outdated / aggressive / lib
 	#! <bash+>
 	Z_expect_no_arguments
 	Z_zexec ':: tools / cargo' outdated --aggressive
 !!
+
+
+
 
 << dependencies / upgrade / compatible / lib
 	#! <bash+>
@@ -33,11 +54,8 @@
 	Z_zexec ':: tools / cargo' upgrade --incompatible allow --recursive true
 !!
 
-<< dependencies / fetch / lib
-	#! <bash+>
-	Z_expect_no_arguments
-	Z_zexec ':: tools / cargo' fetch --locked
-!!
+
+
 
 << dependencies / licenses / lib
 	#! <bash+>
@@ -79,8 +97,18 @@
 			--format ' | {p}' \
 			--prefix depth \
 			--locked \
-	| tail -n +2 \
-	| sort \
+	#
+!!
+
+<< dependencies / show / duplicates
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zspawn ':: tools / cargo' tree \
+			--all-features \
+			--duplicates \
+			--format ' | {p}' \
+			--prefix depth \
+			--locked \
 	#
 !!
 
@@ -93,7 +121,6 @@
 			--format '{p}' \
 			--prefix none \
 			--locked \
-	| tail -n +2 \
 	| cut -f 1,2 -d ' ' \
 	| sort -u \
 	#
@@ -108,7 +135,6 @@
 			--format '{p}' \
 			--prefix none \
 			--locked \
-	| tail -n +2 \
 	| cut -f 1 -d ' ' \
 	| sort -u \
 	#
@@ -124,7 +150,6 @@
 			--format '{p}' \
 			--prefix none \
 			--locked \
-	| tail -n +2 \
 	| cut -f 1,2 -d ' ' \
 	| sort -u \
 	| sort -u -s -k 1,1 -t ' ' \
@@ -148,8 +173,8 @@
 			--format '{l} | {p}' \
 			--prefix none \
 			--locked \
-	| tail -n +2 \
 	| sort -u \
 	#
 !!
+
 

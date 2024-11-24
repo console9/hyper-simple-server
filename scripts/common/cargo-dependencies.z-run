@@ -24,6 +24,12 @@
 	Z_zexec ':: tools / cargo' update --aggressive
 !!
 
+<< dependencies / update / lock / lib
+	#! <bash+>
+	Z_expect_no_arguments
+	Z_zexec ':: tools / cargo' update --workspace
+!!
+
 
 
 

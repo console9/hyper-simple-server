@@ -40,6 +40,13 @@
 !!
 
 
+<< dependencies / update / lock / all
+	#! <bash+>
+	Z_zspawn ':: dependencies / update / lock / lib'
+	Z_zspawn ':: dependencies / update / lock / example'
+!!
+
+
 << dependencies / fetch / all
 	#! <bash+>
 	Z_zspawn ':: dependencies / fetch / lib'

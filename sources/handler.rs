@@ -432,7 +432,7 @@ pub trait HandlerSimpleSync
 	where
 		Self : Send + Sync + 'static,
 {
-	fn handle (&self, _request : &Request<Body>, _response : &mut Response<Body>) -> HandlerResult;
+	fn handle (&self, _request : Request<Body>, _response : &mut Response<Body>) -> HandlerResult;
 	
 	fn wrap (self) -> HandlerSimpleSyncWrapper<Self> where Self : Sized {
 		HandlerSimpleSyncWrapper (self)
@@ -472,7 +472,7 @@ impl <H> Handler for HandlerSimpleSyncWrapper<H>
 	
 	fn handle (&self, _request : Request<Body>) -> Self::Future {
 		let mut _response = Response::new (Body::empty ());
-		match HandlerSimpleSync::handle (&self.0, &_request, &mut _response) {
+		match HandlerSimpleSync::handle (&self.0, _request, &mut _response) {
 			Ok (()) =>
 				future::ready (Ok (_response.map (BodyWrapper::new))),
 			Err (_error) =>

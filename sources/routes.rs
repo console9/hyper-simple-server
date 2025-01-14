@@ -311,7 +311,11 @@ impl RouteMatched {
 	
 	
 	pub fn parameter_nth (&self, _index : usize) -> &String {
-		& (self.parameters.get (_index) .else_panic (0xe86a76a8)) .1
+		self.try_parameter_nth (_index) .else_panic (0xe86a76a8)
+	}
+	
+	pub fn try_parameter_nth (&self, _index : usize) -> Option<&String> {
+		self.parameters.get (_index) .map (|_pair| &_pair.1)
 	}
 	
 	pub fn parameters_1 (&self) -> &String {
@@ -364,7 +368,11 @@ impl RouteMatched {
 	}
 	
 	pub fn resolve (_request : &Request<Body>) -> Option<&Self> {
-		_request.extensions () .get ()
+		Self::resolve_from_extensions (_request.extensions ())
+	}
+	
+	pub fn resolve_from_extensions (_extensions : &Extensions) -> Option<&Self> {
+		_extensions.get ()
 	}
 	
 	fn resolve_or_panic (_request : &Request<Body>) -> &Self {

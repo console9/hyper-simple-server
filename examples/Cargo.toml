@@ -65,16 +65,11 @@ hss-tls-rust = ["hyper-simple-server/hss-tls-rust"]
 
 [patch.crates-io]
 
-# hyper-simple-server = { git = "https://github.com/console9/hyper-simple-server", tag = "v0.6.1" }
-hyper-simple-server = { git = "https://github.com/console9/hyper-simple-server", branch = "development" }
-# hyper-simple-server = { path = "../.dependencies/hyper-simple-server/sources" }
-
-# vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
-# vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
-
+# hyper-simple-server = { git = "https://github.com/console9/hyper-simple-server", branch = "development" }
 vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
 vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
 
+hyper-simple-server = { path = "../.dependencies/hyper-simple-server/sources" }
 # vrl-errors = { path = "../.dependencies/volution-rust-libraries/sources/errors" }
 # vrl-cli-arguments = { path = "../.dependencies/volution-rust-libraries/sources/cli-arguments" }
 

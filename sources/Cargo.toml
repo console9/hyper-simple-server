@@ -12,9 +12,9 @@ name = "hyper-simple-server"
 version = "0.6.0"
 publish = false
 
-edition = "2021"
-rust-version = "1.75"
-resolver = "2"
+edition = "2024"
+rust-version = "1.85"
+resolver = "3"
 
 authors = [
 	"Ciprian Dorin Craciun <ciprian@volution.ro>",

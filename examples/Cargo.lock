@@ -321,7 +321,7 @@ dependencies = [
 [[package]]
 name = "hyper-simple-server"
 version = "0.6.0"
-source = "git+https://github.com/console9/hyper-simple-server?branch=development#d588e259dbea9d660418837f013877febfd36b47"
+source = "git+https://github.com/console9/hyper-simple-server?branch=development#6761c146a91d400c5343bcb0e000048dbce98431"
 dependencies = [
  "bytes",
  "cpuprofiler",

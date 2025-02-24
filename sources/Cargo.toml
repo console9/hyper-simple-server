@@ -313,9 +313,6 @@ vrl-cli-arguments = { version = "*", default-features = false, features = [], op
 
 [patch.crates-io]
 
-# vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
-# vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", tag = "v0.1.1" }
-
 vrl-errors = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
 vrl-cli-arguments = { git = "https://github.com/volution/volution-rust-libraries", branch = "development" }
 

@@ -28,28 +28,28 @@
 
 << dependencies / update / conservative / all
 	#! <bash+>
-	Z_zspawn ':: dependencies / update / conservative / lib'
-	Z_zspawn ':: dependencies / update / conservative / example'
+	Z_zspawn ':: dependencies / update / conservative / lib' "${@}"
+	Z_zspawn ':: dependencies / update / conservative / example' "${@}"
 !!
 
 
 << dependencies / update / aggressive / all
 	#! <bash+>
-	Z_zspawn ':: dependencies / update / aggressive / lib'
-	Z_zspawn ':: dependencies / update / aggressive / example'
+	Z_zspawn ':: dependencies / update / aggressive / lib' "${@}"
+	Z_zspawn ':: dependencies / update / aggressive / example' "${@}"
 !!
 
 
 << dependencies / update / lock / all
 	#! <bash+>
-	Z_zspawn ':: dependencies / update / lock / lib'
-	Z_zspawn ':: dependencies / update / lock / example'
+	Z_zspawn ':: dependencies / update / lock / lib' "${@}"
+	Z_zspawn ':: dependencies / update / lock / example' "${@}"
 !!
 
 
 << dependencies / fetch / all
 	#! <bash+>
-	Z_zspawn ':: dependencies / fetch / lib'
-	Z_zspawn ':: dependencies / fetch / example'
+	Z_zspawn ':: dependencies / fetch / lib' "${@}"
+	Z_zspawn ':: dependencies / fetch / example' "${@}"
 !!
 

@@ -95,6 +95,13 @@
 	Z_zexec ':: tools / cargo' update --workspace
 !!
 
+<< dependencies / update / list / example
+	#! <bash+>
+	Z_expect_no_arguments
+	export -- _RUST_MANIFEST="${_EXAMPLE_SOURCES}/Cargo.toml"
+	Z_zexec ':: tools / cargo' update --workspace --locked --verbose
+!!
+
 << dependencies / fetch / example
 	#! <bash+>
 	Z_expect_no_arguments

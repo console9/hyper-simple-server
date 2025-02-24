@@ -47,6 +47,13 @@
 !!
 
 
+<< dependencies / update / list / all
+	#! <bash+>
+	Z_zspawn ':: dependencies / update / list / lib' "${@}"
+	Z_zspawn ':: dependencies / update / list / example' "${@}"
+!!
+
+
 << dependencies / fetch / all
 	#! <bash+>
 	Z_zspawn ':: dependencies / fetch / lib' "${@}"

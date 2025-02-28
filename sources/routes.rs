@@ -261,6 +261,14 @@ impl RoutesBuilder {
 		self.routes.push (_route);
 		self
 	}
+	
+	pub fn with_route_objects (mut self, _routes : impl Iterator<Item = Route>) -> Self {
+		for _route in _routes {
+			let _route = Arc::new (_route);
+			self.routes.push (_route);
+		}
+		self
+	}
 }
 
 

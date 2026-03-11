@@ -846,8 +846,8 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vrl-cli-arguments"
-version = "0.1.0"
-source = "git+https://github.com/volution/volution-rust-libraries?branch=development#ac5e392157a3e56507b73267a9e3daaf8bbfee76"
+version = "0.2.0"
+source = "git+https://github.com/volution/volution-rust-libraries?branch=development#cc4958ba826bdaef7e3cdeb47fcff39566d57cfe"
 dependencies = [
  "vrl-errors",
  "vrl-preludes",
@@ -855,16 +855,16 @@ dependencies = [
 
 [[package]]
 name = "vrl-errors"
-version = "0.1.0"
-source = "git+https://github.com/volution/volution-rust-libraries?branch=development#ac5e392157a3e56507b73267a9e3daaf8bbfee76"
+version = "0.2.0"
+source = "git+https://github.com/volution/volution-rust-libraries?branch=development#cc4958ba826bdaef7e3cdeb47fcff39566d57cfe"
 dependencies = [
  "vrl-preludes",
 ]
 
 [[package]]
 name = "vrl-preludes"
-version = "0.1.0"
-source = "git+https://github.com/volution/volution-rust-libraries?branch=development#ac5e392157a3e56507b73267a9e3daaf8bbfee76"
+version = "0.2.0"
+source = "git+https://github.com/volution/volution-rust-libraries?branch=development#cc4958ba826bdaef7e3cdeb47fcff39566d57cfe"
 
 [[package]]
 name = "want"

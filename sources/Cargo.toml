@@ -9,11 +9,11 @@
 
 name = "hyper-simple-server"
 
-version = "0.6.0"
+version = "0.7.0"
 publish = false
 
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.94"
 resolver = "3"
 
 authors = [
